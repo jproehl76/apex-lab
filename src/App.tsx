@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Menu } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, LogOut } from 'lucide-react';
+import { LoginScreen } from '@/components/LoginScreen';
 import { Toaster } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -15,10 +16,40 @@ import React from 'react';
 import trackPhoto from '@/assets/m3-track.jpg';
 import bmwMLogo from '@/assets/bmw-m-logo.jpg';
 
+const AUTH_KEY = 'm3-auth-user';
+
+interface AuthUser {
+  email: string;
+  name: string;
+  picture: string;
+}
+
 export default function App() {
   const store = useSessionStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    try {
+      const raw = localStorage.getItem(AUTH_KEY);
+      return raw ? (JSON.parse(raw) as AuthUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(AUTH_KEY);
+    }
+  }, [user]);
+
+  if (!user) {
+    return <LoginScreen onAuth={setUser} />;
+  }
+
+  const signOut = () => setUser(null);
 
   const sidebarContent = (
     <>
@@ -83,6 +114,12 @@ export default function App() {
             >
               {sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
             </button>
+            <div className="flex items-center gap-2">
+              <img src={user.picture} alt={user.name} className="h-7 w-7 rounded-full" />
+              <button onClick={signOut} className="text-slate-500 hover:text-red-400 transition-colors" title="Sign out">
+                <LogOut size={16} />
+              </button>
+            </div>
             <img
               src={bmwMLogo}
               alt="BMW M"
