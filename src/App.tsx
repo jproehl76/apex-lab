@@ -45,7 +45,7 @@ export default function App() {
             <img
               src={bmwMLogo}
               alt="BMW M"
-              className="h-10 w-10"
+              className="h-[200px] w-[200px]"
               style={{ mixBlendMode: 'screen' }}
             />
           </div>
