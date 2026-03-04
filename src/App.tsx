@@ -116,7 +116,7 @@ export default function App() {
             <EmptyDashboard />
           ) : (
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="bg-slate-900 border border-slate-800 flex-wrap h-auto gap-1">
+              <TabsList className="bg-slate-900/90 border border-slate-800 flex-wrap h-auto gap-1">
                 <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
                 <TabsTrigger value="laptimes" className="text-xs">Lap Times</TabsTrigger>
                 <TabsTrigger value="corners" className="text-xs">Corner Speeds</TabsTrigger>
@@ -166,7 +166,7 @@ export default function App() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-5 space-y-4">
+    <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-5 space-y-4">
       <h2 className="text-sm font-semibold text-slate-300 tracking-tight">{title}</h2>
       {children}
     </div>
