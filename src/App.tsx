@@ -16,10 +16,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <header className="border-b border-slate-800 sticky top-0 z-10 overflow-hidden">
+      <header className="border-b border-slate-800 sticky top-0 z-10 overflow-hidden relative">
         {/* Photo strip — subtle, darkened, motion blur visible */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center w-full h-full"
           style={{
             backgroundImage: `url(${trackPhoto})`,
             backgroundPosition: 'center 40%',
