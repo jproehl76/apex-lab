@@ -23,7 +23,7 @@ export default function App() {
           style={{
             backgroundImage: `url(${trackPhoto})`,
             backgroundPosition: 'center 40%',
-            filter: 'brightness(0.18) saturate(0.6)',
+            filter: 'brightness(0.35) saturate(0.7)',
           }}
         />
         {/* Gradient overlay — fades photo into dark on right */}
