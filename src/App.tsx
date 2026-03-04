@@ -23,10 +23,10 @@ export default function App() {
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectPosition: 'center 40%', filter: 'brightness(0.35) saturate(0.7)' }}
+          style={{ objectPosition: 'center 40%', filter: 'brightness(0.55) saturate(0.8)' }}
         />
         {/* Gradient overlay — fades photo into dark on right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 via-slate-950/40 to-slate-950/80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/50 via-slate-950/20 to-slate-950/60" />
         {/* Content */}
         <div className="relative flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
