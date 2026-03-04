@@ -22,7 +22,7 @@ export default function App() {
         alt=""
         aria-hidden="true"
         className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ objectPosition: 'center 40%', filter: 'brightness(0.55) saturate(0.8)', opacity: 0.18, zIndex: 0 }}
+        style={{ objectPosition: 'center 40%', filter: 'brightness(0.55) saturate(0.8)', opacity: 0.36, zIndex: 0 }}
       />
       <header className="border-b border-slate-800 sticky top-0 z-10 relative">
         {/* Content */}
