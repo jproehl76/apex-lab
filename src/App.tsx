@@ -72,7 +72,7 @@ export default function App() {
             <div className="h-6 w-1 rounded-full bg-blue-500" />
             <div>
               <h1 className="text-sm font-bold tracking-tight text-slate-100">M3 Session Dashboard</h1>
-              <p className="text-xs text-slate-400">2025 BMW G80 M3 Competition xDrive · #358</p>
+              <p className="text-xs text-slate-400">2025 BMW G80 M3 Competition xDrive</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
