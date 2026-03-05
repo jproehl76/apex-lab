@@ -57,8 +57,8 @@ function buildApexes(
   sessionCorners: BestLapCorner[],
   proj: d3.GeoProjection
 ): Apex[] {
-  if (refLayout && refLayout.corners.length > 0) {
-    return refLayout.corners.flatMap(rc => {
+  if (refLayout && (refLayout.corners?.length ?? 0) > 0) {
+    return refLayout.corners!.flatMap(rc => {
       const xy = proj([rc.lon, rc.lat]);
       if (!xy) return [];
       const sc = matchCorner(rc.id, rc.name, sessionCorners);

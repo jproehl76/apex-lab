@@ -21,6 +21,7 @@ import type { LoadedSession, BestLapCorner, GpsPoint } from '@/types/session';
 import { KPH_TO_MPH, M_TO_FEET, sessionLabel } from '@/lib/utils';
 import { findTrackLayout } from '@/assets/trackLayouts';
 import { fetchOsmTrackLayout } from '@/lib/services/osmTrackFetch';
+import { detectCornersFromWaypoints } from '@/lib/services/detectCorners';
 import { T, FF, FS, S } from '@/lib/chartTheme';
 
 export type HeatChannel = 'speed' | 'throttle' | 'brake';
@@ -226,31 +227,46 @@ function MapBoundsFitter({ bounds }: { bounds: L.LatLngBoundsExpression | null }
   return null;
 }
 
-// ── Apex list — positions for corner markers ──────────────────────────────────
+// ── Apex list — auto-detected from waypoint curvature ─────────────────────────
 interface Apex {
   id: string; name: string; lat: number; lon: number; corner: BestLapCorner | null;
 }
 
-function matchCorner(rcId: string, rcName: string, sessionCorners: BestLapCorner[]): BestLapCorner | null {
+function matchCorner(id: string, name: string, sessionCorners: BestLapCorner[]): BestLapCorner | null {
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
   return sessionCorners.find(c =>
-    norm(c.corner_id) === norm(rcId) ||
-    norm(c.corner_name) === norm(rcName) ||
-    norm(c.corner_name) === norm(rcId)
+    norm(c.corner_id) === norm(id) ||
+    norm(c.corner_name) === norm(name) ||
+    norm(c.corner_name) === norm(id)
   ) ?? null;
 }
 
+/**
+ * Build the apex list for corner markers.
+ *
+ * Priority:
+ *  1. Known track with waypoints → detectCornersFromWaypoints (official names from cornerNames)
+ *  2. OSM-fetched waypoints for unknown track → auto-detect with sequential T1, T2…
+ *  3. No waypoints → place markers at speed minima in the GPS trace (rough fallback)
+ */
 function buildApexes(
   refLayout: ReturnType<typeof findTrackLayout>,
+  osmWaypoints: [number, number][] | null,
   trace: GpsPoint[],
-  sessionCorners: BestLapCorner[]
+  sessionCorners: BestLapCorner[],
 ): Apex[] {
-  if (refLayout && refLayout.corners.length > 0) {
-    return refLayout.corners.map(rc => ({
-      id: rc.id, name: rc.name, lat: rc.lat, lon: rc.lon,
-      corner: matchCorner(rc.id, rc.name, sessionCorners),
+  const waypoints = refLayout?.waypoints ?? osmWaypoints;
+  const cornerNames = refLayout?.cornerNames;
+
+  if (waypoints && waypoints.length >= 5) {
+    const detected = detectCornersFromWaypoints(waypoints, cornerNames);
+    return detected.map(dc => ({
+      id: dc.id, name: dc.name, lat: dc.lat, lon: dc.lon,
+      corner: matchCorner(dc.id, dc.name, sessionCorners),
     }));
   }
+
+  // Fallback: place at speed minima in the GPS trace
   if (!trace.length || !sessionCorners.length) return [];
   const chunk = Math.ceil(trace.length / sessionCorners.length);
   return sessionCorners.flatMap((c, i) => {
@@ -465,8 +481,8 @@ export function TrackHeatMap({ sessions, selectedCornerId, onCornerSelect }: Pro
   }, [trace]);
 
   const apexes = useMemo(
-    () => buildApexes(refLayout, trace, session?.data.best_lap_corners ?? []),
-    [refLayout, trace, session]
+    () => buildApexes(refLayout, osmWaypoints, trace, session?.data.best_lap_corners ?? []),
+    [refLayout, osmWaypoints, trace, session]
   );
 
   // Auto-fetch OSM track geometry when we have GPS trace but no precise reference layout

@@ -18,8 +18,14 @@ export interface TrackLayout {
   waypoints: [number, number][];
   /** Overpass segment drawn on top to simulate a bridge (optional) */
   bridgeWaypoints?: [number, number][];
-  /** Geographic apex for each corner — used to place map markers accurately */
-  corners: { id: string; name: string; lat: number; lon: number }[];
+  /**
+   * Official corner labels in lap order, starting from T1 (first corner after S/F).
+   * Corner positions are auto-detected from waypoint curvature at runtime.
+   * If omitted, corners are labeled T1, T2, T3… sequentially.
+   */
+  cornerNames?: string[];
+  /** @deprecated Manual corner positions — ignored when cornerNames is set. */
+  corners?: { id: string; name: string; lat: number; lon: number }[];
 }
 
 // ── Road Atlanta (Michelin Raceway Road Atlanta) ──────────────────────────────
@@ -89,19 +95,11 @@ const roadAtlanta: TrackLayout = {
   bridgeWaypoints: [
     [34.1396160, -83.8181358], [34.1389087, -83.8165818],
   ],
-  corners: [
-    // Positions derived from OSM waypoint geometry (apex = point of maximum curvature)
-    { id: 't1',  name: 'T1',  lat: 34.1508, lon: -83.8154 }, // Fast right sweeper (north apex)
-    { id: 't2',  name: 'T2',  lat: 34.1505, lon: -83.8165 }, // Left over crest
-    { id: 't3',  name: 'T3',  lat: 34.1500, lon: -83.8175 }, // Esses — right
-    { id: 't4',  name: 'T4',  lat: 34.1491, lon: -83.8181 }, // Esses — left
-    { id: 't5',  name: 'T5',  lat: 34.1487, lon: -83.8183 }, // Esses — right exit
-    { id: 't6',  name: 'T6',  lat: 34.1484, lon: -83.8180 }, // Banked 90° right
-    { id: 't7',  name: 'T7',  lat: 34.1447, lon: -83.8188 }, // Slowest corner
-    { id: 't10', name: 'T10', lat: 34.1362, lon: -83.8183 }, // Chicane — right
-    { id: 't11', name: 'T11', lat: 34.1362, lon: -83.8168 }, // Blind apex under bridge
-    { id: 't12', name: 'T12', lat: 34.1421, lon: -83.8153 }, // Sweeping right to S/F
-  ],
+  // Official corner labels in lap order. Positions are auto-detected from
+  // waypoint curvature — T1 right after the pit straight, T7 = slowest corner
+  // onto back straight, T10/T11 = chicane complex, T12 = final sweeper.
+  // Road Atlanta skips T8/T9 (back straight has no numbered corners).
+  cornerNames: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T10', 'T11', 'T12'],
 };
 
 // ── Road America ──────────────────────────────────────────────────────────────
@@ -133,15 +131,10 @@ const roadAmerica: TrackLayout = {
     [43.7966, -87.9890], [43.7968, -87.9872],
     [43.7970, -87.9960], // closes
   ],
-  corners: [
-    { id: 't1',  name: 'T1',  lat: 43.7975, lon: -87.9878 },
-    { id: 't3',  name: 'T3',  lat: 43.7993, lon: -87.9868 },
-    { id: 't5',  name: 'T5',  lat: 43.8020, lon: -87.9878 },
-    { id: 't7',  name: 'T7',  lat: 43.8018, lon: -87.9918 },
-    { id: 't10', name: 'T10', lat: 43.7982, lon: -87.9945 },
-    { id: 't12', name: 'T12', lat: 43.7968, lon: -87.9925 },
-    { id: 't14', name: 'T14', lat: 43.7966, lon: -87.9882 },
-  ],
+  // Road America: 14 turns, counterclockwise. Official numbering includes
+  // T1, T3, T5 (Canada Corner), T6, T7, T8 (Kettle Bottom), T9, T10 (Kink),
+  // T11, T12, T13 (Carousel), T14 (final hairpin).
+  cornerNames: ['T1', 'T3', 'T5', 'T6', 'T7', 'T8', 'T10', 'T12', 'T13', 'T14'],
 };
 
 // ── Brainerd International Raceway ────────────────────────────────────────────
@@ -166,12 +159,7 @@ const brainerd: TrackLayout = {
     [46.3958, -94.0862],
     [46.3958, -94.0858], // closes
   ],
-  corners: [
-    { id: 't1', name: 'T1', lat: 46.3924, lon: -94.0876 },
-    { id: 't3', name: 'T3', lat: 46.3920, lon: -94.0900 },
-    { id: 't5', name: 'T5', lat: 46.3932, lon: -94.0918 },
-    { id: 't7', name: 'T7', lat: 46.3954, lon: -94.0902 },
-  ],
+  cornerNames: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8'],
 };
 
 // ── Sebring International Raceway ─────────────────────────────────────────────
@@ -190,12 +178,7 @@ const sebring: TrackLayout = {
     [27.4515, -81.3458], [27.4525, -81.3462],
     [27.4535, -81.3468], [27.4545, -81.3470],
   ],
-  corners: [
-    { id: 't1',  name: 'T1',  lat: 27.4548, lon: -81.3415 },
-    { id: 't7',  name: 'T7',  lat: 27.4507, lon: -81.3412 },
-    { id: 't13', name: 'T13', lat: 27.4508, lon: -81.3445 },
-    { id: 't17', name: 'T17', lat: 27.4535, lon: -81.3465 },
-  ],
+  cornerNames: ['T1', 'T3', 'T5', 'T7', 'T10', 'T13', 'T17'],
 };
 
 // ── Pittsburgh International Race Complex (PittRace) ─────────────────────────
@@ -213,11 +196,7 @@ const pittRace: TrackLayout = {
     [40.8898, -80.3660], [40.8906, -80.3672],
     [40.8912, -80.3680],
   ],
-  corners: [
-    { id: 't1', name: 'T1', lat: 40.8926, lon: -80.3658 },
-    { id: 't4', name: 'T4', lat: 40.8926, lon: -80.3625 },
-    { id: 't8', name: 'T8', lat: 40.8897, lon: -80.3645 },
-  ],
+  cornerNames: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9'],
 };
 
 export const TRACK_LAYOUTS: TrackLayout[] = [
