@@ -67,7 +67,7 @@ export function ThermalChart({ sessions }: Props) {
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '28px', fontWeight: 600, color: card.color, lineHeight: 1, textShadow: `0 0 20px ${card.color}44` }}>
                       {card.current}
                     </span>
-                    <span style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: `${card.color}80` }}>{card.unit}</span>
+                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: `${card.color}80` }}>{card.unit}</span>
                   </div>
 
                   {/* Progress bar */}

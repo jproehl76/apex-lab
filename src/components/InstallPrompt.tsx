@@ -20,8 +20,8 @@ export function InstallPrompt() {
     <div className="fixed left-4 right-4 z-50 card p-4 flex items-start gap-3 xl:hidden"
       style={{ bottom: 'calc(80px + env(safe-area-inset-bottom) + 8px)', boxShadow: '0 -4px 40px rgba(0,0,0,0.6)' }}>
       <div className="flex-1">
-        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, color: '#E8E8F0', marginBottom: 4 }}>Add to Home Screen</div>
-        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#606070' }}>
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', fontWeight: 600, color: '#E8E8F0', marginBottom: 4 }}>Add to Home Screen</div>
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#606070' }}>
           Tap <strong style={{ color: '#9898A8' }}>Share</strong> then <strong style={{ color: '#9898A8' }}>Add to Home Screen</strong> for the full app experience.
         </div>
       </div>

@@ -175,7 +175,7 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
           {/* No-track fallback */}
           {!refPath && !proj && (
             <text x={SVG_W / 2} y={SVG_H / 2} textAnchor="middle" dominantBaseline="middle"
-              style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.2em', fill: '#252535', textTransform: 'uppercase' }}>
+              style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.2em', fill: '#252535', textTransform: 'uppercase' }}>
               No track reference — load Road Atlanta session
             </text>
           )}
@@ -188,7 +188,7 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
               <g>
                 <line x1={pt[0] - 7} y1={pt[1]} x2={pt[0] + 7} y2={pt[1]} stroke="#4A4A60" strokeWidth={2} />
                 <text x={pt[0]} y={pt[1] - 9} textAnchor="middle"
-                  style={{ fontFamily: 'Barlow Condensed', fontSize: '8px', letterSpacing: '0.15em', fill: '#383848', textTransform: 'uppercase' }}>
+                  style={{ fontFamily: 'BMWTypeNext', fontSize: '8px', letterSpacing: '0.15em', fill: '#383848', textTransform: 'uppercase' }}>
                   S/F
                 </text>
               </g>
@@ -207,7 +207,7 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
                   fill={sel ? '#A855F7' : '#0D0D18'}
                   stroke={sel ? '#A855F7' : '#2E2E48'} strokeWidth={1.5} />
                 <text x={a.x} y={a.y + 0.5} textAnchor="middle" dominantBaseline="middle"
-                  style={{ fontFamily: 'Barlow Condensed', fontSize: sel ? '9px' : '8px', fontWeight: 700,
+                  style={{ fontFamily: 'BMWTypeNext', fontSize: sel ? '9px' : '8px', fontWeight: 700,
                     fill: sel ? '#FFF' : '#7070A0', userSelect: 'none', pointerEvents: 'none' }}>
                   {a.name}
                 </text>

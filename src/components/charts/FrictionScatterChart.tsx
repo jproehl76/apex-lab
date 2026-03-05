@@ -43,7 +43,7 @@ export function FrictionScatterChart({ sessions }: Props) {
 
   if (!hasData) {
     return (
-      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}>
+      <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#606070' }}>
         No scatter point data available. Ensure the preprocessor outputs friction_circle.scatter_points.
       </p>
     );
@@ -113,7 +113,7 @@ export function FrictionScatterChart({ sessions }: Props) {
         ].map(item => (
           <div key={item.label} className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', color: '#505060', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.1em', color: '#505060', textTransform: 'uppercase' }}>
               {item.label}
             </span>
           </div>

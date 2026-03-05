@@ -2,7 +2,7 @@ export const CHART_MARGINS = { top: 10, right: 12, bottom: 28, left: 56 };
 export const CHART_MARGINS_MOBILE = { top: 6, right: 6, bottom: 22, left: 44 };
 
 export const AXIS_STYLE = {
-  tick: { fill: '#505060', fontSize: 11, fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' },
+  tick: { fill: '#505060', fontSize: 11, fontFamily: 'BMWTypeNext', letterSpacing: '0.05em' },
   axisLine: { stroke: '#252535' },
   tickLine: { stroke: '#252535' },
 };
@@ -19,7 +19,7 @@ export const TOOLTIP_STYLE = {
   borderRadius: '6px',
   padding: '10px 14px',
   boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-  fontFamily: 'Barlow Condensed',
+  fontFamily: 'BMWTypeNext',
   fontSize: '13px',
   letterSpacing: '0.04em',
   color: '#E8E8F0',

@@ -197,10 +197,10 @@ export default function App() {
             style={{ height: 'clamp(36px, 7vh, 72px)', width: 'clamp(36px, 7vh, 72px)', mixBlendMode: 'screen', filter: 'brightness(1.2) saturate(1.1)' }} />
 
           <div className="flex flex-col justify-center min-w-0">
-            <h1 style={{ fontFamily: 'Barlow Condensed', fontSize: 'clamp(18px, 3.2vh, 36px)', fontWeight: 700, letterSpacing: '0.07em', color: '#F0F0FA', lineHeight: 1, textTransform: 'uppercase' }}>
+            <h1 style={{ fontFamily: 'BMWTypeNext', fontSize: 'clamp(18px, 3.2vh, 36px)', fontWeight: 700, letterSpacing: '0.07em', color: '#F0F0FA', lineHeight: 1, textTransform: 'uppercase' }}>
               G80 M3 Competition
             </h1>
-            <p className="hidden sm:block" style={{ fontFamily: 'Barlow Condensed', fontSize: 'clamp(9px, 1.4vh, 12px)', letterSpacing: '0.22em', color: '#404058', textTransform: 'uppercase', marginTop: 3 }}>
+            <p className="hidden sm:block" style={{ fontFamily: 'BMWTypeNext', fontSize: 'clamp(9px, 1.4vh, 12px)', letterSpacing: '0.22em', color: '#404058', textTransform: 'uppercase', marginTop: 3 }}>
               Track Telemetry · Session Analysis
             </p>
           </div>
@@ -210,7 +210,7 @@ export default function App() {
               <span style={{ fontFamily: 'JetBrains Mono', fontSize: 'clamp(18px, 3.5vh, 32px)', fontWeight: 600, color: '#A855F7', lineHeight: 1, textShadow: '0 0 24px rgba(168,85,247,0.5)' }}>
                 {bestLapDisplay}
               </span>
-              <span style={{ fontFamily: 'Barlow Condensed', fontSize: 'clamp(8px, 1.1vh, 10px)', letterSpacing: '0.22em', color: '#504860', textTransform: 'uppercase', marginTop: 2 }}>
+              <span style={{ fontFamily: 'BMWTypeNext', fontSize: 'clamp(8px, 1.1vh, 10px)', letterSpacing: '0.22em', color: '#504860', textTransform: 'uppercase', marginTop: 2 }}>
                 Best Lap
               </span>
             </div>
@@ -318,7 +318,7 @@ export default function App() {
               className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors"
               style={{ color: active ? '#1C69D4' : '#404058', borderTop: active ? '2px solid #1C69D4' : '2px solid transparent' }}>
               <tab.Icon size={20} />
-              <span style={{ fontFamily: 'Barlow Condensed', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
+              <span style={{ fontFamily: 'BMWTypeNext', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
             </button>
           );
         })}

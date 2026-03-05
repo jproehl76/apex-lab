@@ -82,7 +82,7 @@ export function CornerDetailTable({ sessions }: Props) {
                   {idx === 0 && (
                     <Badge variant="destructive" className="text-[9px] px-1.5 py-0 rounded font-bold">#{idx + 1}</Badge>
                   )}
-                  <span style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, letterSpacing: '0.04em' }}>
+                  <span style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', fontWeight: 600, letterSpacing: '0.04em' }}>
                     {row.cornerName}
                   </span>
                 </div>

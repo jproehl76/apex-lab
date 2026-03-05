@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── BMW TypeNext Latin ──────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'BMWTypeNext';
+  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Thin.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'BMWTypeNext';
+  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Light.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'BMWTypeNext';
+  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   /* ── shadcn/ui dark theme variables ─────────────────────────────────────── */
   :root {
@@ -42,7 +65,7 @@
   }
 
   body {
-    font-family: 'Barlow Condensed', system-ui, sans-serif;
+    font-family: 'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
     font-size: 14px;
     color: #E8E8F0;
   }

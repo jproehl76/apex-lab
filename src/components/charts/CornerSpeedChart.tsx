@@ -62,7 +62,7 @@ export function CornerSpeedChart({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
       <div className="flex h-48 items-center justify-center">
-        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
           Load sessions to compare corner speeds
         </span>
       </div>
@@ -78,12 +78,12 @@ export function CornerSpeedChart({ sessions }: Props) {
         {sessions.map(s => (
           <div key={s.id} className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm" style={{ background: s.color }} />
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
               {sessionLabel(s)}
             </span>
           </div>
         ))}
-        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
+        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
           Best lap apex speed · higher = faster
         </span>
       </div>
@@ -102,7 +102,7 @@ export function CornerSpeedChart({ sessions }: Props) {
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
             tickFormatter={(v: number) => `${v}`}
-            label={{ value: 'MPH', angle: -90, position: 'insideLeft', offset: 12, fill: '#404050', fontSize: 11, fontFamily: 'Barlow Condensed', letterSpacing: '0.1em' }}
+            label={{ value: 'MPH', angle: -90, position: 'insideLeft', offset: 12, fill: '#404050', fontSize: 11, fontFamily: 'BMWTypeNext', letterSpacing: '0.1em' }}
             domain={['auto', 'auto']}
           />
           <Tooltip content={<CustomTooltip />} />

@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        ui:      ['Rajdhani', 'system-ui', 'sans-serif'],
+        ui:      ['BMWTypeNext', 'Barlow Condensed', 'system-ui', 'sans-serif'],
         mono:    ['JetBrains Mono', 'SF Mono', 'monospace'],
-        display: ['Barlow Condensed', 'Rajdhani', 'sans-serif'],
+        display: ['BMWTypeNext', 'Barlow Condensed', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

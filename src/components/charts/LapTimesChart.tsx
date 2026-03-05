@@ -71,12 +71,12 @@ export function LapTimesChart({ sessions }: Props) {
         {bestLaps.map(({ id, color, label }) => (
           <div key={id} className="flex items-center gap-1.5">
             <div className="h-0.5 w-5 rounded" style={{ background: color }} />
-            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
               {label}
             </span>
           </div>
         ))}
-        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
+        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
           Outlier laps excluded · dashed = best lap
         </span>
       </div>
@@ -89,7 +89,7 @@ export function LapTimesChart({ sessions }: Props) {
             tick={AXIS_STYLE.tick}
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
-            label={{ value: 'LAP', position: 'insideBottom', offset: -6, fill: '#404050', fontSize: 11, fontFamily: 'Barlow Condensed', letterSpacing: '0.1em' }}
+            label={{ value: 'LAP', position: 'insideBottom', offset: -6, fill: '#404050', fontSize: 11, fontFamily: 'BMWTypeNext', letterSpacing: '0.1em' }}
           />
           <YAxis
             tick={AXIS_STYLE.tick}
@@ -131,7 +131,7 @@ export function LapTimesChart({ sessions }: Props) {
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex h-48 items-center justify-center">
-      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+      <span style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
         {message}
       </span>
     </div>

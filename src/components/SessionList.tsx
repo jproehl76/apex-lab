@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Eye, EyeOff, Pencil, Check } from 'lucide-react';
+import { autoAnimate } from '@formkit/auto-animate';
 import type { LoadedSession } from '@/types/session';
 import { sessionLabel } from '@/lib/utils';
 
@@ -15,6 +16,11 @@ interface SessionListProps {
 export function SessionList({ sessions, activeIds, onToggle, onRemove, onRename, onClearAll }: SessionListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (listRef.current) autoAnimate(listRef.current);
+  }, []);
 
   if (sessions.length === 0) return null;
 
@@ -29,74 +35,70 @@ export function SessionList({ sessions, activeIds, onToggle, onRemove, onRename,
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           Sessions ({sessions.length})
         </p>
-        <button
-          onClick={onClearAll}
-          className="text-xs text-slate-500 hover:text-red-400 transition-colors"
-        >
+        <button onClick={onClearAll} className="text-[10px] tracking-widest uppercase text-muted-foreground/50 hover:text-destructive transition-colors">
           Clear all
         </button>
       </div>
 
-      {sessions.map((session) => {
-        const isActive = activeIds.has(session.id);
-        const isEditing = editingId === session.id;
+      <div ref={listRef} className="space-y-1">
+        {sessions.map((session) => {
+          const isActive = activeIds.has(session.id);
+          const isEditing = editingId === session.id;
 
-        return (
-          <div
-            key={session.id}
-            className="flex items-center gap-2 rounded-lg bg-slate-800/60 px-3 py-2 border border-slate-700/50"
-          >
-            <div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: session.color }} />
+          return (
+            <div key={session.id}
+              className="flex items-center gap-2 rounded border px-2.5 py-1.5 transition-colors"
+              style={{
+                borderColor: isActive ? `${session.color}40` : 'hsl(var(--border))',
+                background: isActive ? `${session.color}0A` : 'transparent',
+              }}>
+              <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: session.color }} />
 
-            {isEditing ? (
-              <input
-                className="flex-1 min-w-0 text-xs bg-slate-700 text-slate-100 rounded px-1 py-0.5 outline-none border border-blue-500"
-                value={editValue}
-                autoFocus
-                onChange={e => setEditValue(e.target.value)}
-                onBlur={() => commitEdit(session.id)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') commitEdit(session.id);
-                  if (e.key === 'Escape') setEditingId(null);
-                }}
-              />
-            ) : (
-              <span className={`flex-1 min-w-0 text-xs truncate ${isActive ? 'text-slate-200' : 'text-slate-500'}`}>
-                {sessionLabel(session)}
-              </span>
-            )}
+              {isEditing ? (
+                <input
+                  className="flex-1 min-w-0 text-xs bg-secondary text-foreground rounded px-1 py-0.5 outline-none border border-primary"
+                  value={editValue}
+                  autoFocus
+                  onChange={e => setEditValue(e.target.value)}
+                  onBlur={() => commitEdit(session.id)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') commitEdit(session.id);
+                    if (e.key === 'Escape') setEditingId(null);
+                  }}
+                />
+              ) : (
+                <span className="flex-1 min-w-0 text-xs truncate tracking-wide"
+                  style={{ color: isActive ? '#D0D0E0' : 'hsl(var(--muted-foreground))' }}>
+                  {sessionLabel(session)}
+                </span>
+              )}
 
-            <button
-              onClick={() => isEditing ? commitEdit(session.id) : startEdit(session)}
-              className="shrink-0 text-slate-500 hover:text-slate-200 transition-colors"
-              title={isEditing ? 'Save name' : 'Rename session'}
-            >
-              {isEditing ? <Check size={14} /> : <Pencil size={14} />}
-            </button>
+              <button onClick={() => isEditing ? commitEdit(session.id) : startEdit(session)}
+                className="shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                title={isEditing ? 'Save name' : 'Rename session'}>
+                {isEditing ? <Check size={12} /> : <Pencil size={12} />}
+              </button>
 
-            <button
-              onClick={() => onToggle(session.id)}
-              className="shrink-0 text-slate-500 hover:text-slate-200 transition-colors"
-              title={isActive ? 'Hide session' : 'Show session'}
-            >
-              {isActive ? <Eye size={14} /> : <EyeOff size={14} />}
-            </button>
+              <button onClick={() => onToggle(session.id)}
+                className="shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                title={isActive ? 'Hide session' : 'Show session'}>
+                {isActive ? <Eye size={12} /> : <EyeOff size={12} />}
+              </button>
 
-            <button
-              onClick={() => onRemove(session.id)}
-              className="shrink-0 text-slate-500 hover:text-red-400 transition-colors"
-              title="Remove session"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        );
-      })}
+              <button onClick={() => onRemove(session.id)}
+                className="shrink-0 text-muted-foreground/40 hover:text-destructive transition-colors"
+                title="Remove session">
+                <X size={12} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

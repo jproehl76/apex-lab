@@ -79,10 +79,10 @@ export function DropZone({ onSessionLoaded }: DropZoneProps) {
       />
       <Upload size={20} style={{ color: isDragging ? '#3B82F6' : '#606070' }} />
       <div>
-        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, letterSpacing: '0.05em', color: '#E8E8F0' }}>
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', fontWeight: 600, letterSpacing: '0.05em', color: '#E8E8F0' }}>
           {isDragging ? 'Drop session here' : 'Load Session'}
         </div>
-        <div style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#606070', marginTop: 2 }}>
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#606070', marginTop: 2 }}>
           RaceChrono CSV · JSON · tap to browse
         </div>
       </div>
