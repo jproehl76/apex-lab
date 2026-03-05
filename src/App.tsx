@@ -235,7 +235,7 @@ export default function App() {
               lineHeight: 1,
               textTransform: 'uppercase',
             }}>
-              G80 M3 Competition
+              Jonathan Proehl
             </h1>
             <p className="hidden sm:block" style={{
               fontFamily: 'BMWTypeNext',
