@@ -35,7 +35,7 @@ export async function openDrivePicker(accessToken: string): Promise<DrivePickerS
 
   return new Promise((resolve) => {
     const view = new window.google.picker.DocsView()
-      .setMimeTypes('application/json')
+      .setMimeTypes('application/json,text/plain,text/json,application/octet-stream')
       .setParent('1BrltfQ6HfS5O5Rkb0xU767zSpuCtLsGM')
       .setIncludeFolders(false);
 
