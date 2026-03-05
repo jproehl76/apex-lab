@@ -46,9 +46,10 @@ export async function openDrivePicker(accessToken: string): Promise<DrivePickerS
       .setCallback((data: PickerResult) => {
         if (data.action === window.google.picker.Action.PICKED && data.docs?.[0]) {
           resolve({ fileId: data.docs[0].id, filename: data.docs[0].name });
-        } else {
+        } else if (data.action === window.google.picker.Action.CANCEL) {
           resolve(null);
         }
+        // Ignore other actions (e.g. 'loaded') — wait for PICKED or CANCEL
       })
       .build();
 
