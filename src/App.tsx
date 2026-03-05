@@ -137,31 +137,22 @@ export default function App() {
       );
       case 'corners': return (
         <div className="space-y-3">
-          {/* Row 1: Corner Apex Speeds (left, tall) + Friction Circle (right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-start">
-            <div className="lg:col-span-3">
-              <Section title="Corner Apex Speeds">
-                <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
-              </Section>
-            </div>
-            <div className="lg:col-span-2">
-              <Section title="Friction Circle">
-                <ErrorBoundary><FrictionScatterChart sessions={store.activeSessions} /></ErrorBoundary>
-              </Section>
-            </div>
-          </div>
-          {/* Row 2: Corner Detail table (left) + G-Force Envelope (right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-start">
-            <div className="lg:col-span-3">
-              <Section title="Corner Detail">
-                <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
-              </Section>
-            </div>
-            <div className="lg:col-span-2">
-              <Section title="G-Force Envelope">
-                <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
-              </Section>
-            </div>
+          {/* Row 1: Corner Apex Speeds — full width */}
+          <Section title="Corner Apex Speeds">
+            <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
+          </Section>
+          {/* Row 2: Corner Detail — full width */}
+          <Section title="Corner Detail">
+            <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
+          </Section>
+          {/* Row 3: G-Force Envelope + Friction Circle side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <Section title="G-Force Envelope">
+              <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
+            </Section>
+            <Section title="Friction Circle">
+              <ErrorBoundary><FrictionScatterChart sessions={store.activeSessions} /></ErrorBoundary>
+            </Section>
           </div>
         </div>
       );
