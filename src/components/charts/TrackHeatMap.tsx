@@ -15,7 +15,7 @@
  */
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useMemo, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Tooltip, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { LoadedSession, BestLapCorner, GpsPoint } from '@/types/session';
 import { KPH_TO_MPH, M_TO_FEET, sessionLabel } from '@/lib/utils';
@@ -100,87 +100,94 @@ function opportunityColor(pct: number): string {
   return S.good;
 }
 
-// ── Color helpers ─────────────────────────────────────────────────────────────
-function speedHex(kph: number, minKph: number, maxKph: number): string {
-  const t = Math.max(0, Math.min(1, (kph - minKph) / Math.max(1, maxKph - minKph)));
-  if (t >= 0.67) return '#22C55E';
-  if (t >= 0.33) return '#F59E0B';
-  return '#EF4444';
-}
-function throttleRgba(pct: number): string {
-  return `rgba(34,197,94,${Math.max(0.15, pct / 100).toFixed(2)})`;
-}
-function brakeRgba(bar: number, maxBar: number): string {
-  if (maxBar <= 0) return 'rgba(239,68,68,0.15)';
-  return `rgba(239,68,68,${Math.max(0.15, Math.min(1, bar / maxBar)).toFixed(2)})`;
-}
-function pointColor(pt: GpsPoint, ch: HeatChannel, minSpd: number, maxSpd: number, maxBrake: number): string {
+
+// ── Leaflet polyline heat overlay ─────────────────────────────────────────────
+// Uses react-leaflet Polyline — guaranteed pixel-perfect alignment with tiles.
+// GPS points are quantized into 3 color bins per channel, then grouped into
+// consecutive same-color runs to keep DOM element count low (~100–400 polylines).
+interface Stats { minSpd: number; maxSpd: number; maxBrake: number }
+
+function getQuantizedColor(pt: GpsPoint, ch: HeatChannel, stats: Stats): string {
   switch (ch) {
-    case 'speed':    return speedHex(pt.speed_kph, minSpd, maxSpd);
-    case 'throttle': return throttleRgba(pt.throttle_pct);
-    case 'brake':    return brakeRgba(pt.brake_bar, maxBrake);
+    case 'speed': {
+      const t = (pt.speed_kph - stats.minSpd) / Math.max(1, stats.maxSpd - stats.minSpd);
+      if (t >= 0.67) return '#22C55E';
+      if (t >= 0.33) return '#F59E0B';
+      return '#EF4444';
+    }
+    case 'throttle': {
+      const p = pt.throttle_pct;
+      if (p >= 70) return '#22C55E';
+      if (p >= 25) return '#84CC16';
+      return '#15803D';
+    }
+    case 'brake': {
+      if (stats.maxBrake <= 0) return 'rgba(239,68,68,0.3)';
+      const t = pt.brake_bar / stats.maxBrake;
+      if (t >= 0.6) return '#EF4444';
+      if (t >= 0.2) return '#F97316';
+      return 'rgba(239,68,68,0.35)';
+    }
   }
 }
 
-// ── Leaflet canvas heat layer ─────────────────────────────────────────────────
-interface Stats { minSpd: number; maxSpd: number; maxBrake: number }
+function HeatPolylines({ trace, channel, stats }: { trace: GpsPoint[]; channel: HeatChannel; stats: Stats }) {
+  const segments = useMemo(() => {
+    if (trace.length < 2) return [];
 
-function HeatLayer({ trace, channel, stats }: { trace: GpsPoint[]; channel: HeatChannel; stats: Stats }) {
-  const map = useMap();
+    // Max distance between consecutive GPS points in degrees (~500m) to skip jumps
+    const MAX_JUMP = 0.005;
 
-  useEffect(() => {
-    if (!trace.length) return;
-    const container = map.getContainer();
-    const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:650';
-    container.appendChild(canvas);
+    const result: { color: string; positions: [number, number][] }[] = [];
+    let currentColor = getQuantizedColor(trace[0], channel, stats);
+    let currentPositions: [number, number][] = [[trace[0].lat, trace[0].lon]];
 
-    let raf = 0;
+    for (let i = 1; i < trace.length; i++) {
+      const prev = trace[i - 1];
+      const curr = trace[i];
+      const jump = Math.hypot(curr.lat - prev.lat, curr.lon - prev.lon);
 
-    function draw() {
-      const size = map.getSize();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width  = size.x * dpr;
-      canvas.height = size.y * dpr;
-      canvas.style.width  = size.x + 'px';
-      canvas.style.height = size.y + 'px';
+      if (jump > MAX_JUMP) {
+        // GPS jump — flush current segment and start fresh
+        if (currentPositions.length > 1) {
+          result.push({ color: currentColor, positions: currentPositions });
+        }
+        currentColor = getQuantizedColor(curr, channel, stats);
+        currentPositions = [[curr.lat, curr.lon]];
+        continue;
+      }
 
-      const ctx = canvas.getContext('2d')!;
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, size.x, size.y);
-      ctx.lineWidth = 3.5;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-
-      for (let i = 0; i < trace.length - 1; i++) {
-        const p = trace[i], q = trace[i + 1];
-        const a = map.latLngToContainerPoint(L.latLng(p.lat, p.lon));
-        const b = map.latLngToContainerPoint(L.latLng(q.lat, q.lon));
-        if (Math.hypot(b.x - a.x, b.y - a.y) > 120) continue; // skip GPS jumps
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.strokeStyle = pointColor(p, channel, stats.minSpd, stats.maxSpd, stats.maxBrake);
-        ctx.stroke();
+      const color = getQuantizedColor(curr, channel, stats);
+      if (color === currentColor) {
+        currentPositions.push([curr.lat, curr.lon]);
+      } else {
+        // Overlap by one point for seamless transition
+        currentPositions.push([curr.lat, curr.lon]);
+        result.push({ color: currentColor, positions: currentPositions });
+        currentColor = color;
+        currentPositions = [[prev.lat, prev.lon], [curr.lat, curr.lon]];
       }
     }
 
-    function scheduleDraw() {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(draw);
+    if (currentPositions.length > 1) {
+      result.push({ color: currentColor, positions: currentPositions });
     }
 
-    map.on('move moveend zoomend resize', scheduleDraw);
-    draw();
+    return result;
+  }, [trace, channel, stats]);
 
-    return () => {
-      map.off('move moveend zoomend resize', scheduleDraw);
-      cancelAnimationFrame(raf);
-      canvas.remove();
-    };
-  }, [map, trace, channel, stats]);
-
-  return null;
+  return (
+    <>
+      {segments.map((seg, i) => (
+        <Polyline
+          key={i}
+          positions={seg.positions}
+          pathOptions={{ color: seg.color, weight: 4, opacity: 0.92, lineCap: 'round', lineJoin: 'round' }}
+          interactive={false}
+        />
+      ))}
+    </>
+  );
 }
 
 // ── Map bounds fitter — updates bounds when session changes ───────────────────
@@ -588,9 +595,9 @@ export function TrackHeatMap({ sessions, selectedCornerId, onCornerSelect }: Pro
               {/* Fit bounds when session changes */}
               <MapBoundsFitter bounds={mapBounds} />
 
-              {/* GPS heat trace canvas overlay */}
+              {/* GPS heat trace — native Leaflet polylines, pixel-perfect with tiles */}
               {trace.length > 1 && (
-                <HeatLayer trace={trace} channel={channel} stats={stats} />
+                <HeatPolylines trace={trace} channel={channel} stats={stats} />
               )}
 
               {/* Corner apex markers */}

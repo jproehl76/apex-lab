@@ -109,7 +109,7 @@ export function CornerSpeedChart({ sessions }: Props) {
       </div>
 
       {/* Apex speed bar chart */}
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={320}>
         <BarChart data={data} margin={CHART_MARGINS} barCategoryGap="28%">
           <CartesianGrid stroke={GRID_STYLE.stroke} vertical={false} />
           <XAxis dataKey="label" tick={AXIS_STYLE.tick} axisLine={AXIS_STYLE.axisLine} tickLine={AXIS_STYLE.tickLine} />

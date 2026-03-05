@@ -137,25 +137,32 @@ export default function App() {
       );
       case 'corners': return (
         <div className="space-y-3">
-          {/* Row 1: Corner Apex Speeds — taller, constrained width */}
-          <div className="max-w-2xl">
-            <Section title="Corner Apex Speeds">
-              <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
-            </Section>
+          {/* Row 1: Corner Apex Speeds (left, tall) + Friction Circle (right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-start">
+            <div className="lg:col-span-3">
+              <Section title="Corner Apex Speeds">
+                <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
+              </Section>
+            </div>
+            <div className="lg:col-span-2">
+              <Section title="Friction Circle">
+                <ErrorBoundary><FrictionScatterChart sessions={store.activeSessions} /></ErrorBoundary>
+              </Section>
+            </div>
           </div>
-          {/* Row 2: Friction Circle + G-Force Envelope side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <Section title="Friction Circle">
-              <ErrorBoundary><FrictionScatterChart sessions={store.activeSessions} /></ErrorBoundary>
-            </Section>
-            <Section title="G-Force Envelope">
-              <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
-            </Section>
+          {/* Row 2: Corner Detail table (left) + G-Force Envelope (right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3 items-start">
+            <div className="lg:col-span-3">
+              <Section title="Corner Detail">
+                <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
+              </Section>
+            </div>
+            <div className="lg:col-span-2">
+              <Section title="G-Force Envelope">
+                <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
+              </Section>
+            </div>
           </div>
-          {/* Row 3: corner detail table — full width for columns */}
-          <Section title="Corner Detail">
-            <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
-          </Section>
         </div>
       );
       case 'health': return (
