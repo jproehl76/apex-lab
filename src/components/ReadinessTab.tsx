@@ -14,11 +14,11 @@ export function ReadinessTab({ sessionDates, connectedOverride }: Props) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-6 p-8">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: '#1A1A22', border: '1px solid #2E2E3C' }}>
-          <Activity size={28} style={{ color: '#606070' }} />
+          <Activity size={28} style={{ color: '#9A9AB0' }} />
         </div>
         <div className="text-center">
           <div style={{ fontFamily: 'BMWTypeNext', fontSize: '20px', fontWeight: 600, color: '#E8E8F0', letterSpacing: '0.05em', marginBottom: 8 }}>Driver Readiness</div>
-          <div style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#606070', lineHeight: 1.5, maxWidth: 280, margin: '0 auto' }}>
+          <div style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#9A9AB0', lineHeight: 1.5, maxWidth: 280, margin: '0 auto' }}>
             Connect your WHOOP to see recovery score, HRV, and sleep data alongside your lap times.
           </div>
         </div>

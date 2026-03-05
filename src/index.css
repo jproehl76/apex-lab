@@ -38,11 +38,11 @@
     --primary:          213 75% 46%;    /* BMW blue */
     --primary-foreground: 0 0% 100%;
     --secondary:        220 18% 12%;
-    --secondary-foreground: 220 15% 70%;
+    --secondary-foreground: 220 15% 82%;
     --muted:            220 18% 12%;
-    --muted-foreground: 220 10% 58%;
+    --muted-foreground: 220 12% 72%;
     --accent:           220 18% 14%;
-    --accent-foreground: 220 15% 80%;
+    --accent-foreground: 220 15% 88%;
     --destructive:      0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     --border:           220 18% 13%;

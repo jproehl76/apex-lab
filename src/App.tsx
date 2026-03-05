@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { LogOut, Heart, MapIcon } from 'lucide-react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { LoginScreen } from '@/components/LoginScreen';
 import { Toaster, toast } from 'sonner';
 import { DropZone } from '@/components/DropZone';
@@ -18,8 +17,8 @@ import { DebriefNotes } from '@/components/DebriefNotes';
 import { CoachingInsights } from '@/components/CoachingInsights';
 import { DrivePickerButton } from '@/components/DrivePickerButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { WhoopPanel } from '@/components/WhoopPanel';
 import { ReadinessTab } from '@/components/ReadinessTab';
+import { WeatherWidget } from '@/components/WeatherWidget';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { handleWhoopCallback } from '@/lib/services/whoopAuth';
 import { usePersistedSessions } from '@/lib/usePersistedSessions';
@@ -115,7 +114,17 @@ export default function App() {
     if (store.activeSessions.length === 0) return <EmptyDashboard />;
     switch (tab) {
       case 'session': return (
-        <div className="space-y-5">
+        <div className="space-y-4">
+          {/* Track conditions — weather for session date */}
+          {activeTrackLayout && store.activeSessions[0] && (
+            <Section title="Track Conditions">
+              <WeatherWidget
+                date={store.activeSessions[0].data.header.date}
+                lat={activeTrackLayout.waypoints[0][0]}
+                lon={activeTrackLayout.waypoints[0][1]}
+              />
+            </Section>
+          )}
           <Section title="Session Summary">
             <ErrorBoundary><SessionStats sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
@@ -127,40 +136,35 @@ export default function App() {
           </Section>
         </div>
       );
-      case 'map': return (
-        <div className="h-full p-3">
-          <TrackHeatMap sessions={store.activeSessions}
-            selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
-        </div>
-      );
       case 'corners': return (
         <div className="space-y-3">
-          <Section title="Corner Speeds">
-            <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
-          </Section>
-          <Section title="Corner Detail">
-            <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
-          </Section>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <Section title="Friction Circle">
-              <ErrorBoundary><FrictionScatterChart sessions={store.activeSessions} /></ErrorBoundary>
+          {/* Row 1: side-by-side charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <Section title="Corner Apex Speeds">
+              <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
             </Section>
             <Section title="G-Force Envelope">
               <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
             </Section>
           </div>
+          {/* Row 2: corner detail table — needs full width for columns */}
+          <Section title="Corner Detail">
+            <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
+          </Section>
+          {/* Row 3: friction scatter */}
+          <Section title="Friction Circle">
+            <ErrorBoundary><FrictionScatterChart sessions={store.activeSessions} /></ErrorBoundary>
+          </Section>
         </div>
       );
       case 'health': return (
-        <div className="space-y-5">
+        <div className="space-y-4">
           <Section title="Engine Thermals">
             <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          <Section title="Driver Readiness">
+          {/* ReadinessTab handles connect state + renders WhoopPanel when connected */}
+          <Section title="Driver Readiness &amp; WHOOP">
             <ErrorBoundary><ReadinessTab sessionDates={sessionDates} connectedOverride={whoopConnected} /></ErrorBoundary>
-          </Section>
-          <Section title="WHOOP Recovery">
-            <ErrorBoundary><WhoopPanel sessionDates={sessionDates} connectedOverride={whoopConnected} /></ErrorBoundary>
           </Section>
         </div>
       );
@@ -356,7 +360,7 @@ export default function App() {
         {/* Right panel */}
         <div className="flex flex-col flex-1 min-w-0 min-h-0 bg-background">
           {store.activeSessions.length > 0 ? (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
+            <div className="flex flex-col flex-1 min-h-0">
               {/* Desktop tab strip */}
               <div className="hidden lg:flex shrink-0 border-b border-border bg-card/60 px-3 items-center gap-1">
                 {DESKTOP_TABS.map(tab => (
@@ -375,15 +379,21 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-4">
-                {DESKTOP_TABS.map(tab => (
-                  <TabsContent key={tab.id} value={tab.id} className="mt-0">
-                    {renderTabContent(tab.id)}
-                  </TabsContent>
-                ))}
-              </div>
-            </Tabs>
+              {/* Map tab: full height, no padding, no scroll */}
+              {activeTab === 'map' && (
+                <div className="flex-1 min-h-0 p-2 pb-[calc(8px+env(safe-area-inset-bottom))] lg:pb-2">
+                  <TrackHeatMap sessions={store.activeSessions}
+                    selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
+                </div>
+              )}
+
+              {/* All other tabs: scrollable content */}
+              {activeTab !== 'map' && (
+                <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-4">
+                  {renderTabContent(activeTab)}
+                </div>
+              )}
+            </div>
           ) : (
             <main className="flex-1 overflow-y-auto scroll-touch p-4">
               <EmptyDashboard />

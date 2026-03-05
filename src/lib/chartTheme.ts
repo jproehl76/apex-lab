@@ -14,9 +14,9 @@
 // ── Text hierarchy ────────────────────────────────────────────────────────────
 export const T = {
   fg:     '#E8E8F0',  // primary foreground: data values, main content
-  label:  '#A0A0B8',  // labels: section headers, legends, axis tick labels
-  muted:  '#707085',  // muted: units, captions, tooltip sub-labels
-  ghost:  '#3A3A52',  // ghost: decorative dashes, placeholders (non-informational)
+  label:  '#C0C0D4',  // labels: section headers, legends, axis tick labels  (~9:1)
+  muted:  '#9A9AB0',  // muted: units, captions, tooltip sub-labels           (~5.5:1)
+  ghost:  '#5A5A72',  // ghost: decorative dashes, placeholders               (~2.5:1)
 } as const;
 
 // ── Status / performance colors ───────────────────────────────────────────────
@@ -53,7 +53,7 @@ export const CHART_MARGINS        = { top: 10, right: 12, bottom: 28, left: 56 }
 export const CHART_MARGINS_MOBILE = { top: 6,  right: 6,  bottom: 22, left: 44 };
 
 export const AXIS_STYLE = {
-  tick:     { fill: T.label, fontSize: FS.small, fontFamily: FF.sans, letterSpacing: '0.05em' },
+  tick:     { fill: '#C0C0D4', fontSize: FS.small, fontFamily: FF.sans, letterSpacing: '0.05em' },
   axisLine: { stroke: '#2A2A3A' },
   tickLine: { stroke: '#2A2A3A' },
 } as const;

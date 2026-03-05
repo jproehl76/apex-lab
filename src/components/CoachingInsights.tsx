@@ -93,7 +93,7 @@ export function CoachingInsights({ sessions }: Props) {
 
   if (sessions.length === 0) {
     return (
-      <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.06em', color: '#707085' }}>
+      <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.06em', color: '#9A9AB0' }}>
         Load a session to see coaching insights.
       </p>
     );
@@ -104,7 +104,7 @@ export function CoachingInsights({ sessions }: Props) {
       {insightsBySession.map(({ session, insights }) => (
         <div key={session.id} className="space-y-2">
           {sessions.length > 1 && (
-            <p style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9898A8' }}>{sessionLabel(session)}</p>
+            <p style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C0C0D4' }}>{sessionLabel(session)}</p>
           )}
           {insights.length === 0 ? (
             <div className="rounded p-3 flex items-center gap-3" style={{ borderLeft: '3px solid #22C55E', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderLeftWidth: 3 }}>

@@ -287,9 +287,9 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
                 <text x={a.x} y={a.y + 0.5} textAnchor="middle" dominantBaseline="middle"
                   style={{
                     fontFamily: 'BMWTypeNext',
-                    fontSize: sel ? '9px' : '8px',
+                    fontSize: sel ? '10px' : '9px',
                     fontWeight: 700,
-                    fill: sel ? '#FFF' : hasData ? '#8080A8' : '#404050',
+                    fill: sel ? '#FFF' : hasData ? '#C0C0D4' : '#5A5A72',
                     userSelect: 'none',
                     pointerEvents: 'none',
                   }}>

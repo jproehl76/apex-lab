@@ -21,13 +21,13 @@ export function InstallPrompt() {
       style={{ bottom: 'calc(80px + env(safe-area-inset-bottom) + 8px)', boxShadow: '0 -4px 40px rgba(0,0,0,0.6)' }}>
       <div className="flex-1">
         <div style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', fontWeight: 600, color: '#E8E8F0', marginBottom: 4 }}>Add to Home Screen</div>
-        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#606070' }}>
-          Tap <strong style={{ color: '#9898A8' }}>Share</strong> then <strong style={{ color: '#9898A8' }}>Add to Home Screen</strong> for the full app experience.
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#9A9AB0' }}>
+          Tap <strong style={{ color: '#C0C0D4' }}>Share</strong> then <strong style={{ color: '#C0C0D4' }}>Add to Home Screen</strong> for the full app experience.
         </div>
       </div>
       <button onClick={() => { localStorage.setItem('install_prompt_dismissed', '1'); setShow(false); }}
         className="flex-shrink-0 p-1.5 rounded-lg" style={{ background: '#2E2E3C' }}>
-        <X size={14} style={{ color: '#606070' }} />
+        <X size={14} style={{ color: '#9A9AB0' }} />
       </button>
     </div>
   );
