@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { kphToMph, sessionLabel } from '@/lib/utils';
-import { CHART_MARGINS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, SESSION_COLORS } from '@/lib/chartTheme';
+import { CHART_MARGINS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, TOOLTIP_HEADER_STYLE, LEGEND_LABEL_STYLE, SESSION_COLORS, T, FF, FS, S, axisLabel } from '@/lib/chartTheme';
 
 interface Props {
   sessions: LoadedSession[];
@@ -36,16 +36,14 @@ function CustomTooltip({ active, payload, label, sessions }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ ...TOOLTIP_STYLE, minWidth: 160 }}>
-      <p style={{ marginBottom: 8, color: '#606070', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-        {label}
-      </p>
+      <p style={TOOLTIP_HEADER_STYLE}>{label}</p>
       {payload.map((entry: { dataKey: string; value: number }) => {
         const s = sessions.find((s: LoadedSession) => s.id === entry.dataKey);
         return (
           <div key={entry.dataKey} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
-            <span style={{ color: s?.color ?? '#8080A0', fontSize: '10px' }}>{s ? sessionLabel(s) : entry.dataKey}</span>
-            <span style={{ fontFamily: 'JetBrains Mono', fontWeight: 700, color: '#E8E8F0' }}>
-              {entry.value} <span style={{ fontSize: '9px', color: '#505060' }}>mph</span>
+            <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: s?.color ?? T.label }}>{s ? sessionLabel(s) : entry.dataKey}</span>
+            <span style={{ fontFamily: FF.mono, fontWeight: 700, fontSize: `${FS.value}px`, color: T.fg }}>
+              {entry.value} <span style={{ fontSize: `${FS.nano}px`, color: T.muted }}>mph</span>
             </span>
           </div>
         );
@@ -67,7 +65,7 @@ export function CornerSpeedChart({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
       <div className="flex h-48 items-center justify-center">
-        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+        <span style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, letterSpacing: '0.08em', color: T.muted, textTransform: 'uppercase' }}>
           Load sessions to compare apex speeds
         </span>
       </div>
@@ -96,7 +94,7 @@ export function CornerSpeedChart({ sessions }: Props) {
             {[['#22C55E', 'Faster'], ['#F59E0B', 'Mid'], ['#EF4444', 'Slower']].map(([color, label]) => (
               <span key={label} className="flex items-center gap-1.5">
                 <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: color }} />
-                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '9px', letterSpacing: '0.08em', color: '#505060' }}>{label}</span>
+                <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.08em', color: T.muted }}>{label}</span>
               </span>
             ))}
           </div>
@@ -104,9 +102,7 @@ export function CornerSpeedChart({ sessions }: Props) {
           sessions.map((s, i) => (
             <div key={s.id} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-sm" style={{ background: SESSION_COLORS[i % SESSION_COLORS.length] }} />
-              <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.08em', color: '#8080A0', textTransform: 'uppercase' }}>
-                {sessionLabel(s)}
-              </span>
+              <span style={LEGEND_LABEL_STYLE}>{sessionLabel(s)}</span>
             </div>
           ))
         )}
@@ -121,7 +117,7 @@ export function CornerSpeedChart({ sessions }: Props) {
             tick={AXIS_STYLE.tick}
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
-            label={{ value: 'MPH', angle: -90, position: 'insideLeft', offset: 12, fill: '#404050', fontSize: 10, fontFamily: 'BMWTypeNext', letterSpacing: '0.1em' }}
+            label={axisLabel('MPH', 'insideLeft')}
             domain={['auto', 'auto']}
           />
           <Tooltip content={<CustomTooltip sessions={sessions} />} />
@@ -152,20 +148,20 @@ export function CornerSpeedChart({ sessions }: Props) {
         if (!deltas.length) return null;
         return (
           <div>
-            <div className="text-[8px] tracking-widest uppercase mb-2" style={{ color: '#404050' }}>
+            <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted, marginBottom: 8 }}>
               Apex delta — {sessionLabel(s2)} vs {sessionLabel(s1)}
             </div>
             <div className="flex flex-wrap gap-1.5">
               {deltas.map(({ corner, delta }) => {
-                const color = delta > 0.5 ? '#22C55E' : delta < -0.5 ? '#EF4444' : '#F59E0B';
+                const color = delta > 0.5 ? S.good : delta < -0.5 ? S.bad : S.warn;
                 return (
-                  <div key={corner} className="flex flex-col items-center rounded px-2 py-1"
-                    style={{ background: `${color}10`, border: `1px solid ${color}28`, minWidth: 40 }}>
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '7px', letterSpacing: '0.1em', color: '#505060' }}>{corner}</span>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color, lineHeight: 1.2 }}>
+                  <div key={corner} className="flex flex-col items-center rounded px-2 py-1.5"
+                    style={{ background: `${color}10`, border: `1px solid ${color}28`, minWidth: 44 }}>
+                    <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.08em', color: T.muted }}>{corner}</span>
+                    <span style={{ fontFamily: FF.mono, fontSize: `${FS.value}px`, fontWeight: 700, color, lineHeight: 1.3 }}>
                       {delta > 0 ? '+' : ''}{delta}
                     </span>
-                    <span style={{ fontSize: '6px', color: `${color}80` }}>mph</span>
+                    <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.muted }}>mph</span>
                   </div>
                 );
               })}

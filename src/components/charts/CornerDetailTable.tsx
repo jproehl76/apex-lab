@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import type { LoadedSession, BestLapCorner } from '@/types/session';
 import { KPH_TO_MPH, M_TO_FEET, sessionLabel } from '@/lib/utils';
+import { T, FF, FS, S } from '@/lib/chartTheme';
 
 interface MergedCornerRow {
   id: string;
@@ -57,47 +58,45 @@ function buildRows(session: LoadedSession): MergedCornerRow[] {
 // ── Color helpers ─────────────────────────────────────────────────────────────
 
 function gapColor(v: number | null): string {
-  if (v === null) return 'inherit';
-  if (v > 3)  return '#EF3340';
-  if (v > 1.5) return '#F59E0B';
-  return 'hsl(var(--muted-foreground))';
+  if (v === null) return T.muted;
+  if (v > 3)   return S.bad;
+  if (v > 1.5) return S.warn;
+  return T.muted;
 }
 
 function brakeStdColor(v: number | null): string {
-  if (v === null) return 'inherit';
-  if (v > 40) return '#EF3340';
-  if (v > 20) return '#F59E0B';
-  return 'hsl(var(--muted-foreground))';
+  if (v === null) return T.muted;
+  if (v > 40) return S.bad;
+  if (v > 20) return S.warn;
+  return T.muted;
 }
 
 function coastColor(v: number | null): string {
-  if (v === null) return 'inherit';
-  if (v > 0.3) return '#F59E0B';
-  return 'hsl(var(--muted-foreground))';
+  if (v === null) return T.muted;
+  if (v > 0.3) return S.warn;
+  return T.muted;
 }
 
 function trailColor(v: number | null): string {
-  if (v === null) return 'inherit';
-  // Long trail braking = good technique; very short = abrupt; none = not trail braking
-  if (v > 0.3) return '#22C55E';
-  if (v > 0.1) return '#F59E0B';
-  return 'hsl(var(--muted-foreground))';
+  if (v === null) return T.muted;
+  if (v > 0.3) return S.good;
+  if (v > 0.1) return S.warn;
+  return T.muted;
 }
 
 function throttleColor(v: number | null): string {
-  if (v === null) return 'inherit';
-  // Shorter throttle-on distance = earlier WOT pickup = better exit
-  if (v < 50)  return '#22C55E';
-  if (v < 100) return '#F59E0B';
-  return '#EF3340';
+  if (v === null) return T.muted;
+  if (v < 50)  return S.good;
+  if (v < 100) return S.warn;
+  return S.bad;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
   return (
-    <th className={`pb-2 pt-0 text-[8px] tracking-[0.12em] uppercase whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
-      style={{ color: '#404050', fontFamily: 'BMWTypeNext', fontWeight: 400, borderBottom: '1px solid #1A1A2A' }}>
+    <th className={`pb-2 pt-0 whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
+      style={{ color: T.muted, fontFamily: FF.sans, fontSize: `${FS.nano}px`, fontWeight: 400, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: '1px solid #1A1A2A' }}>
       {children}
     </th>
   );
@@ -109,9 +108,9 @@ function Td({ children, right, mono, color, dim }: {
   return (
     <td className={`py-2 ${right ? 'text-right' : 'text-left'}`}
       style={{
-        fontFamily: mono ? 'JetBrains Mono' : 'BMWTypeNext',
-        fontSize: mono ? '12px' : '11px',
-        color: color ?? (dim ? '#404050' : 'hsl(var(--foreground))'),
+        fontFamily: mono ? FF.mono : FF.sans,
+        fontSize:   `${FS.value}px`,
+        color:      color ?? (dim ? T.muted : T.fg),
         letterSpacing: mono ? 0 : '0.03em',
         borderBottom: '1px solid #12121C',
       }}>
@@ -121,11 +120,11 @@ function Td({ children, right, mono, color, dim }: {
 }
 
 function Val({ v, decimals, suffix, color }: { v: number | null; decimals?: number; suffix?: string; color?: string }) {
-  if (v === null) return <span style={{ color: '#30303C' }}>—</span>;
+  if (v === null) return <span style={{ color: T.ghost }}>—</span>;
   return (
     <span style={{ color }}>
       {decimals != null ? v.toFixed(decimals) : Math.round(v)}
-      {suffix && <span style={{ fontSize: '8px', color: '#404050', marginLeft: 2 }}>{suffix}</span>}
+      {suffix && <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.muted, marginLeft: 2 }}>{suffix}</span>}
     </span>
   );
 }
@@ -173,7 +172,7 @@ export function CornerDetailTable({ sessions }: Props) {
       )}
 
       {/* Opportunity note */}
-      <p className="text-[8px] tracking-[0.1em] uppercase" style={{ color: '#404050' }}>
+      <p style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>
         Sorted by opportunity — largest apex speed variance first
       </p>
 
@@ -243,13 +242,13 @@ export function CornerDetailTable({ sessions }: Props) {
       {/* Legend */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
         {[
-          { color: '#EF3340', label: 'High variability / poor technique' },
-          { color: '#F59E0B', label: 'Moderate — worth attention' },
-          { color: '#22C55E', label: 'Good technique (trail brake / throttle pickup)' },
+          { color: S.bad,  label: 'High variability / poor technique' },
+          { color: S.warn, label: 'Moderate — worth attention' },
+          { color: S.good, label: 'Good technique (trail brake / early throttle pickup)' },
         ].map(({ color, label }) => (
           <span key={label} className="flex items-center gap-1.5">
             <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: color }} />
-            <span style={{ fontFamily: 'BMWTypeNext', fontSize: '8px', letterSpacing: '0.08em', color: '#404050' }}>{label}</span>
+            <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.08em', color: T.muted }}>{label}</span>
           </span>
         ))}
       </div>

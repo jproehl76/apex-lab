@@ -3,7 +3,7 @@ import {
 } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { formatLapTime, sessionLabel } from '@/lib/utils';
-import { CHART_MARGINS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE } from '@/lib/chartTheme';
+import { CHART_MARGINS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, TOOLTIP_HEADER_STYLE, LEGEND_LABEL_STYLE, T, FF, FS, axisLabel } from '@/lib/chartTheme';
 
 interface Props {
   sessions: LoadedSession[];
@@ -35,13 +35,11 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={TOOLTIP_STYLE}>
-      <p style={{ marginBottom: 6, color: '#606070', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        Lap {label}
-      </p>
+      <p style={TOOLTIP_HEADER_STYLE}>Lap {label}</p>
       {payload.map((entry: { color: string; name: string; value: number }) => (
         <div key={entry.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
-          <span style={{ color: '#606070' }}>{entry.name}</span>
-          <span style={{ color: entry.color, fontFamily: 'JetBrains Mono', fontWeight: 600 }}>
+          <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.muted }}>{entry.name}</span>
+          <span style={{ color: entry.color, fontFamily: FF.mono, fontWeight: 700, fontSize: `${FS.value}px` }}>
             {formatLapTime(entry.value)}
           </span>
         </div>
@@ -71,12 +69,10 @@ export function LapTimesChart({ sessions }: Props) {
         {bestLaps.map(({ id, color, label }) => (
           <div key={id} className="flex items-center gap-1.5">
             <div className="h-0.5 w-5 rounded" style={{ background: color }} />
-            <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
-              {label}
-            </span>
+            <span style={LEGEND_LABEL_STYLE}>{label}</span>
           </div>
         ))}
-        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
+        <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.muted, marginLeft: 'auto', letterSpacing: '0.06em' }}>
           Outlier laps excluded · dashed = best lap
         </span>
       </div>
@@ -89,7 +85,7 @@ export function LapTimesChart({ sessions }: Props) {
             tick={AXIS_STYLE.tick}
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
-            label={{ value: 'LAP', position: 'insideBottom', offset: -6, fill: '#404050', fontSize: 11, fontFamily: 'BMWTypeNext', letterSpacing: '0.1em' }}
+            label={axisLabel('LAP', 'insideBottom')}
           />
           <YAxis
             tick={AXIS_STYLE.tick}
@@ -131,7 +127,7 @@ export function LapTimesChart({ sessions }: Props) {
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex h-48 items-center justify-center">
-      <span style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+      <span style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, letterSpacing: '0.08em', color: T.muted, textTransform: 'uppercase' }}>
         {message}
       </span>
     </div>
