@@ -12,6 +12,7 @@ const CLIENT_ID = import.meta.env.VITE_WHOOP_CLIENT_ID as string | undefined;
 
 interface Props {
   sessionDates: string[]; // ISO date strings from active sessions
+  connectedOverride?: boolean; // set to true by App after successful OAuth callback
 }
 
 function recoveryColor(score: number | null): string {
@@ -51,11 +52,16 @@ function hasAnyData(d: WhoopDayData): boolean {
   );
 }
 
-export function WhoopPanel({ sessionDates }: Props) {
+export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   // Feature gate: no credentials → don't render
   if (!CLIENT_ID) return null;
 
   const [connected, setConnected] = useState<boolean>(() => isWhoopConnected());
+
+  // When App signals a successful OAuth callback, flip connected on
+  useEffect(() => {
+    if (connectedOverride) setConnected(true);
+  }, [connectedOverride]);
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<WhoopDayData[]>([]);
   const [error, setError] = useState<string | null>(null);

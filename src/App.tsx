@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, LogOut } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { DropZone } from '@/components/DropZone';
@@ -40,6 +40,7 @@ export default function App() {
   const store = usePersistedSessions();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [whoopConnected, setWhoopConnected] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const raw = localStorage.getItem(AUTH_KEY);
@@ -55,9 +56,17 @@ export default function App() {
     const code = params.get('code');
     const state = params.get('state');
     if (code && state) {
-      // Clear the URL params without reloading
       window.history.replaceState({}, '', window.location.pathname);
-      handleWhoopCallback(code, state).catch(() => {});
+      handleWhoopCallback(code, state).then((ok) => {
+        if (ok) {
+          setWhoopConnected(true);
+          toast.success('WHOOP connected successfully');
+        } else {
+          toast.error('WHOOP connection failed — check console for details');
+        }
+      }).catch(() => {
+        toast.error('WHOOP connection failed');
+      });
     }
   }, []);
 
@@ -208,7 +217,7 @@ export default function App() {
                 </ErrorBoundary>
                 <ErrorBoundary>
                   <Section title="WHOOP Recovery">
-                    <WhoopPanel sessionDates={store.activeSessions.map(s => s.data.header.date)} />
+                    <WhoopPanel sessionDates={store.activeSessions.map(s => s.data.header.date)} connectedOverride={whoopConnected} />
                   </Section>
                 </ErrorBoundary>
                 <ErrorBoundary>
