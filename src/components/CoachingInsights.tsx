@@ -93,7 +93,7 @@ export function CoachingInsights({ sessions }: Props) {
 
   if (sessions.length === 0) {
     return (
-      <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.06em', color: '#505060' }}>
+      <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.06em', color: '#707085' }}>
         Load a session to see coaching insights.
       </p>
     );

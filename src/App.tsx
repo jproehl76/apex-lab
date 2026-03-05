@@ -12,6 +12,7 @@ import { ThermalChart } from '@/components/charts/ThermalChart';
 import { FrictionCircleChart } from '@/components/charts/FrictionCircleChart';
 import { CornerDetailTable } from '@/components/charts/CornerDetailTable';
 import { TrackMapChart } from '@/components/charts/TrackMapChart';
+import { TrackHeatMap } from '@/components/charts/TrackHeatMap';
 import { FrictionScatterChart } from '@/components/charts/FrictionScatterChart';
 import { DebriefNotes } from '@/components/DebriefNotes';
 import { CoachingInsights } from '@/components/CoachingInsights';
@@ -32,13 +33,15 @@ const AUTH_KEY = 'm3-auth-user';
 
 interface AuthUser { email: string; name: string; picture: string }
 
-// 4 tabs — no redundancy
+// 5 tabs
 // Session  = stats + coaching + lap times
+// Map      = GPS heat map with speed/throttle/brake channels
 // Corners  = corner speeds + detail + friction scatter
 // Health   = thermals + driver readiness
 // Notes    = debrief
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
+  { id: 'map',      label: 'Map'      },
   { id: 'corners',  label: 'Corners'  },
   { id: 'health',   label: 'Health'   },
   { id: 'notes',    label: 'Notes'    },
@@ -126,12 +129,12 @@ export default function App() {
       );
       case 'map': return (
         <div className="h-full p-3">
-          <TrackMapChart sessions={store.activeSessions} variant="chart"
+          <TrackHeatMap sessions={store.activeSessions}
             selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
         </div>
       );
       case 'corners': return (
-        <div className="space-y-5">
+        <div className="space-y-3">
           <Section title="Corner Speeds">
             <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
@@ -379,9 +382,6 @@ export default function App() {
                     {renderTabContent(tab.id)}
                   </TabsContent>
                 ))}
-                <TabsContent value="map" className="mt-0 h-full">
-                  {renderTabContent('map')}
-                </TabsContent>
               </div>
             </Tabs>
           ) : (

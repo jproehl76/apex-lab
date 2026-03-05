@@ -95,7 +95,7 @@ function throttleColor(v: number | null): string {
 
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
   return (
-    <th className={`pb-2 pt-0 whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
+    <th className={`pb-1 pt-0 whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
       style={{ color: T.muted, fontFamily: FF.sans, fontSize: `${FS.nano}px`, fontWeight: 400, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: '1px solid #1A1A2A' }}>
       {children}
     </th>
@@ -106,7 +106,7 @@ function Td({ children, right, mono, color, dim }: {
   children: React.ReactNode; right?: boolean; mono?: boolean; color?: string; dim?: boolean;
 }) {
   return (
-    <td className={`py-2 ${right ? 'text-right' : 'text-left'}`}
+    <td className={`py-1 ${right ? 'text-right' : 'text-left'}`}
       style={{
         fontFamily: mono ? FF.mono : FF.sans,
         fontSize:   `${FS.value}px`,

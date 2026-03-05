@@ -6,8 +6,8 @@ import {
   getWhoopToken,
 } from '@/lib/services/whoopAuth';
 import { fetchWhoopDataForDates, type WhoopDayData } from '@/lib/services/whoopApi';
+import { FF, FS, T, S } from '@/lib/chartTheme';
 
-// Guard: hide the panel entirely when credentials are not configured
 const CLIENT_ID = import.meta.env.VITE_WHOOP_CLIENT_ID as string | undefined;
 
 interface Props {
@@ -15,84 +15,72 @@ interface Props {
   connectedOverride?: boolean;
 }
 
-// ── Colour helpers ─────────────────────────────────────────────────────────────
-
+// ── Color helpers ──────────────────────────────────────────────────────────────
 function recoveryColor(score: number | null): string {
-  if (score === null) return '#505060';
-  if (score >= 67) return '#22C55E';
-  if (score >= 34) return '#F59E0B';
-  return '#EF4444';
+  if (score === null) return T.muted;
+  if (score >= 67) return S.good;
+  if (score >= 34) return S.warn;
+  return S.bad;
 }
-
 function sleepColor(pct: number | null): string {
-  if (pct === null) return '#505060';
-  if (pct >= 85) return '#22C55E';
-  if (pct >= 70) return '#F59E0B';
-  return '#EF4444';
+  if (pct === null) return T.muted;
+  if (pct >= 85) return S.good;
+  if (pct >= 70) return S.warn;
+  return S.bad;
 }
-
 function hrvColor(ms: number | null): string {
-  if (ms === null) return '#505060';
-  if (ms >= 70) return '#22C55E';
-  if (ms >= 50) return '#F59E0B';
-  return '#EF4444';
+  if (ms === null) return T.muted;
+  if (ms >= 70) return S.good;
+  if (ms >= 50) return S.warn;
+  return S.bad;
 }
-
 function hrColor(bpm: number | null): string {
-  if (bpm === null) return '#505060';
-  if (bpm <= 55) return '#22C55E';
-  if (bpm <= 65) return '#F59E0B';
-  return '#EF4444';
+  if (bpm === null) return T.muted;
+  if (bpm <= 55) return S.good;
+  if (bpm <= 65) return S.warn;
+  return S.bad;
 }
-
 function respColor(rate: number | null): string {
-  if (rate === null) return '#505060';
-  if (rate >= 12 && rate <= 16) return '#22C55E';
-  if (rate <= 18) return '#F59E0B';
-  return '#EF4444';
+  if (rate === null) return T.muted;
+  if (rate >= 12 && rate <= 16) return S.good;
+  if (rate <= 18) return S.warn;
+  return S.bad;
 }
-
 function strainColor(strain: number | null): string {
-  if (strain === null) return '#505060';
-  if (strain < 10) return '#22C55E';
-  if (strain < 14) return '#F59E0B';
+  if (strain === null) return T.muted;
+  if (strain < 10) return S.good;
+  if (strain < 14) return S.warn;
   if (strain < 18) return '#F97316';
-  return '#EF4444';
+  return S.bad;
 }
-
 function tempColor(delta: number | null): string {
-  if (delta === null) return '#505060';
+  if (delta === null) return T.muted;
   const abs = Math.abs(delta);
-  if (abs <= 0.3) return '#22C55E';
-  if (abs <= 0.6) return '#F59E0B';
-  return '#EF4444';
+  if (abs <= 0.3) return S.good;
+  if (abs <= 0.6) return S.warn;
+  return S.bad;
 }
 
 // ── Format helpers ─────────────────────────────────────────────────────────────
-
 function fmt(v: number | null, decimals = 0, suffix = ''): string {
   if (v === null) return '—';
   return `${decimals === 0 ? Math.round(v) : v.toFixed(decimals)}${suffix}`;
 }
-
 function fmtHours(h: number | null): string {
   if (h === null) return '—';
   const hrs = Math.floor(h);
   const mins = Math.round((h - hrs) * 60);
   return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
 }
-
 function fmtTempDelta(v: number | null): string {
   if (v === null) return '—';
   return `${v >= 0 ? '+' : ''}${v.toFixed(1)}°C`;
 }
-
 function formatDate(iso: string): string {
   const [, month, day] = iso.split('-').map(Number);
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${months[(month ?? 1) - 1]} ${day}`;
 }
-
 function hasAnyData(d: WhoopDayData): boolean {
   return d.recovery_score !== null || d.hrv_rmssd_ms !== null || d.resting_hr !== null
     || d.sleep_performance_pct !== null || d.day_strain !== null;
@@ -101,14 +89,14 @@ function hasAnyData(d: WhoopDayData): boolean {
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
 /** A single metric tile */
-function Tile({
-  label, value, color, sub,
-}: { label: string; value: string; color: string; sub?: string }) {
+function Tile({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
   return (
     <div className="rounded p-2 text-center" style={{ background: `${color}10`, border: `1px solid ${color}25` }}>
-      <div className="text-[7px] tracking-widest uppercase mb-1" style={{ color: `${color}90` }}>{label}</div>
-      <div style={{ fontFamily: 'JetBrains Mono', fontSize: '15px', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
-      {sub && <div className="text-[8px] mt-0.5" style={{ color: `${color}70` }}>{sub}</div>}
+      <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: `${color}B0`, marginBottom: 3 }}>
+        {label}
+      </div>
+      <div style={{ fontFamily: FF.mono, fontSize: '15px', fontWeight: 700, color, lineHeight: 1 }}>{value}</div>
+      {sub && <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: `${color}80`, marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -122,39 +110,54 @@ function Bar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
+/** Metric row: label + value bar */
+function MetricRow({ label, value, barPct, color }: { label: string; value: string; barPct: number; color: string }) {
+  return (
+    <div>
+      <div className="flex justify-between items-baseline mb-0.5">
+        <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>
+          {label}
+        </span>
+        <span style={{ fontFamily: FF.mono, fontSize: `${FS.value}px`, fontWeight: 700, color }}>
+          {value}
+        </span>
+      </div>
+      <Bar pct={barPct} color={color} />
+    </div>
+  );
+}
+
+/** Section label */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted, marginBottom: 6 }}>
+      {children}
+    </div>
+  );
+}
+
 /** Recovery score gauge arc (SVG half-circle) */
 function RecoveryArc({ score, color }: { score: number | null; color: string }) {
   const pct = score ?? 0;
   const r = 38;
   const cx = 52, cy = 52;
-  const circumference = Math.PI * r; // half circle
+  const circumference = Math.PI * r;
   const offset = circumference * (1 - pct / 100);
-
   return (
     <svg width="104" height="60" viewBox="0 0 104 60" style={{ overflow: 'visible' }}>
-      {/* Track */}
-      <path
-        d={`M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`}
-        fill="none" stroke="#1A1A2A" strokeWidth={8} strokeLinecap="round"
-      />
-      {/* Fill */}
-      <path
-        d={`M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`}
-        fill="none"
-        stroke={color}
-        strokeWidth={8}
-        strokeLinecap="round"
+      <path d={`M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`}
+        fill="none" stroke="#1A1A2A" strokeWidth={8} strokeLinecap="round" />
+      <path d={`M ${cx - r},${cy} A ${r},${r} 0 0 1 ${cx + r},${cy}`}
+        fill="none" stroke={color} strokeWidth={8} strokeLinecap="round"
         strokeDasharray={`${circumference} ${circumference}`}
         strokeDashoffset={offset}
-        style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-      />
-      {/* Score */}
+        style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
       <text x={cx} y={cy - 4} textAnchor="middle"
-        style={{ fontFamily: 'JetBrains Mono', fontSize: '22px', fontWeight: 700, fill: color }}>
+        style={{ fontFamily: FF.mono, fontSize: '22px', fontWeight: 700, fill: color }}>
         {score !== null ? score : '—'}
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle"
-        style={{ fontFamily: 'BMWTypeNext', fontSize: '7px', letterSpacing: '0.15em', fill: `${color}70`, textTransform: 'uppercase' }}>
+      <text x={cx} y={cy + 12} textAnchor="middle"
+        style={{ fontFamily: FF.sans, fontSize: '10px', letterSpacing: '0.15em', fill: `${color}90`, textTransform: 'uppercase' }}>
         Recovery
       </text>
     </svg>
@@ -169,7 +172,7 @@ function DriverCard({ day }: { day: WhoopDayData }) {
   if (!hasAnyData(day)) {
     return (
       <div className="rounded-lg p-3 border border-border/50"
-        style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#505060' }}>
+        style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: T.muted }}>
         No WHOOP data — {formatDate(day.date)}
       </div>
     );
@@ -181,12 +184,11 @@ function DriverCard({ day }: { day: WhoopDayData }) {
       {/* Header bar */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40"
         style={{ background: '#0D0D18' }}>
-        <span className="text-[8px] tracking-widest uppercase" style={{ color: '#606070' }}>
+        <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted }}>
           WHOOP · {formatDate(day.date)}
         </span>
         {day.day_strain !== null && (
-          <span className="text-[8px] tracking-widest uppercase"
-            style={{ color: strainColor(day.day_strain) }}>
+          <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: strainColor(day.day_strain) }}>
             Strain {fmt(day.day_strain, 1)}
           </span>
         )}
@@ -194,160 +196,122 @@ function DriverCard({ day }: { day: WhoopDayData }) {
 
       <div className="p-3 space-y-3">
 
-        {/* ── Section 1: Readiness ── */}
+        {/* ── Readiness ── */}
         <div className="flex items-start gap-3">
-          {/* Recovery arc */}
           <div className="shrink-0">
             <RecoveryArc score={day.recovery_score} color={recColor} />
           </div>
-
-          {/* HRV + RHR stack */}
           <div className="flex-1 space-y-1.5 pt-1">
-            <div>
-              <div className="flex justify-between items-baseline mb-0.5">
-                <span className="text-[7px] tracking-widest uppercase" style={{ color: '#606070' }}>HRV</span>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: hrvColor(day.hrv_rmssd_ms) }}>
-                  {fmt(day.hrv_rmssd_ms, 0, 'ms')}
-                </span>
-              </div>
-              <Bar pct={(day.hrv_rmssd_ms ?? 0) / 120 * 100} color={hrvColor(day.hrv_rmssd_ms)} />
-            </div>
-
-            <div>
-              <div className="flex justify-between items-baseline mb-0.5">
-                <span className="text-[7px] tracking-widest uppercase" style={{ color: '#606070' }}>Resting HR</span>
-                <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: hrColor(day.resting_hr) }}>
-                  {fmt(day.resting_hr, 0, 'bpm')}
-                </span>
-              </div>
-              {/* Inverted bar — lower RHR is better */}
-              <Bar pct={day.resting_hr !== null ? Math.max(0, 100 - ((day.resting_hr - 40) / 60 * 100)) : 0}
-                color={hrColor(day.resting_hr)} />
-            </div>
-
+            <MetricRow
+              label="HRV"
+              value={fmt(day.hrv_rmssd_ms, 0, 'ms')}
+              barPct={(day.hrv_rmssd_ms ?? 0) / 120 * 100}
+              color={hrvColor(day.hrv_rmssd_ms)}
+            />
+            <MetricRow
+              label="Resting HR"
+              value={fmt(day.resting_hr, 0, 'bpm')}
+              barPct={day.resting_hr !== null ? Math.max(0, 100 - ((day.resting_hr - 40) / 60 * 100)) : 0}
+              color={hrColor(day.resting_hr)}
+            />
             {day.respiratory_rate !== null && (
-              <div>
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="text-[7px] tracking-widest uppercase" style={{ color: '#606070' }}>Resp Rate</span>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: respColor(day.respiratory_rate) }}>
-                    {fmt(day.respiratory_rate, 1, '/min')}
-                  </span>
-                </div>
-                <Bar pct={(day.respiratory_rate / 25) * 100} color={respColor(day.respiratory_rate)} />
-              </div>
+              <MetricRow
+                label="Resp Rate"
+                value={fmt(day.respiratory_rate, 1, '/min')}
+                barPct={(day.respiratory_rate / 25) * 100}
+                color={respColor(day.respiratory_rate)}
+              />
             )}
           </div>
         </div>
 
-        {/* ── Section 2: Sleep ── */}
+        {/* ── Sleep ── */}
         <div>
-          <div className="text-[7px] tracking-widest uppercase mb-1.5" style={{ color: '#404050' }}>Sleep</div>
+          <SectionLabel>Sleep</SectionLabel>
           <div className="space-y-1 mb-2">
             {day.sleep_performance_pct !== null && (
-              <div>
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="text-[7px] tracking-widest uppercase" style={{ color: '#606070' }}>Performance</span>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: slColor }}>
-                    {fmt(day.sleep_performance_pct, 0, '%')}
-                  </span>
-                </div>
-                <Bar pct={day.sleep_performance_pct} color={slColor} />
-              </div>
+              <MetricRow
+                label="Performance"
+                value={fmt(day.sleep_performance_pct, 0, '%')}
+                barPct={day.sleep_performance_pct}
+                color={slColor}
+              />
             )}
             {day.sleep_consistency_pct !== null && (
-              <div>
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="text-[7px] tracking-widest uppercase" style={{ color: '#606070' }}>Consistency</span>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: sleepColor(day.sleep_consistency_pct) }}>
-                    {fmt(day.sleep_consistency_pct, 0, '%')}
-                  </span>
-                </div>
-                <Bar pct={day.sleep_consistency_pct} color={sleepColor(day.sleep_consistency_pct)} />
-              </div>
+              <MetricRow
+                label="Consistency"
+                value={fmt(day.sleep_consistency_pct, 0, '%')}
+                barPct={day.sleep_consistency_pct}
+                color={sleepColor(day.sleep_consistency_pct)}
+              />
             )}
           </div>
-
-          {/* Sleep stage tiles */}
           {(day.rem_sleep_hours !== null || day.swe_sleep_hours !== null) && (
             <div className="grid grid-cols-2 gap-1.5">
               {day.rem_sleep_hours !== null && (
-                <Tile
-                  label="REM Sleep"
-                  value={fmtHours(day.rem_sleep_hours)}
-                  color={day.rem_sleep_hours >= 1.5 ? '#22C55E' : day.rem_sleep_hours >= 1.0 ? '#F59E0B' : '#EF4444'}
-                  sub="target ≥1.5h"
-                />
+                <Tile label="REM Sleep" value={fmtHours(day.rem_sleep_hours)}
+                  color={day.rem_sleep_hours >= 1.5 ? S.good : day.rem_sleep_hours >= 1.0 ? S.warn : S.bad}
+                  sub="target ≥1.5h" />
               )}
               {day.swe_sleep_hours !== null && (
-                <Tile
-                  label="Deep Sleep"
-                  value={fmtHours(day.swe_sleep_hours)}
-                  color={day.swe_sleep_hours >= 1.0 ? '#22C55E' : day.swe_sleep_hours >= 0.5 ? '#F59E0B' : '#EF4444'}
-                  sub="target ≥1h"
-                />
+                <Tile label="Deep Sleep" value={fmtHours(day.swe_sleep_hours)}
+                  color={day.swe_sleep_hours >= 1.0 ? S.good : day.swe_sleep_hours >= 0.5 ? S.warn : S.bad}
+                  sub="target ≥1h" />
               )}
             </div>
           )}
         </div>
 
-        {/* ── Section 3: Engine (autonomic markers) ── */}
+        {/* ── Autonomic markers ── */}
         {(day.spo2_pct !== null || day.skin_temp_celsius !== null || day.max_hr !== null) && (
           <div>
-            <div className="text-[7px] tracking-widest uppercase mb-1.5" style={{ color: '#404050' }}>Markers</div>
+            <SectionLabel>Markers</SectionLabel>
             <div className={`grid gap-1.5 ${[day.spo2_pct, day.skin_temp_celsius, day.max_hr].filter(v => v !== null).length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
               {day.spo2_pct !== null && (
-                <Tile
-                  label="SpO₂"
-                  value={fmt(day.spo2_pct, 1, '%')}
-                  color={day.spo2_pct >= 98 ? '#22C55E' : day.spo2_pct >= 95 ? '#F59E0B' : '#EF4444'}
-                />
+                <Tile label="SpO₂" value={fmt(day.spo2_pct, 1, '%')}
+                  color={day.spo2_pct >= 98 ? S.good : day.spo2_pct >= 95 ? S.warn : S.bad} />
               )}
               {day.skin_temp_celsius !== null && (
-                <Tile
-                  label="Skin Temp"
-                  value={fmtTempDelta(day.skin_temp_celsius)}
-                  color={tempColor(day.skin_temp_celsius)}
-                  sub="vs baseline"
-                />
+                <Tile label="Skin Temp" value={fmtTempDelta(day.skin_temp_celsius)}
+                  color={tempColor(day.skin_temp_celsius)} sub="vs baseline" />
               )}
               {day.max_hr !== null && (
-                <Tile
-                  label="Max HR"
-                  value={fmt(day.max_hr, 0, 'bpm')}
-                  color="#8080A0"
-                />
+                <Tile label="Max HR" value={fmt(day.max_hr, 0, 'bpm')} color={T.label} />
               )}
             </div>
           </div>
         )}
 
-        {/* ── Section 4: Load ── */}
+        {/* ── Strain load ── */}
         {day.day_strain !== null && (
           <div>
-            <div className="text-[7px] tracking-widest uppercase mb-1.5" style={{ color: '#404050' }}>Load</div>
+            <SectionLabel>Load</SectionLabel>
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="text-[7px] tracking-widest uppercase" style={{ color: '#606070' }}>Day Strain</span>
-                  <span style={{ fontFamily: 'JetBrains Mono', fontSize: '13px', fontWeight: 700, color: strainColor(day.day_strain) }}>
-                    {fmt(day.day_strain, 1)} <span className="text-[8px]" style={{ color: '#505060' }}>/ 21</span>
+                  <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>
+                    Day Strain
+                  </span>
+                  <span style={{ fontFamily: FF.mono, fontSize: `${FS.value}px`, fontWeight: 700, color: strainColor(day.day_strain) }}>
+                    {fmt(day.day_strain, 1)}{' '}
+                    <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.muted }}>/ 21</span>
                   </span>
                 </div>
                 <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: '#1A1A2A' }}>
-                  {/* Graduated zones */}
                   <div className="absolute inset-0 flex">
-                    <div style={{ width: '47.6%', background: '#22C55E30' }} />
-                    <div style={{ width: '19%',   background: '#F59E0B30' }} />
+                    <div style={{ width: '47.6%', background: `${S.good}30` }} />
+                    <div style={{ width: '19%',   background: `${S.warn}30` }} />
                     <div style={{ width: '19%',   background: '#F9731630' }} />
-                    <div style={{ width: '14.4%', background: '#EF444430' }} />
+                    <div style={{ width: '14.4%', background: `${S.bad}30` }} />
                   </div>
-                  {/* Fill */}
                   <div className="absolute inset-y-0 left-0 rounded-full"
                     style={{ width: `${(day.day_strain / 21) * 100}%`, background: strainColor(day.day_strain) }} />
                 </div>
                 <div className="flex justify-between mt-0.5">
                   {['Easy', 'Mod', 'Hard', 'Max'].map(z => (
-                    <span key={z} className="text-[6px] tracking-widest uppercase" style={{ color: '#404050' }}>{z}</span>
+                    <span key={z} style={{ fontFamily: FF.sans, fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', color: T.muted }}>
+                      {z}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -365,10 +329,10 @@ function DriverCard({ day }: { day: WhoopDayData }) {
 export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   if (!CLIENT_ID) return null;
 
-  const [connected, setConnected]  = useState<boolean>(() => isWhoopConnected());
-  const [loading, setLoading]      = useState<boolean>(false);
-  const [data, setData]            = useState<WhoopDayData[]>([]);
-  const [error, setError]          = useState<string | null>(null);
+  const [connected, setConnected] = useState<boolean>(() => isWhoopConnected());
+  const [loading, setLoading]     = useState<boolean>(false);
+  const [data, setData]           = useState<WhoopDayData[]>([]);
+  const [error, setError]         = useState<string | null>(null);
 
   useEffect(() => {
     if (connectedOverride) setConnected(true);
@@ -379,7 +343,6 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
     let cancelled = false;
     setLoading(true);
     setError(null);
-
     (async () => {
       try {
         const token = await getWhoopToken();
@@ -395,7 +358,6 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
         if (!cancelled) setLoading(false);
       }
     })();
-
     return () => { cancelled = true; };
   }, [connected, sessionDates.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -406,22 +368,15 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
     setError(null);
   }
 
-  // ── Not connected ──────────────────────────────────────────────────────────
   if (!connected) {
     return (
       <div className="flex items-center gap-3">
-        <button
-          onClick={initiateWhoopAuth}
-          className="px-3 py-1.5 rounded-lg transition-colors"
-          style={{
-            fontFamily: 'BMWTypeNext', fontSize: '12px', fontWeight: 600,
-            letterSpacing: '0.05em', background: 'rgba(34,197,94,0.15)',
-            border: '1px solid rgba(34,197,94,0.4)', color: '#22C55E',
-          }}
-        >
+        <button onClick={initiateWhoopAuth} className="px-3 py-1.5 rounded-lg transition-colors"
+          style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, fontWeight: 600, letterSpacing: '0.05em',
+            background: `${S.good}18`, border: `1px solid ${S.good}40`, color: S.good }}>
           Connect WHOOP
         </button>
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#606070' }}>
+        <p style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: T.muted }}>
           See your biometrics on race day
         </p>
       </div>
@@ -430,7 +385,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2" style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#9898A8' }}>
+      <div className="flex items-center gap-2" style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: T.label }}>
         <span className="animate-spin">⟳</span>
         Loading WHOOP data…
       </div>
@@ -440,11 +395,11 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   if (error) {
     return (
       <div className="space-y-2">
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#EF4444' }}>{error}</p>
+        <p style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: S.bad }}>{error}</p>
         <button onClick={handleDisconnect} className="underline transition-colors"
-          style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#606070' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#606070')}>
+          style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: T.muted }}
+          onMouseEnter={e => (e.currentTarget.style.color = S.bad)}
+          onMouseLeave={e => (e.currentTarget.style.color = T.muted)}>
           Disconnect
         </button>
       </div>
@@ -454,11 +409,10 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   return (
     <div className="space-y-3">
       {data.map(day => <DriverCard key={day.date} day={day} />)}
-
       <button onClick={handleDisconnect} className="underline transition-colors"
-        style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: '#505060' }}
-        onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
-        onMouseLeave={e => (e.currentTarget.style.color = '#505060')}>
+        style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: T.muted }}
+        onMouseEnter={e => (e.currentTarget.style.color = S.bad)}
+        onMouseLeave={e => (e.currentTarget.style.color = T.muted)}>
         Disconnect WHOOP
       </button>
     </div>
