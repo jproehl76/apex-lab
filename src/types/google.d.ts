@@ -37,6 +37,8 @@ interface GooglePickerBuilder {
 
 interface GoogleDocsView {
   setMimeTypes: (mimes: string) => this;
+  setParent: (folderId: string) => this;
+  setIncludeFolders: (include: boolean) => this;
 }
 
 interface GooglePickerResult {
