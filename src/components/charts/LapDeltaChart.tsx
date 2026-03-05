@@ -39,7 +39,7 @@ export function LapDeltaChart({ sessions }: Props) {
 
   if (sessions.length === 0) {
     return (
-      <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}>
+      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}>
         Lap delta requires 2 or more laps in a session.
       </p>
     );
@@ -50,13 +50,13 @@ export function LapDeltaChart({ sessions }: Props) {
       {sessionData.map(({ session, rows }) => (
         <div key={session.id} className="space-y-2">
           {sessions.length > 1 && (
-            <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', fontWeight: 600, color: '#9898A8' }}>{sessionLabel(session)}</p>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 600, color: '#9898A8' }}>{sessionLabel(session)}</p>
           )}
-          <p style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#606070' }}>
-            Corner min-speed gap vs. best lap (mph) — larger = more time available
+          <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.06em', color: '#505060' }}>
+            Corner min-speed gap vs. best lap — larger = more time available
           </p>
           {rows.length < 2 ? (
-            <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}>Insufficient corner data.</p>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}>Insufficient corner data.</p>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={rows} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>

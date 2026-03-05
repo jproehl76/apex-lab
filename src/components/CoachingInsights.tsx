@@ -92,31 +92,35 @@ export function CoachingInsights({ sessions }: Props) {
   );
 
   if (sessions.length === 0) {
-    return <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}>Load a session to see coaching insights.</p>;
+    return (
+      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', letterSpacing: '0.06em', color: '#505060' }}>
+        Load a session to see coaching insights.
+      </p>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {insightsBySession.map(({ session, insights }) => (
         <div key={session.id} className="space-y-2">
           {sessions.length > 1 && (
-            <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', fontWeight: 600, color: '#9898A8' }}>{sessionLabel(session)}</p>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9898A8' }}>{sessionLabel(session)}</p>
           )}
           {insights.length === 0 ? (
-            <div className="card p-3 flex items-start gap-3" style={{ borderLeft: '3px solid #22C55E', background: 'rgba(34,197,94,0.04)' }}>
-              <div style={{ fontFamily: 'Rajdhani', fontSize: '13px', fontWeight: 600, color: '#22C55E' }}>
-                No significant issues found — consistent driving.
+            <div className="rounded p-3 flex items-center gap-3" style={{ borderLeft: '3px solid #22C55E', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderLeftWidth: 3 }}>
+              <div style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 600, letterSpacing: '0.06em', color: '#22C55E' }}>
+                Consistent driving — no significant issues found.
               </div>
             </div>
           ) : (
             insights.map(insight => (
               <div
                 key={insight.id}
-                className="card p-3 flex flex-col gap-1"
-                style={{ borderLeft: `3px solid ${insight.severityColor}`, background: `rgba(${insight.severityRGB}, 0.04)` }}
+                className="rounded p-3"
+                style={{ borderLeft: `3px solid ${insight.severityColor}`, background: `rgba(${insight.severityRGB}, 0.06)`, border: `1px solid rgba(${insight.severityRGB}, 0.15)`, borderLeftWidth: 3 }}
               >
-                <div style={{ fontFamily: 'Rajdhani', fontSize: '13px', fontWeight: 600, color: '#E8E8F0' }}>{insight.label}</div>
-                <div style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#9898A8', marginTop: 2 }}>{insight.detail}</div>
+                <div style={{ fontFamily: 'Barlow Condensed', fontSize: '14px', fontWeight: 700, letterSpacing: '0.06em', color: '#E8E8F0' }}>{insight.label}</div>
+                <div style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.04em', color: '#7878A0', marginTop: 3 }}>{insight.detail}</div>
               </div>
             ))
           )}

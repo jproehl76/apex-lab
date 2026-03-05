@@ -134,8 +134,10 @@ export default function App() {
       case 'overview': return (
         <div className="space-y-4">
           <Section title="Session Summary"><ErrorBoundary><SessionStats sessions={store.activeSessions} /></ErrorBoundary></Section>
-          <Section title="WHOOP Recovery"><ErrorBoundary><WhoopPanel sessionDates={sessionDates} connectedOverride={whoopConnected} /></ErrorBoundary></Section>
-          <Section title="Coaching Insights"><ErrorBoundary><CoachingInsights sessions={store.activeSessions} /></ErrorBoundary></Section>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Section title="Coaching Insights"><ErrorBoundary><CoachingInsights sessions={store.activeSessions} /></ErrorBoundary></Section>
+            <Section title="WHOOP Recovery"><ErrorBoundary><WhoopPanel sessionDates={sessionDates} connectedOverride={whoopConnected} /></ErrorBoundary></Section>
+          </div>
           <Section title="Lap Time Progression"><ErrorBoundary><LapTimesChart sessions={store.activeSessions} /></ErrorBoundary></Section>
         </div>
       );
@@ -444,10 +446,10 @@ export default function App() {
 // ── Section wrapper ───────────────────────────────────────────────────────────
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-lg mb-4" style={{ background: '#0E0E18', border: '1px solid #1E1E28' }}>
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1E1E28]">
-        <div className="w-0.5 h-4 rounded-full" style={{ background: '#1C69D4' }} />
-        <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', fontWeight: 600, letterSpacing: '0.12em', color: '#C0C0D0', textTransform: 'uppercase' }}>
+    <div className="overflow-hidden rounded-lg" style={{ background: '#0C0C16', border: '1px solid #1C1C28' }}>
+      <div className="flex items-center gap-2.5 px-4 py-2.5" style={{ borderBottom: '1px solid #1C1C28', background: '#0A0A14' }}>
+        <div className="w-px h-3.5 rounded-full" style={{ background: 'linear-gradient(to bottom, #1C69D4, #A855F7)' }} />
+        <h2 style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', fontWeight: 600, letterSpacing: '0.2em', color: '#505068', textTransform: 'uppercase' }}>
           {title}
         </h2>
       </div>

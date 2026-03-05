@@ -1,5 +1,5 @@
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer,
 } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { formatLapTime, sessionLabel } from '@/lib/utils';
@@ -35,11 +35,16 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={TOOLTIP_STYLE}>
-      <p style={{ marginBottom: 4, fontWeight: 600, color: '#9898A8' }}>Lap {label}</p>
+      <p style={{ marginBottom: 6, color: '#606070', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        Lap {label}
+      </p>
       {payload.map((entry: { color: string; name: string; value: number }) => (
-        <p key={entry.name} style={{ color: entry.color }}>
-          {entry.name}: <span>{formatLapTime(entry.value)}</span>
-        </p>
+        <div key={entry.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
+          <span style={{ color: '#606070' }}>{entry.name}</span>
+          <span style={{ color: entry.color, fontFamily: 'JetBrains Mono', fontWeight: 600 }}>
+            {formatLapTime(entry.value)}
+          </span>
+        </div>
       ))}
     </div>
   );
@@ -52,54 +57,56 @@ export function LapTimesChart({ sessions }: Props) {
 
   const data = buildChartData(sessions);
 
-  // Best lap reference lines per session
   const bestLaps = sessions.map(s => ({
     id: s.id,
     color: s.color,
     best: s.data.consistency.best_lap_s,
+    label: sessionLabel(s),
   }));
 
   return (
-    <div className="space-y-2" style={{ touchAction: 'pan-x pan-y', userSelect: 'none' }}>
-      <p style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#606070' }}>
-        Outlier laps excluded. Dashed lines = best lap per session.
-      </p>
-      <ResponsiveContainer width="100%" height={320}>
+    <div className="space-y-3" style={{ touchAction: 'pan-x pan-y', userSelect: 'none' }}>
+      {/* Inline legend */}
+      <div className="flex items-center gap-4 px-1 flex-wrap">
+        {bestLaps.map(({ id, color, label }) => (
+          <div key={id} className="flex items-center gap-1.5">
+            <div className="h-0.5 w-5 rounded" style={{ background: color }} />
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+              {label}
+            </span>
+          </div>
+        ))}
+        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
+          Outlier laps excluded · dashed = best lap
+        </span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={360}>
         <LineChart data={data} margin={CHART_MARGINS}>
-          <CartesianGrid
-            stroke={GRID_STYLE.stroke}
-            vertical={GRID_STYLE.vertical}
-          />
+          <CartesianGrid stroke={GRID_STYLE.stroke} vertical={false} />
           <XAxis
             dataKey="lap"
             tick={AXIS_STYLE.tick}
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
-            label={{ value: 'Lap', position: 'insideBottom', offset: -4, fill: '#606070', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+            label={{ value: 'LAP', position: 'insideBottom', offset: -6, fill: '#404050', fontSize: 11, fontFamily: 'Barlow Condensed', letterSpacing: '0.1em' }}
           />
           <YAxis
             tick={AXIS_STYLE.tick}
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
             tickFormatter={(v: number) => formatLapTime(v)}
-            width={72}
+            width={76}
             domain={['auto', 'auto']}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: '12px' }}
-            formatter={(value) => {
-              const s = sessions.find(s => s.id === value);
-              return <span style={{ color: '#9898A8', fontFamily: 'Rajdhani' }}>{s ? sessionLabel(s) : value}</span>;
-            }}
-          />
           {bestLaps.map(({ id, color, best }) => (
             <ReferenceLine
               key={`ref-${id}`}
               y={best}
               stroke={color}
-              strokeDasharray="4 4"
-              strokeOpacity={0.5}
+              strokeDasharray="5 3"
+              strokeOpacity={0.4}
             />
           ))}
           {sessions.map(session => (
@@ -107,11 +114,11 @@ export function LapTimesChart({ sessions }: Props) {
               key={session.id}
               type="monotone"
               dataKey={session.id}
-              name={session.id}
+              name={sessionLabel(session)}
               stroke={session.color}
-              strokeWidth={2}
-              dot={{ r: 3, fill: session.color }}
-              activeDot={{ r: 5 }}
+              strokeWidth={2.5}
+              dot={{ r: 3, fill: session.color, strokeWidth: 0 }}
+              activeDot={{ r: 5, strokeWidth: 0 }}
               connectNulls={false}
             />
           ))}
@@ -123,8 +130,10 @@ export function LapTimesChart({ sessions }: Props) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex h-48 items-center justify-center" style={{ fontFamily: 'Rajdhani', fontSize: '13px', color: '#606070' }}>
-      {message}
+    <div className="flex h-48 items-center justify-center">
+      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+        {message}
+      </span>
     </div>
   );
 }

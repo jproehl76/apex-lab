@@ -8,9 +8,9 @@ import { sessionLabel } from '@/lib/utils';
 import { AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE } from '@/lib/chartTheme';
 
 function pointColor(totalG: number): string {
-  if (totalG > 0.8) return '#22C55E';
-  if (totalG >= 0.5) return '#F59E0B';
-  return '#38384A';
+  if (totalG > 0.8) return '#00C853';
+  if (totalG >= 0.5) return '#1C69D4';
+  return '#252535';
 }
 
 interface ScatterDot {
@@ -43,7 +43,7 @@ export function FrictionScatterChart({ sessions }: Props) {
 
   if (!hasData) {
     return (
-      <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}>
+      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}>
         No scatter point data available. Ensure the preprocessor outputs friction_circle.scatter_points.
       </p>
     );
@@ -105,10 +105,19 @@ export function FrictionScatterChart({ sessions }: Props) {
           ))}
         </ScatterChart>
       </ResponsiveContainer>
-      <div className="flex gap-4" style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#606070' }}>
-        <span><span className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#22C55E' }} />&gt;0.8G</span>
-        <span><span className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#F59E0B' }} />0.5–0.8G</span>
-        <span><span className="inline-block w-2 h-2 rounded-full mr-1" style={{ background: '#38384A' }} />&lt;0.5G</span>
+      <div className="flex gap-5 px-1">
+        {[
+          { color: '#00C853', label: '> 0.8G' },
+          { color: '#1C69D4', label: '0.5 – 0.8G' },
+          { color: '#252535', label: '< 0.5G' },
+        ].map(item => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.1em', color: '#505060', textTransform: 'uppercase' }}>
+              {item.label}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

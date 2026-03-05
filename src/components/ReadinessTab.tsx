@@ -18,13 +18,13 @@ export function ReadinessTab({ sessionDates, connectedOverride }: Props) {
         </div>
         <div className="text-center">
           <div style={{ fontFamily: 'Barlow Condensed', fontSize: '20px', fontWeight: 600, color: '#E8E8F0', letterSpacing: '0.05em', marginBottom: 8 }}>Driver Readiness</div>
-          <div style={{ fontFamily: 'Rajdhani', fontSize: '13px', color: '#606070', lineHeight: 1.5, maxWidth: 280, margin: '0 auto' }}>
+          <div style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#606070', lineHeight: 1.5, maxWidth: 280, margin: '0 auto' }}>
             Connect your WHOOP to see recovery score, HRV, and sleep data alongside your lap times.
           </div>
         </div>
         <button onClick={initiateWhoopAuth}
           className="px-6 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all duration-150 active:scale-95"
-          style={{ fontFamily: 'Rajdhani', letterSpacing: '0.08em', background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.4)', color: '#3B82F6' }}>
+          style={{ fontFamily: 'Barlow Condensed', letterSpacing: '0.08em', background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.4)', color: '#3B82F6' }}>
           Connect via WHOOP →
         </button>
       </div>

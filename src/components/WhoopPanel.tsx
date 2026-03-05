@@ -112,7 +112,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
           onClick={initiateWhoopAuth}
           className="px-3 py-1.5 rounded-lg transition-colors"
           style={{
-            fontFamily: 'Rajdhani',
+            fontFamily: 'Barlow Condensed',
             fontSize: '12px',
             fontWeight: 600,
             letterSpacing: '0.05em',
@@ -123,7 +123,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
         >
           Connect WHOOP
         </button>
-        <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}>
+        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}>
           See your recovery &amp; HRV on race day
         </p>
       </div>
@@ -133,7 +133,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex items-center gap-2" style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#9898A8' }}>
+      <div className="flex items-center gap-2" style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#9898A8' }}>
         <span className="animate-spin">⟳</span>
         Loading WHOOP data…
       </div>
@@ -144,11 +144,11 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   if (error) {
     return (
       <div className="space-y-2">
-        <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#EF4444' }}>{error}</p>
+        <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#EF4444' }}>{error}</p>
         <button
           onClick={handleDisconnect}
           className="underline transition-colors"
-          style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}
+          style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}
           onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
           onMouseLeave={e => (e.currentTarget.style.color = '#606070')}
         >
@@ -167,7 +167,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
             key={day.date}
             className="card p-3 space-y-2"
           >
-            <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', fontWeight: 600, color: '#9898A8' }}>
+            <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 600, color: '#9898A8' }}>
               WHOOP — {formatDate(day.date)}
             </p>
 
@@ -180,7 +180,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
                 <WhoopStat label="Strain" value={fmtDecimal(day.day_strain)} />
               </div>
             ) : (
-              <p style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}>No WHOOP data found for this date.</p>
+              <p style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}>No WHOOP data found for this date.</p>
             )}
           </div>
         ))}
@@ -189,7 +189,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
       <button
         onClick={handleDisconnect}
         className="underline transition-colors"
-        style={{ fontFamily: 'Rajdhani', fontSize: '12px', color: '#606070' }}
+        style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', color: '#606070' }}
         onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
         onMouseLeave={e => (e.currentTarget.style.color = '#606070')}
       >
@@ -208,7 +208,7 @@ interface WhoopStatProps {
 function WhoopStat({ label, value, valueColor }: WhoopStatProps) {
   return (
     <span>
-      <span style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#606070' }}>{label}: </span>
+      <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#606070' }}>{label}: </span>
       <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', fontWeight: 600, color: valueColor ?? '#E8E8F0' }}>
         {value}
       </span>

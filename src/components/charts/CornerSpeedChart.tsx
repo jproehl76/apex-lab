@@ -1,5 +1,5 @@
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer,
 } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { kphToMph, sessionLabel } from '@/lib/utils';
@@ -43,11 +43,16 @@ function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div style={TOOLTIP_STYLE}>
-      <p style={{ marginBottom: 4, fontWeight: 600, color: '#9898A8' }}>{label}</p>
+      <p style={{ marginBottom: 6, color: '#606070', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        {label}
+      </p>
       {payload.map((entry: { color: string; name: string; value: number }) => (
-        <p key={entry.name} style={{ color: entry.color }}>
-          {entry.name}: <span>{entry.value} mph</span>
-        </p>
+        <div key={entry.name} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 2 }}>
+          <span style={{ color: '#606070' }}>{entry.name}</span>
+          <span style={{ color: entry.color, fontFamily: 'JetBrains Mono', fontWeight: 600 }}>
+            {entry.value} mph
+          </span>
+        </div>
       ))}
     </div>
   );
@@ -56,8 +61,10 @@ function CustomTooltip({ active, payload, label }: any) {
 export function CornerSpeedChart({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center" style={{ fontFamily: 'Rajdhani', fontSize: '13px', color: '#606070' }}>
-        Load sessions to compare corner speeds
+      <div className="flex h-48 items-center justify-center">
+        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+          Load sessions to compare corner speeds
+        </span>
       </div>
     );
   }
@@ -65,16 +72,25 @@ export function CornerSpeedChart({ sessions }: Props) {
   const data = buildChartData(sessions);
 
   return (
-    <div className="space-y-2" style={{ touchAction: 'pan-x pan-y', userSelect: 'none' }}>
-      <p style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#606070' }}>
-        Best lap minimum corner speed. Higher = faster through corner.
-      </p>
-      <ResponsiveContainer width="100%" height={320}>
+    <div className="space-y-3" style={{ touchAction: 'pan-x pan-y', userSelect: 'none' }}>
+      {/* Inline legend */}
+      <div className="flex items-center gap-4 px-1 flex-wrap">
+        {sessions.map(s => (
+          <div key={s.id} className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm" style={{ background: s.color }} />
+            <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', letterSpacing: '0.08em', color: '#505060', textTransform: 'uppercase' }}>
+              {sessionLabel(s)}
+            </span>
+          </div>
+        ))}
+        <span style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#383848', marginLeft: 'auto', letterSpacing: '0.06em' }}>
+          Best lap apex speed · higher = faster
+        </span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={CHART_MARGINS}>
-          <CartesianGrid
-            stroke={GRID_STYLE.stroke}
-            vertical={GRID_STYLE.vertical}
-          />
+          <CartesianGrid stroke={GRID_STYLE.stroke} vertical={false} />
           <XAxis
             dataKey="corner"
             tick={AXIS_STYLE.tick}
@@ -86,26 +102,22 @@ export function CornerSpeedChart({ sessions }: Props) {
             axisLine={AXIS_STYLE.axisLine}
             tickLine={AXIS_STYLE.tickLine}
             tickFormatter={(v: number) => `${v}`}
-            label={{ value: 'mph', angle: -90, position: 'insideLeft', fill: '#606070', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+            label={{ value: 'MPH', angle: -90, position: 'insideLeft', offset: 12, fill: '#404050', fontSize: 11, fontFamily: 'Barlow Condensed', letterSpacing: '0.1em' }}
             domain={['auto', 'auto']}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: '12px' }}
-            formatter={(value) => {
-              const s = sessions.find(s => s.id === value);
-              return <span style={{ color: '#9898A8', fontFamily: 'Rajdhani' }}>{s ? sessionLabel(s) : value}</span>;
-            }}
-          />
           {sessions.map(session => (
             <Bar
               key={session.id}
               dataKey={session.id}
-              name={session.id}
-              fill={session.color}
+              name={sessionLabel(session)}
               radius={[3, 3, 0, 0]}
-              maxBarSize={40}
-            />
+              maxBarSize={36}
+            >
+              {data.map((_, i) => (
+                <Cell key={`cell-${i}`} fill={session.color} fillOpacity={0.85} />
+              ))}
+            </Bar>
           ))}
         </BarChart>
       </ResponsiveContainer>

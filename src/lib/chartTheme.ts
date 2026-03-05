@@ -1,33 +1,34 @@
-export const CHART_MARGINS = { top: 8, right: 8, bottom: 24, left: 48 };
-export const CHART_MARGINS_MOBILE = { top: 4, right: 4, bottom: 20, left: 40 };
+export const CHART_MARGINS = { top: 10, right: 12, bottom: 28, left: 56 };
+export const CHART_MARGINS_MOBILE = { top: 6, right: 6, bottom: 22, left: 44 };
 
 export const AXIS_STYLE = {
-  tick: { fill: '#606070', fontSize: 10, fontFamily: 'JetBrains Mono' },
-  axisLine: { stroke: '#2E2E3C' },
-  tickLine: { stroke: '#2E2E3C' },
+  tick: { fill: '#505060', fontSize: 11, fontFamily: 'Barlow Condensed', letterSpacing: '0.05em' },
+  axisLine: { stroke: '#252535' },
+  tickLine: { stroke: '#252535' },
 };
 
 export const GRID_STYLE = {
-  stroke: '#1E1E28',
+  stroke: '#18181F',
   strokeDasharray: 'none' as const,
   vertical: false,
 };
 
 export const TOOLTIP_STYLE = {
-  backgroundColor: '#242430',
-  border: '1px solid #38384A',
-  borderRadius: '8px',
-  padding: '8px 12px',
-  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-  fontFamily: 'JetBrains Mono',
-  fontSize: '12px',
+  backgroundColor: '#14141E',
+  border: '1px solid #2E2E3C',
+  borderRadius: '6px',
+  padding: '10px 14px',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+  fontFamily: 'Barlow Condensed',
+  fontSize: '13px',
+  letterSpacing: '0.04em',
   color: '#E8E8F0',
 };
 
 export const CHANNEL_COLORS = {
-  speed:    '#3B82F6',
-  brake:    '#EF4444',
-  throttle: '#22C55E',
+  speed:    '#1C69D4',
+  brake:    '#EF3340',
+  throttle: '#00C853',
   rpm:      '#F97316',
   gear:     '#A855F7',
   steering: '#06B6D4',

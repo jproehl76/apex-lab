@@ -57,7 +57,7 @@ function CustomTooltip({ active, payload }: any) {
 export function FrictionCircleChart({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center" style={{ fontFamily: 'Rajdhani', fontSize: '13px', color: '#606070' }}>
+      <div className="flex h-48 items-center justify-center" style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#606070' }}>
         Load sessions to see driver development radar
       </div>
     );
@@ -67,19 +67,19 @@ export function FrictionCircleChart({ sessions }: Props) {
 
   return (
     <div className="space-y-2" style={{ touchAction: 'pan-x pan-y', userSelect: 'none' }}>
-      <p style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#606070' }}>
+      <p style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#606070' }}>
         Normalized scores (0–100). Higher = better. Consistency inverts spread — lower spread = higher score.
       </p>
       <ResponsiveContainer width="100%" height={320}>
         <RadarChart data={data} margin={{ top: 16, right: 32, left: 32, bottom: 16 }}>
           <PolarGrid stroke="#2E2E3C" />
-          <PolarAngleAxis dataKey="metric" tick={{ fill: '#9898A8', fontSize: 11, fontFamily: 'Rajdhani' }} />
+          <PolarAngleAxis dataKey="metric" tick={{ fill: '#9898A8', fontSize: 11, fontFamily: 'Barlow Condensed' }} />
           <Tooltip content={<CustomTooltip />} />
           <Legend
-            wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: '12px' }}
+            wrapperStyle={{ fontFamily: 'Barlow Condensed', fontSize: '12px' }}
             formatter={(value) => {
               const s = sessions.find(s => s.id === value);
-              return <span style={{ color: '#9898A8', fontFamily: 'Rajdhani' }}>{s ? sessionLabel(s) : value}</span>;
+              return <span style={{ color: '#9898A8', fontFamily: 'Barlow Condensed' }}>{s ? sessionLabel(s) : value}</span>;
             }}
           />
           {sessions.map(session => (

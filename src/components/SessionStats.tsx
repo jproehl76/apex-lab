@@ -8,7 +8,7 @@ interface Props {
 export function SessionStats({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
-      <div className="flex h-32 items-center justify-center" style={{ fontFamily: 'Rajdhani', fontSize: '13px', color: '#606070' }}>
+      <div className="flex h-32 items-center justify-center" style={{ fontFamily: 'Barlow Condensed', fontSize: '13px', color: '#606070' }}>
         Load sessions to see summary statistics
       </div>
     );
@@ -25,7 +25,7 @@ export function SessionStats({ sessions }: Props) {
         return (
           <div key={session.id}>
             {sessions.length > 1 && (
-              <p className="mb-2" style={{ fontFamily: 'Rajdhani', fontSize: '12px', fontWeight: 500, color: '#9898A8' }}>
+              <p className="mb-2" style={{ fontFamily: 'Barlow Condensed', fontSize: '12px', fontWeight: 500, color: '#9898A8' }}>
                 {sessionLabel(session)}
               </p>
             )}
@@ -69,7 +69,7 @@ export function SessionStats({ sessions }: Props) {
 
             {/* Missing channels warning */}
             {header.channels_missing.length > 0 && (
-              <p className="mt-2" style={{ fontFamily: 'Rajdhani', fontSize: '11px', color: '#F59E0B' }}>
+              <p className="mt-2" style={{ fontFamily: 'Barlow Condensed', fontSize: '11px', color: '#F59E0B' }}>
                 Missing channels: {header.channels_missing.join(', ')}
               </p>
             )}
