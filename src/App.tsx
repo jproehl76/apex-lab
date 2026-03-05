@@ -322,7 +322,7 @@ export default function App() {
       <div className="flex flex-1 min-h-0">
 
         {/* ── LEFT PANEL: track map + session controls (desktop xl+) ───────── */}
-        <aside className="hidden xl:flex flex-col w-[380px] shrink-0 border-r border-[#1E1E28]"
+        <aside className="hidden lg:flex flex-col w-[380px] shrink-0 border-r border-[#1E1E28]"
           style={{ background: '#080810' }}>
 
           {/* Session controls */}
@@ -380,7 +380,7 @@ export default function App() {
 
           {/* Desktop tab strip */}
           {store.activeSessions.length > 0 && (
-            <div className="hidden xl:flex items-center gap-0.5 px-3 py-2 border-b border-[#1E1E28] overflow-x-auto shrink-0"
+            <div className="hidden lg:flex items-center gap-0.5 px-3 py-2 border-b border-[#1E1E28] overflow-x-auto shrink-0"
               style={{ background: '#080810' }}>
               {ANALYSIS_TABS.map(tab => {
                 const active = activeTab === tab.id;
@@ -402,7 +402,7 @@ export default function App() {
           )}
 
           {/* Content */}
-          <main className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(80px+env(safe-area-inset-bottom))] xl:pb-4"
+          <main className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(80px+env(safe-area-inset-bottom))] lg:pb-4"
             style={{ background: '#0A0A12' }}>
             {renderTabContent(activeTab)}
           </main>
@@ -411,7 +411,7 @@ export default function App() {
 
       {/* ── Mobile bottom tab bar ─────────────────────────────────────────── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 xl:hidden flex items-center justify-around border-t border-[#1E1E28]"
+        className="fixed bottom-0 left-0 right-0 z-30 lg:hidden flex items-center justify-around border-t border-[#1E1E28]"
         style={{
           height: 'calc(56px + env(safe-area-inset-bottom))',
           paddingBottom: 'env(safe-area-inset-bottom)',
