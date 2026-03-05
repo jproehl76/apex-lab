@@ -122,6 +122,18 @@ function mapColumns(headers: string[]): Record<string, number> {
 
 // ─── Main parser ──────────────────────────────────────────────────────────────
 
+// Strip surrounding quotes and whitespace from a CSV cell value
+function stripQuotes(s: string): string {
+  return s.trim().replace(/^["']|["']$/g, '').trim();
+}
+
+// Auto-detect delimiter: try tab first, then comma
+function detectDelimiter(line: string): string {
+  if (line.split('\t').length > 5) return '\t';
+  if (line.split(',').length > 5) return ',';
+  return '\t';
+}
+
 export function parseRacechronoCsv(csvText: string): SessionSummary {
   const lines = csvText.split(/\r?\n/);
 
@@ -130,13 +142,18 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
     throw new Error('Not a RaceChrono export file. Expected "RaceChrono" in the first line.');
   }
 
+  // ── Detect delimiter from headers line (index 9) ─────────────────────────
+  const delim = detectDelimiter(lines[9] ?? '');
+
+  const splitLine = (line: string) => line.split(delim).map(stripQuotes);
+
   // ── Parse metadata (lines 2-9, 0-indexed: lines[1]-lines[8]) ───────────────
   let trackName = 'Unknown Track';
   let sessionDate = '';
 
   for (let i = 1; i <= 9; i++) {
     if (!lines[i]) continue;
-    const parts = lines[i].split('\t');
+    const parts = splitLine(lines[i]);
     if (parts.length < 2) continue;
     const key = parts[0].trim().toLowerCase();
     const val = parts[1].trim();
@@ -158,7 +175,7 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
   const headerLineIndex = 9;
   const dataStartIndex = 11;
 
-  const rawHeaders = lines[headerLineIndex]?.split('\t') ?? [];
+  const rawHeaders = splitLine(lines[headerLineIndex] ?? '');
   if (rawHeaders.length < 5) {
     throw new Error('RaceChrono CSV header line not found or malformed.');
   }
@@ -186,7 +203,7 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
   for (let li = dataStartIndex; li < lines.length; li++) {
     const line = lines[li];
     if (!line || line.trim() === '') continue;
-    const cells = line.split('\t');
+    const cells = splitLine(line);
     if (cells.length < 2) continue;
 
     const ts = getNum(cells, 'ts');
