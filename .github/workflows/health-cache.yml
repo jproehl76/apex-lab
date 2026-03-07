@@ -1,0 +1,93 @@
+name: Health Cache
+
+# Runs nightly at 7am UTC (2am ET / 11pm PT) and on manual trigger.
+# Fetches Oura and/or WHOOP data for the past 90 days and commits
+# public/data/health-cache.json to the repo so the PWA can read it
+# as a static file — no API calls needed at runtime.
+#
+# Required GitHub Secrets (Settings → Secrets and variables → Actions):
+#   OURA_TOKEN          — Oura Personal Access Token (if using Oura)
+#   WHOOP_WORKER_URL    — Your Cloudflare Worker URL (if using WHOOP)
+#
+# The cached JSON is served at /m3-dashboard/data/health-cache.json
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set date range
+        id: dates
+        run: |
+          echo "today=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          echo "start=$(date -d '90 days ago' +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      # ── Oura ────────────────────────────────────────────────────────────────
+      - name: Fetch Oura readiness
+        if: ${{ secrets.OURA_TOKEN != '' }}
+        run: |
+          curl -sf \
+            -H "Authorization: Bearer $OURA_TOKEN" \
+            "https://api.ouraring.com/v2/usercollection/daily_readiness?start_date=${{ steps.dates.outputs.start }}&end_date=${{ steps.dates.outputs.today }}" \
+            -o /tmp/oura-readiness.json || echo '{"data":[]}' > /tmp/oura-readiness.json
+        env:
+          OURA_TOKEN: ${{ secrets.OURA_TOKEN }}
+
+      - name: Fetch Oura sleep
+        if: ${{ secrets.OURA_TOKEN != '' }}
+        run: |
+          curl -sf \
+            -H "Authorization: Bearer $OURA_TOKEN" \
+            "https://api.ouraring.com/v2/usercollection/daily_sleep?start_date=${{ steps.dates.outputs.start }}&end_date=${{ steps.dates.outputs.today }}" \
+            -o /tmp/oura-sleep.json || echo '{"data":[]}' > /tmp/oura-sleep.json
+        env:
+          OURA_TOKEN: ${{ secrets.OURA_TOKEN }}
+
+      - name: Fetch Oura activity
+        if: ${{ secrets.OURA_TOKEN != '' }}
+        run: |
+          curl -sf \
+            -H "Authorization: Bearer $OURA_TOKEN" \
+            "https://api.ouraring.com/v2/usercollection/daily_activity?start_date=${{ steps.dates.outputs.start }}&end_date=${{ steps.dates.outputs.today }}" \
+            -o /tmp/oura-activity.json || echo '{"data":[]}' > /tmp/oura-activity.json
+        env:
+          OURA_TOKEN: ${{ secrets.OURA_TOKEN }}
+
+      # ── WHOOP ───────────────────────────────────────────────────────────────
+      - name: Fetch WHOOP data via Worker
+        if: ${{ secrets.WHOOP_WORKER_URL != '' }}
+        run: |
+          curl -sf "$WHOOP_WORKER_URL/whoop/data?days=90" \
+            -o /tmp/whoop-data.json || echo 'null' > /tmp/whoop-data.json
+        env:
+          WHOOP_WORKER_URL: ${{ secrets.WHOOP_WORKER_URL }}
+
+      # ── Merge into single JSON ───────────────────────────────────────────────
+      - name: Merge health cache
+        run: node scripts/merge-health-cache.mjs
+
+      # ── Commit if changed ────────────────────────────────────────────────────
+      - name: Commit health cache
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add public/data/health-cache.json
+          if git diff --staged --quiet; then
+            echo "No changes to health cache."
+          else
+            git commit -m "chore: update health cache [skip ci]"
+            git push
+          fi

@@ -8,9 +8,10 @@ import { parseRacechronoCsv } from '@/lib/parseRacechronoCsv';
 
 interface Props {
   onSessionLoaded: (filename: string, data: SessionSummary) => { ok: boolean; error?: string };
+  onTokenChange?: (token: string | null) => void;
 }
 
-export function DrivePickerButton({ onSessionLoaded }: Props) {
+export function DrivePickerButton({ onSessionLoaded, onTokenChange }: Props) {
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
@@ -18,6 +19,7 @@ export function DrivePickerButton({ onSessionLoaded }: Props) {
     scope: 'https://www.googleapis.com/auth/drive.readonly',
     onSuccess: (response) => {
       setAccessToken(response.access_token);
+      onTokenChange?.(response.access_token);
     },
     onError: () => {
       toast.error('Google Drive authentication failed.');

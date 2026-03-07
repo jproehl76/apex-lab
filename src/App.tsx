@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { LogOut, Heart, MapIcon } from 'lucide-react';
+import { LogOut, Heart, MapIcon, Bell } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
 import { Toaster, toast } from 'sonner';
 import { DropZone } from '@/components/DropZone';
@@ -21,16 +21,23 @@ import { ReadinessTab } from '@/components/ReadinessTab';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { CommandPalette } from '@/components/CommandPalette';
+import { PrintButton } from '@/components/PrintButton';
+import { PrintView } from '@/components/PrintView';
+import { SharedSessionView } from '@/components/SharedSessionView';
 import { PanelGroup, Panel, PanelResizeHandle } from '@/components/ui/resizable';
 import apexLabLogo from '@/assets/jp-apex-lab-logo.png';
 import { handleWhoopCallback } from '@/lib/services/whoopAuth';
 import { handleStravaCallback } from '@/lib/services/stravaAuth';
+import { decodeSession } from '@/lib/shareSession';
 import { config } from '@/config';
 import { usePersistedSessions } from '@/lib/usePersistedSessions';
 import { sessionLabel, formatLapTime } from '@/lib/utils';
 import { useMemory } from '@/hooks/useMemory';
 import { LapInfoPanel } from '@/components/LapInfoPanel';
 import { findTrackLayout } from '@/assets/trackLayouts';
+import { useShareTarget } from '@/hooks/useShareTarget';
+import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import React from 'react';
 
 const AUTH_KEY = 'm3-auth-user';
@@ -66,6 +73,14 @@ export default function App() {
   const [selectedCornerId, setSelectedCornerId] = useState<string | null>(null);
   const [healthConnected, setHealthConnected] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sharedSummary, setSharedSummary] = useState(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#share=')) {
+      return decodeSession(hash.slice(7));
+    }
+    return null;
+  });
+  const [driveAccessToken, setDriveAccessToken] = useState<string | null>(null);
   const [sidebarLayout, setSidebarLayout] = useState<Record<string, number>>(() => {
     try { return JSON.parse(localStorage.getItem('apex-sidebar-layout') ?? 'null') ?? {}; }
     catch { return {}; }
@@ -74,6 +89,11 @@ export default function App() {
     try { const r = localStorage.getItem(AUTH_KEY); return r ? JSON.parse(r) : null; }
     catch { return null; }
   });
+
+  // Feature hooks
+  useShareTarget(store);
+  useDriveAutoImport(driveAccessToken, store, store.hydrated);
+  const push = usePushNotifications();
 
   useEffect(() => { if (loaded) setActiveTab(memory.lastActiveTab || 'session'); }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
@@ -246,9 +266,23 @@ export default function App() {
     }
   }
 
+  // Shared session read-only overlay (URL hash #share=...)
+  if (sharedSummary) {
+    return (
+      <>
+        <SharedSessionView summary={sharedSummary} onClose={() => {
+          setSharedSummary(null);
+          window.history.replaceState({}, '', window.location.pathname);
+        }} />
+        <Toaster position="bottom-right" richColors />
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
       <Toaster position="bottom-right" richColors />
+      <PrintView sessions={store.activeSessions} />
 
       {/* ── HEADER ── */}
       <header className="relative shrink-0 overflow-hidden" style={{
@@ -313,6 +347,21 @@ export default function App() {
               style={{ fontFamily: 'JetBrains Mono' }}>
               <span>⌘K</span>
             </button>
+            {/* Print/PDF — desktop only, shown when sessions loaded */}
+            {store.activeSessions.length > 0 && (
+              <PrintButton className="hidden lg:flex" />
+            )}
+            {/* Push notification toggle — desktop only, when supported */}
+            {push.isSupported && (
+              <button
+                onClick={() => push.isSubscribed ? push.unsubscribe() : push.subscribe().then(() => toast.success('Notifications enabled'))}
+                disabled={push.isLoading}
+                className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[10px] tracking-wider"
+                title={push.isSubscribed ? 'Disable push notifications' : 'Enable push notifications'}
+                style={{ fontFamily: 'JetBrains Mono', opacity: push.isSubscribed ? 1 : 0.5 }}>
+                <Bell size={11} />
+              </button>
+            )}
             {user.picture && (
               <img src={user.picture} alt={user.name} className="rounded-full ring-1 ring-border"
                 style={{ width: 'clamp(24px, 3.6vh, 31px)', height: 'clamp(24px, 3.6vh, 31px)' }} />
@@ -338,7 +387,7 @@ export default function App() {
             <div className="shrink-0 p-2 border-b border-border bg-card/60">
               <div className="flex gap-2">
                 <div className="flex-1 min-w-0"><DropZone compact onSessionLoaded={store.addSession} /></div>
-                <DrivePickerButton onSessionLoaded={store.addSession} />
+                <DrivePickerButton onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
               </div>
             </div>
             {activeTab === 'map' ? (
@@ -378,7 +427,7 @@ export default function App() {
             <div className="shrink-0 p-2.5 space-y-2 border-b border-border">
               <div className="flex gap-2">
                 <div className="flex-1"><DropZone onSessionLoaded={store.addSession} /></div>
-                <DrivePickerButton onSessionLoaded={store.addSession} />
+                <DrivePickerButton onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
               </div>
               {store.sessions.length > 0 && (
                 <SessionList

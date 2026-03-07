@@ -3,6 +3,7 @@ import { X, Eye, EyeOff, Pencil, Check } from 'lucide-react';
 import { autoAnimate } from '@formkit/auto-animate';
 import type { LoadedSession } from '@/types/session';
 import { sessionLabel } from '@/lib/utils';
+import { ShareButton } from '@/components/ShareButton';
 
 interface SessionListProps {
   sessions: LoadedSession[];
@@ -83,6 +84,8 @@ export function SessionList({ sessions, activeIds, onToggle, onRemove, onRename,
                 title={isEditing ? 'Save name' : 'Rename session'}>
                 {isEditing ? <Check size={12} /> : <Pencil size={12} />}
               </button>
+
+              <ShareButton session={session} className="shrink-0 p-2 -m-1" />
 
               <button onClick={() => onToggle(session.id)}
                 className="shrink-0 p-2 -m-1 rounded text-muted-foreground/40 hover:text-muted-foreground active:opacity-60 transition-all"

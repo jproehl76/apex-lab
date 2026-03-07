@@ -134,6 +134,34 @@
   }
 }
 
+/* ── Print / PDF export ───────────────────────────────────────────────────── */
+@media print {
+  /* Hide all UI chrome */
+  header, aside, nav, .no-print,
+  [data-radix-popper-content-wrapper],
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+  /* Show the print layout */
+  .print-view {
+    display: block !important;
+  }
+  html, body, #root {
+    background: white !important;
+    color: black !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  body {
+    font-family: system-ui, sans-serif !important;
+    font-size: 11pt;
+  }
+  @page {
+    margin: 1.5cm;
+    size: A4 portrait;
+  }
+}
+
 /* ── Leaflet overrides ────────────────────────────────────────────────────── */
 /* Corner label tooltips — transparent dark theme */
 .leaflet-corner-label {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchOuraDataForDates, type OuraDayData } from '@/lib/services/ouraApi';
+import { loadHealthCache, getCacheAge } from '@/lib/healthCache';
 import { FF, FS, T, S } from '@/lib/chartTheme';
 
 const OURA_TOKEN = import.meta.env.VITE_OURA_PERSONAL_TOKEN as string | undefined;
@@ -256,22 +257,44 @@ export function OuraPanel({ sessionDates }: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OuraDayData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [cacheAge, setCacheAge] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!OURA_TOKEN || sessionDates.length === 0) return;
+    if (sessionDates.length === 0) return;
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-    (async () => {
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+
+      // Try live API first
+      if (OURA_TOKEN) {
+        try {
+          const result = await fetchOuraDataForDates(sessionDates);
+          if (!cancelled) { setData(result); setCacheAge(null); }
+          return;
+        } catch { /* fall through to cache */ }
+      }
+
+      // Fall back to health cache
       try {
-        const result = await fetchOuraDataForDates(sessionDates);
-        if (!cancelled) setData(result);
+        const cache = await loadHealthCache();
+        if (cancelled) return;
+        if (cache?.oura) {
+          const filtered = cache.oura.filter(d => sessionDates.includes(d.date));
+          setData(filtered);
+          setCacheAge(getCacheAge(cache.updatedAt));
+        } else if (!OURA_TOKEN) {
+          // No token, no cache — show setup message (handled below)
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load Oura data');
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
+    }
+
+    load();
     return () => { cancelled = true; };
   }, [sessionDates.join(',')]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -306,6 +329,11 @@ export function OuraPanel({ sessionDates }: Props) {
 
   return (
     <div className="space-y-3">
+      {cacheAge && (
+        <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.ghost, letterSpacing: '0.1em' }}>
+          Cached · {cacheAge}
+        </div>
+      )}
       {data.map(day => <DayCard key={day.date} day={day} />)}
     </div>
   );
