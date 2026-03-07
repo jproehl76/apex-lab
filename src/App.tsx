@@ -235,7 +235,7 @@ export default function App() {
             src={apexLabLogo}
             alt="JP Apex Lab"
             style={{
-              height: 'clamp(44px, 8vh, 80px)',
+              height: 'clamp(52px, 10vh, 110px)',
               width: 'auto',
               objectFit: 'contain',
               flexShrink: 0,
