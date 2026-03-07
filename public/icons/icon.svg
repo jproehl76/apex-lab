@@ -1,16 +1,8 @@
 <svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'>
-  <rect width='512' height='512' fill='#0F0F14'/>
-  <rect x='0' y='480' width='512' height='32' fill='url(#bar)'/>
-  <defs>
-    <linearGradient id='bar' x1='0%' y1='0%' x2='100%' y2='0%'>
-      <stop offset='0%' stop-color='#3B82F6'/>
-      <stop offset='100%' stop-color='#A855F7'/>
-    </linearGradient>
-    <linearGradient id='txt' x1='0%' y1='0%' x2='100%' y2='0%'>
-      <stop offset='0%' stop-color='#3B82F6'/>
-      <stop offset='100%' stop-color='#A855F7'/>
-    </linearGradient>
-  </defs>
-  <text x='256' y='310' font-family='Arial Black,sans-serif' font-size='260' font-weight='900' fill='url(#txt)' text-anchor='middle' dominant-baseline='middle'>M3</text>
-  <text x='256' y='420' font-family='Arial,sans-serif' font-size='48' font-weight='400' fill='#606070' text-anchor='middle' letter-spacing='12'>TELEMETRY</text>
+  <rect width='512' height='512' fill='#0A0A12'/>
+  <!-- J hairpin as favicon: bold J shape in BMW light blue -->
+  <path d='M 310 80 L 310 330 Q 310 430 210 430 Q 110 430 110 340 L 110 300'
+    fill='none' stroke='#008AC9' stroke-width='72' stroke-linecap='round' stroke-linejoin='round'/>
+  <!-- Red apex dot -->
+  <circle cx='148' cy='390' r='32' fill='#F11A22'/>
 </svg>
