@@ -11,6 +11,28 @@
 }
 
 
+/* ── Type scale ──────────────────────────────────────────────────────────── */
+/* Use these vars for consistent sizing instead of ad-hoc px/em values       */
+:root {
+  --text-2xs:  9px;   /* micro labels, axis ticks */
+  --text-xs:   10px;  /* section headers, tags */
+  --text-sm:   11px;  /* secondary data */
+  --text-base: 13px;  /* default body / table cells */
+  --text-md:   15px;  /* slightly larger labels */
+  --text-lg:   18px;  /* card values */
+  --text-xl:   22px;  /* featured metrics */
+  --text-2xl:  28px;  /* hero numbers */
+
+  --font-ui:   'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
+  --font-data: 'JetBrains Mono', 'Menlo', monospace;
+  --font-head: 'Rajdhani', 'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
+
+  --tracking-tight:  0;
+  --tracking-wide:   0.08em;
+  --tracking-wider:  0.14em;
+  --tracking-widest: 0.2em;
+}
+
 /* ── BMW TypeNext Latin ──────────────────────────────────────────────────── */
 @font-face {
   font-family: 'BMWTypeNext';

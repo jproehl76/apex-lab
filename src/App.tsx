@@ -20,6 +20,8 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ReadinessTab } from '@/components/ReadinessTab';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { CommandPalette } from '@/components/CommandPalette';
+import { PanelGroup, Panel, PanelResizeHandle } from '@/components/ui/resizable';
 import apexLabLogo from '@/assets/jp-apex-lab-logo.png';
 import { handleWhoopCallback } from '@/lib/services/whoopAuth';
 import { handleStravaCallback } from '@/lib/services/stravaAuth';
@@ -63,6 +65,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('session');
   const [selectedCornerId, setSelectedCornerId] = useState<string | null>(null);
   const [healthConnected, setHealthConnected] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sidebarLayout, setSidebarLayout] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem('apex-sidebar-layout') ?? 'null') ?? {}; }
+    catch { return {}; }
+  });
   const [user, setUser] = useState<AuthUser | null>(() => {
     try { const r = localStorage.getItem(AUTH_KEY); return r ? JSON.parse(r) : null; }
     catch { return null; }
@@ -89,6 +96,20 @@ export default function App() {
     axis: 'x',
     swipe: { distance: [50, 50], velocity: [0.3, 0.3] },
   });
+
+  // Desktop keyboard shortcuts: 1–5 jump tabs, ? shows help
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const n = parseInt(e.key);
+      if (n >= 1 && n <= DESKTOP_TABS.length) {
+        setActiveTab(DESKTOP_TABS[n - 1].id);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!loaded) return;
@@ -126,6 +147,20 @@ export default function App() {
   }, [user]);
 
   if (!user) return <LoginScreen onAuth={setUser} />;
+
+  // Brief overlay while sessions rehydrate from IndexedDB
+  if (!store.hydrated) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <span style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
+            Loading
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   const sessionDates = store.activeSessions.map(s => s.data.header.date);
 
@@ -270,6 +305,14 @@ export default function App() {
                   filter: 'brightness(1.25) drop-shadow(0 0 12px rgba(255,255,255,0.15))',
                 }} />
             )}
+            {/* ⌘K hint — desktop only */}
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[10px] tracking-wider"
+              title="Command palette (⌘K)"
+              style={{ fontFamily: 'JetBrains Mono' }}>
+              <span>⌘K</span>
+            </button>
             {user.picture && (
               <img src={user.picture} alt={user.name} className="rounded-full ring-1 ring-border"
                 style={{ width: 'clamp(24px, 3.6vh, 31px)', height: 'clamp(24px, 3.6vh, 31px)' }} />
@@ -286,139 +329,180 @@ export default function App() {
       </header>
 
       {/* ── BODY ── */}
-      <div className="flex flex-1 min-h-0">
 
-        {/* Left panel — desktop lg+ */}
-        <aside className="hidden lg:flex flex-col w-[340px] shrink-0 border-r border-border bg-card">
-
-          {/* Session loading controls — compact */}
-          <div className="shrink-0 p-2.5 space-y-2 border-b border-border">
-            <div className="flex gap-2">
-              <div className="flex-1"><DropZone onSessionLoaded={store.addSession} /></div>
-              <DrivePickerButton onSessionLoaded={store.addSession} />
-            </div>
-            {store.sessions.length > 0 && (
-              <SessionList
-                sessions={store.sessions}
-                activeIds={store.activeSessionIds}
-                onToggle={store.toggleActive}
-                onRemove={store.removeSession}
-                onRename={store.renameSession}
-                onClearAll={store.clearAll}
-              />
-            )}
-            {store.sessions.length === 0 && (
-              <div className="py-0.5 space-y-0.5 text-[10px] tracking-wider text-muted-foreground uppercase">
-                <ol className="list-decimal list-inside space-y-0.5">
-                  <li>Export CSV from RaceChrono</li>
-                  <li>Drop here or load from Drive</li>
-                </ol>
-              </div>
-            )}
-            {store.sessions.length > 0 && (
-              <button onClick={store.clearSavedSessions}
-                className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
-                Clear saved sessions
-              </button>
-            )}
-          </div>
-
-          {/* F1-style lap info panel */}
-          <LapInfoPanel sessions={store.activeSessions} />
-
-          {/* Lap list — all clean laps with delta */}
-          <div className="flex-1 min-h-0 overflow-y-auto scroll-touch">
-            <LapList sessions={store.activeSessions} />
-          </div>
-        </aside>
-
-        {/* Right panel — touch-action: pan-y lets useDrag capture horizontal swipes
-            while the browser handles vertical scrolling natively */}
-        <div className="flex flex-col flex-1 min-w-0 min-h-0 bg-background"
-          {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
-          {store.activeSessions.length > 0 ? (
-            <div className="flex flex-col flex-1 min-h-0">
-              {/* Mobile-only compact session loading strip */}
-              <div className="lg:hidden shrink-0 p-2 border-b border-border bg-card/60">
-                <div className="flex gap-2">
-                  <div className="flex-1 min-w-0">
-                    <DropZone compact onSessionLoaded={store.addSession} />
-                  </div>
-                  <DrivePickerButton onSessionLoaded={store.addSession} />
-                </div>
-              </div>
-              {/* Desktop tab strip */}
-              <div className="hidden lg:flex shrink-0 border-b border-border bg-card/60 px-3 items-center gap-1">
-                {DESKTOP_TABS.map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className="relative px-4 py-2.5 text-xs tracking-[0.15em] uppercase transition-colors"
-                    style={{
-                      color: activeTab === tab.id ? '#F0F0FA' : 'hsl(var(--muted-foreground))',
-                      fontFamily: 'BMWTypeNext',
-                    }}>
-                    {tab.label}
-                    {activeTab === tab.id && (
-                      <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t"
-                        style={{ background: 'linear-gradient(to right, #1C69D4, #A855F7)' }} />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Map tab: full height, no padding, no scroll */}
-              {activeTab === 'map' && (
-                <div className="flex-1 min-h-0 p-2 pb-[calc(8px+env(safe-area-inset-bottom))] lg:pb-2">
-                  <TrackHeatMap sessions={store.activeSessions}
-                    selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
-                </div>
-              )}
-
-              {/* All other tabs: scrollable content */}
-              {activeTab !== 'map' && (
-                <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(64px+env(safe-area-inset-bottom))] lg:pb-4">
-                  {renderTabContent(activeTab)}
-                </div>
-              )}
-            </div>
-          ) : (
-            <main className="flex-1 overflow-y-auto scroll-touch p-4">
-              {/* Mobile session loading controls — desktop uses the left sidebar */}
-              <div className="lg:hidden mb-4 space-y-2">
-                <DropZone onSessionLoaded={store.addSession} />
+      {/* MOBILE layout (< lg): no sidebar, swipe navigation */}
+      <div className="flex flex-col flex-1 min-h-0 lg:hidden" {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
+        {store.activeSessions.length > 0 ? (
+          <div className="flex flex-col flex-1 min-h-0">
+            {/* Compact session loading strip */}
+            <div className="shrink-0 p-2 border-b border-border bg-card/60">
+              <div className="flex gap-2">
+                <div className="flex-1 min-w-0"><DropZone compact onSessionLoaded={store.addSession} /></div>
                 <DrivePickerButton onSessionLoaded={store.addSession} />
               </div>
-              <EmptyDashboard />
-            </main>
-          )}
-        </div>
+            </div>
+            {activeTab === 'map' ? (
+              <div className="flex-1 min-h-0 p-2 pb-[calc(72px+env(safe-area-inset-bottom))]">
+                <TrackHeatMap sessions={store.activeSessions}
+                  selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
+                {renderTabContent(activeTab)}
+              </div>
+            )}
+          </div>
+        ) : (
+          <main className="flex-1 overflow-y-auto scroll-touch p-4">
+            <div className="mb-4 space-y-2">
+              <DropZone onSessionLoaded={store.addSession} />
+              <DrivePickerButton onSessionLoaded={store.addSession} />
+            </div>
+            <EmptyDashboard />
+          </main>
+        )}
+      </div>
+
+      {/* DESKTOP layout (>= lg): resizable sidebar + main */}
+      <div className="hidden lg:flex flex-1 min-h-0">
+        <PanelGroup
+          orientation="horizontal"
+          defaultLayout={Object.keys(sidebarLayout).length > 0 ? sidebarLayout : undefined}
+          onLayoutChanged={(layout) => {
+            setSidebarLayout(layout);
+            try { localStorage.setItem('apex-sidebar-layout', JSON.stringify(layout)); } catch { /* quota */ }
+          }}
+        >
+          {/* Left sidebar panel */}
+          <Panel id="sidebar" defaultSize={24} minSize={16} maxSize={40} className="flex flex-col border-r border-border bg-card">
+            <div className="shrink-0 p-2.5 space-y-2 border-b border-border">
+              <div className="flex gap-2">
+                <div className="flex-1"><DropZone onSessionLoaded={store.addSession} /></div>
+                <DrivePickerButton onSessionLoaded={store.addSession} />
+              </div>
+              {store.sessions.length > 0 && (
+                <SessionList
+                  sessions={store.sessions}
+                  activeIds={store.activeSessionIds}
+                  onToggle={store.toggleActive}
+                  onRemove={store.removeSession}
+                  onRename={store.renameSession}
+                  onClearAll={store.clearAll}
+                />
+              )}
+              {store.sessions.length === 0 && (
+                <div className="py-0.5 text-[10px] tracking-wider text-muted-foreground uppercase">
+                  <ol className="list-decimal list-inside space-y-0.5">
+                    <li>Export CSV from RaceChrono</li>
+                    <li>Drop here or load from Drive</li>
+                  </ol>
+                </div>
+              )}
+              {store.sessions.length > 0 && (
+                <button onClick={store.clearSavedSessions}
+                  className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
+                  Clear saved sessions
+                </button>
+              )}
+            </div>
+            <LapInfoPanel sessions={store.activeSessions} />
+            <div className="flex-1 min-h-0 overflow-y-auto scroll-touch">
+              <LapList sessions={store.activeSessions} />
+            </div>
+          </Panel>
+
+          {/* Drag handle */}
+          <PanelResizeHandle className="w-1 bg-border hover:bg-primary/40 active:bg-primary/60 transition-colors cursor-col-resize" />
+
+          {/* Right content panel */}
+          <Panel id="main" className="flex flex-col min-w-0">
+            {store.activeSessions.length > 0 ? (
+              <div className="flex flex-col h-full">
+                {/* Desktop tab strip */}
+                <div className="shrink-0 border-b border-border bg-card/60 px-3 flex items-center gap-1">
+                  {DESKTOP_TABS.map((tab, i) => (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                      title={`${tab.label} (${i + 1})`}
+                      className="group relative px-4 py-2.5 text-xs tracking-[0.15em] uppercase transition-colors"
+                      style={{
+                        color: activeTab === tab.id ? '#F0F0FA' : 'hsl(var(--muted-foreground))',
+                        fontFamily: 'BMWTypeNext',
+                      }}>
+                      {tab.label}
+                      <span className="absolute top-1 right-1 text-[7px] opacity-0 group-hover:opacity-30 transition-opacity"
+                        style={{ fontFamily: 'JetBrains Mono' }}>{i + 1}</span>
+                      {activeTab === tab.id && (
+                        <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t"
+                          style={{ background: 'linear-gradient(to right, #1C69D4, #A855F7)' }} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {activeTab === 'map' ? (
+                  <div className="flex-1 min-h-0 p-2">
+                    <TrackHeatMap sessions={store.activeSessions}
+                      selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto scroll-touch p-4">
+                    {renderTabContent(activeTab)}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <main className="flex-1 overflow-y-auto scroll-touch p-4">
+                <EmptyDashboard />
+              </main>
+            )}
+          </Panel>
+        </PanelGroup>
       </div>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden flex items-center justify-around border-t border-border"
+      <nav className="fixed bottom-0 left-0 right-0 z-30 lg:hidden border-t border-border"
         style={{
-          height: 'calc(52px + env(safe-area-inset-bottom))',
-          paddingBottom: 'env(safe-area-inset-bottom)',
           background: 'rgba(10,10,18,0.97)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
-        {MOBILE_TABS.map(tab => {
-          const active = activeTab === tab.id;
-          return (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-100 active:scale-[0.90] active:opacity-70 select-none"
+        {/* Swipe position dots */}
+        <div className="flex items-center justify-center gap-1.5 pt-1">
+          {MOBILE_TABS.map(tab => (
+            <div key={tab.id}
+              className="rounded-full transition-all duration-200"
               style={{
-                color: active ? '#1C69D4' : 'hsl(var(--muted-foreground))',
-                borderTop: active ? '2px solid #1C69D4' : '2px solid transparent',
-              }}>
-              <tab.Icon size={18} />
-              <span style={{ fontFamily: 'BMWTypeNext', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
-            </button>
-          );
-        })}
+                width: activeTab === tab.id ? 16 : 4,
+                height: 3,
+                background: activeTab === tab.id ? '#1C69D4' : 'rgba(255,255,255,0.15)',
+              }} />
+          ))}
+        </div>
+        {/* Tab buttons */}
+        <div className="flex items-center justify-around" style={{ height: 48 }}>
+          {MOBILE_TABS.map(tab => {
+            const active = activeTab === tab.id;
+            return (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-100 active:scale-[0.90] active:opacity-70 select-none"
+                style={{ color: active ? '#1C69D4' : 'hsl(var(--muted-foreground))' }}>
+                <tab.Icon size={18} />
+                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
       <InstallPrompt />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        onNavigate={setActiveTab}
+        onClearAll={store.clearAll}
+        onSignOut={() => setUser(null)}
+        hasData={store.sessions.length > 0}
+      />
     </div>
   );
 }

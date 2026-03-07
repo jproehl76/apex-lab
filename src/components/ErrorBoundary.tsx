@@ -24,9 +24,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
   override render() {
     if (this.state.hasError) {
       return this.props.fallback ?? (
-        <div className="rounded-xl border border-red-900 bg-red-950/30 p-6 text-sm text-red-400">
-          <p className="font-semibold mb-1">Something went wrong in this panel.</p>
-          <p className="font-mono text-xs text-red-600">{this.state.message}</p>
+        <div className="rounded border border-destructive/30 bg-destructive/5 px-4 py-3 flex items-start gap-3">
+          <span className="text-destructive mt-0.5 shrink-0">⚠</span>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-destructive mb-0.5" style={{ fontFamily: 'var(--font-ui)' }}>
+              Panel error
+            </p>
+            <p className="text-[10px] text-muted-foreground truncate" style={{ fontFamily: 'var(--font-data)' }}>
+              {this.state.message}
+            </p>
+          </div>
         </div>
       );
     }
