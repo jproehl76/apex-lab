@@ -134,6 +134,16 @@
   }
 }
 
+/* ── react-resizable-panels fix ───────────────────────────────────────────── */
+/* v4's outer panel div has overflow:visible and no min-width:0.              */
+/* Without min-width:0, flex items cannot shrink below content min-width,     */
+/* causing the main panel to overflow and cover the sidebar on window resize. */
+[data-panel] {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* ── Print / PDF export ───────────────────────────────────────────────────── */
 @media print {
   /* Hide all UI chrome */
