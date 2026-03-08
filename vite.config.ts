@@ -13,8 +13,8 @@ export default defineConfig({
       filename: 'sw.ts',
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      scope: '/m3-dashboard/',
-      base: '/m3-dashboard/',
+      scope: '/apex-lab/',
+      base: '/apex-lab/',
       // Use existing public/manifest.json (not auto-generated)
       manifest: false,
       injectManifest: {
@@ -25,7 +25,7 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/m3-dashboard/',
+  base: '/apex-lab/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

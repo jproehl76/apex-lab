@@ -67,13 +67,13 @@ registerRoute(
 );
 
 // ── Share Target handler ────────────────────────────────────────────────────────
-// Intercepts POST /m3-dashboard/ from the Web Share Target API.
+// Intercepts POST /apex-lab/ from the Web Share Target API.
 // Saves the shared file to IndexedDB so the app can pick it up on next render.
 self.addEventListener('fetch', (event: FetchEvent) => {
   const url = new URL(event.request.url);
   if (
     event.request.method === 'POST' &&
-    (url.pathname === '/m3-dashboard/' || url.pathname === '/m3-dashboard')
+    (url.pathname === '/apex-lab/' || url.pathname === '/m3-dashboard')
   ) {
     event.respondWith(
       (async () => {
@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
             await storeSharePending(file.name, text);
           }
         } catch { /* ignore parse errors */ }
-        return Response.redirect('/m3-dashboard/?shared=1', 303);
+        return Response.redirect('/apex-lab/?shared=1', 303);
       })()
     );
   }
@@ -123,8 +123,8 @@ self.addEventListener('push', (event: PushEvent) => {
   event.waitUntil(
     self.registration.showNotification(data?.title ?? 'JP Apex Lab', {
       body: data?.body ?? 'You have new activity data.',
-      icon: '/m3-dashboard/icons/icon-192.png',
-      badge: '/m3-dashboard/icons/icon-192.png',
+      icon: '/apex-lab/icons/icon-192.png',
+      badge: '/apex-lab/icons/icon-192.png',
       tag: 'apex-push',
     })
   );
@@ -136,9 +136,9 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then(windowClients => {
-        const existing = windowClients.find(c => c.url.includes('/m3-dashboard/'));
+        const existing = windowClients.find(c => c.url.includes('/apex-lab/'));
         if (existing) return existing.focus();
-        return self.clients.openWindow('/m3-dashboard/');
+        return self.clients.openWindow('/apex-lab/');
       })
   );
 });

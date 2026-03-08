@@ -72,7 +72,7 @@ export function decodeSession(encoded: string): ShareSummary | null {
 /** Format the shareable URL for the current page */
 export function buildShareUrl(session: LoadedSession): string {
   const encoded = encodeSession(session);
-  const base = `${window.location.origin}/m3-dashboard/`;
+  const base = `${window.location.origin}/apex-lab/`;
   return `${base}#share=${encoded}`;
 }
 

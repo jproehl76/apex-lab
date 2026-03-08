@@ -31,6 +31,8 @@ import { handleWhoopCallback } from '@/lib/services/whoopAuth';
 import { handleStravaCallback } from '@/lib/services/stravaAuth';
 import { decodeSession } from '@/lib/shareSession';
 import { config } from '@/config';
+import { readProfile, type UserProfile } from '@/lib/userProfile';
+import { ProfileSetup } from '@/components/ProfileSetup';
 import { usePersistedSessions } from '@/lib/usePersistedSessions';
 import { sessionLabel, formatLapTime } from '@/lib/utils';
 import { useMemory } from '@/hooks/useMemory';
@@ -41,7 +43,7 @@ import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import React from 'react';
 
-const AUTH_KEY = 'm3-auth-user';
+const AUTH_KEY = 'apex-lab-auth-user';
 
 interface AuthUser { email: string; name: string; picture: string }
 
@@ -92,6 +94,17 @@ export default function App() {
     try { const r = localStorage.getItem(AUTH_KEY); return r ? JSON.parse(r) : null; }
     catch { return null; }
   });
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
+
+  // Load profile when user logs in
+  useEffect(() => {
+    if (!user) { setProfile(null); setShowProfileSetup(false); return; }
+    readProfile(user.email).then(p => {
+      setProfile(p);
+      if (!p || !p.carName) setShowProfileSetup(true);
+    });
+  }, [user?.email]); // eslint-disable-line
 
   // Feature hooks
   useShareTarget(store);
@@ -295,6 +308,12 @@ export default function App() {
     <div className="flex flex-col h-screen overflow-hidden bg-background">
       <Toaster position="bottom-right" richColors />
       <PrintView sessions={store.activeSessions} />
+      {showProfileSetup && user && (
+        <ProfileSetup
+          email={user.email}
+          onSave={p => { setProfile(p); setShowProfileSetup(false); }}
+        />
+      )}
 
       {/* ── HEADER ── */}
       <header className="relative shrink-0 overflow-hidden" style={{
@@ -373,6 +392,15 @@ export default function App() {
                 style={{ fontFamily: 'JetBrains Mono', opacity: push.isSubscribed ? 1 : 0.5 }}>
                 <Bell size={11} />
               </button>
+            )}
+            {/* Car name — shown when profile is set */}
+            {profile?.carName && (
+              <span
+                className="hidden md:block text-muted-foreground"
+                style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {profile.carName}
+              </span>
             )}
             {user.picture && (
               <img src={user.picture} alt={user.name} className="rounded-full ring-1 ring-border"

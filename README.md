@@ -2,7 +2,7 @@
 
 Personal track data dashboard for the G80 M3 Competition. Ingests RaceChrono CSV exports and presents lap analysis, corner performance, engine thermals, and driver readiness in a single pit-wall interface.
 
-**Live app:** https://jproehl76.github.io/m3-dashboard/
+**Live app:** https://jproehl76.github.io/apex-lab/
 
 ---
 
@@ -41,8 +41,8 @@ Then in the dashboard: drag the CSV onto the drop zone, or use **Load from Drive
 Requires Node 18+ and pnpm.
 
 ```bash
-git clone https://github.com/jproehl76/m3-dashboard.git
-cd m3-dashboard
+git clone https://github.com/jproehl76/apex-lab.git
+cd apex-lab
 pnpm install
 pnpm dev
 ```

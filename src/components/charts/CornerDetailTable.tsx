@@ -177,7 +177,7 @@ export function CornerDetailTable({ sessions }: Props) {
       </p>
 
       <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 'max-content' }}>
           <thead>
             <tr>
               <Th>Corner</Th>

@@ -29,12 +29,49 @@ export const DEFAULT_MEMORY: AppMemory = {
   whoopBaselines: { restingHR: null, hrv: null, lastUpdated: null },
 };
 
-const DB_NAME = 'm3_dashboard';
-const DB_VERSION = 1;
-const STORE_NAME = 'memory';
-const MEMORY_KEY = 'm3_memory_v1';
+const OLD_DB_NAME  = 'm3_dashboard';
+const DB_NAME      = 'apex_lab_v1';
+const DB_VERSION   = 1;
+const STORE_NAME   = 'memory';
+const OLD_MEMORY_KEY = 'm3_memory_v1';
+const MEMORY_KEY   = 'apex_lab_memory_v1';
 
-export async function openDB(): Promise<IDBDatabase> {
+/** One-time migration: copy data from old 'm3_dashboard' IDB to 'apex_lab_v1'. */
+async function migrateOldDB(): Promise<void> {
+  try {
+    // Check whether old DB exists by attempting to open it
+    const oldData = await new Promise<AppMemory | null>((resolve) => {
+      const req = indexedDB.open(OLD_DB_NAME, 1);
+      req.onupgradeneeded = () => { req.transaction?.abort(); resolve(null); };
+      req.onsuccess = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) { db.close(); resolve(null); return; }
+        const get = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(OLD_MEMORY_KEY);
+        get.onsuccess = () => { db.close(); resolve(get.result ?? null); };
+        get.onerror   = () => { db.close(); resolve(null); };
+      };
+      req.onerror = () => resolve(null);
+    });
+
+    if (!oldData) return; // nothing to migrate
+
+    // Write to new DB
+    const newDB = await openDBInternal();
+    await new Promise<void>((resolve, reject) => {
+      const tx = newDB.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put(oldData, MEMORY_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror    = () => reject(tx.error);
+    });
+
+    // Delete old DB
+    indexedDB.deleteDatabase(OLD_DB_NAME);
+  } catch { /* silent — migration is best-effort */ }
+}
+
+let _migrationDone = false;
+
+function openDBInternal(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e) => {
@@ -42,8 +79,16 @@ export async function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
     };
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onerror   = () => reject(req.error);
   });
+}
+
+export async function openDB(): Promise<IDBDatabase> {
+  if (!_migrationDone) {
+    _migrationDone = true;
+    await migrateOldDB();
+  }
+  return openDBInternal();
 }
 
 function deepMerge<T>(target: T, source: Partial<T>): T {

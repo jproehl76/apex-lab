@@ -1,8 +1,13 @@
+// ── App branding ──────────────────────────────────────────────────────────────
+// These constants identify this app. Keep APP_NAME consistent with the
+// deployed URL and public/manifest.json.
+export const APP_NAME = 'JP Apex Lab';
+export const APP_LOGO = '/apex-lab/icons/icon-192.png';
+
 export const config = {
-  ownerName: 'Jonathan Proehl',
-  ownerEmail: 'jonathan.proehl@gmail.com',
-  carName: '2025 BMW G80 M3 Competition xDrive',
-  carLogoUrl: null as string | null,   // set to a URL string, or null to use src/assets/car-logo.jpg
+  appName: 'JP Apex Lab',
+  carName: '2025 BMW G80 M3 Competition xDrive',  // default; overridden by user profile
+  carLogoUrl: null as string | null,
   stripeColors: ['#1C69D4', '#6B2D9E', '#EF3340'] as string[],
   defaultPrimaryColor: '#1C69D4',
   defaultAccentColor: '#A855F7',

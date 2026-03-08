@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/m3-dashboard/sw.js', { scope: '/m3-dashboard/' })
+    navigator.serviceWorker.register('/apex-lab/sw.js', { scope: '/apex-lab/' })
       .catch(() => {}); // silent fail
   });
 }

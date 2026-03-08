@@ -9,7 +9,7 @@ name: Health Cache
 #   OURA_TOKEN          — Oura Personal Access Token (if using Oura)
 #   WHOOP_WORKER_URL    — Your Cloudflare Worker URL (if using WHOOP)
 #
-# The cached JSON is served at /m3-dashboard/data/health-cache.json
+# The cached JSON is served at /apex-lab/data/health-cache.json
 
 on:
   schedule:

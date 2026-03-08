@@ -123,7 +123,7 @@ export function SharedSessionView({ summary, onClose }: Props) {
         )}
 
         <p style={{ fontFamily: 'BMWTypeNext', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', opacity: 0.5, textAlign: 'center', paddingBottom: 16 }}>
-          JP Apex Lab · jproehl76.github.io/m3-dashboard
+          JP Apex Lab · jproehl76.github.io/apex-lab
         </p>
       </div>
     </div>

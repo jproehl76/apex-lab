@@ -11,8 +11,8 @@ repo can be pulled in with a single git command.
 Click **Fork** on GitHub to create your own copy. Clone it locally:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/m3-dashboard.git
-cd m3-dashboard
+git clone https://github.com/YOUR_USERNAME/apex-lab.git
+cd apex-lab
 ```
 
 ---
@@ -148,7 +148,7 @@ This builds and pushes the `dist/` folder to the `gh-pages` branch.
 Add the original repo as a remote once:
 
 ```bash
-git remote add upstream https://github.com/jonathanproehl/m3-dashboard.git
+git remote add upstream https://github.com/jonathanproehl/apex-lab.git
 ```
 
 To pull in new features/fixes:
