@@ -16,4 +16,8 @@ export const config = {
   whoopWorkerUrl: 'https://frosty-bar-6808.jonathan-proehl.workers.dev',
   stravaWorkerUrl: '',   // set if healthProvider === 'strava'
   // Oura uses VITE_OURA_PERSONAL_TOKEN from .env — no workerUrl needed
+  coachingWorkerUrl: import.meta.env.VITE_COACHING_WORKER_URL ?? '',
+  // ↑ Vercel (or other) proxy that forwards to Anthropic with the server-side key.
+  //   Set VITE_COACHING_WORKER_URL=https://<your-app>.vercel.app in .env
+  //   Leave empty if users supply their own Anthropic key via Settings.
 };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { lookupVin, writeProfile, type UserProfile } from '@/lib/userProfile';
+import { lookupVin, writeProfile, DEFAULT_PROFILE, type UserProfile } from '@/lib/userProfile';
 
 interface Props {
   email: string;
@@ -28,6 +28,7 @@ export function ProfileSetup({ email, onSave }: Props) {
   async function handleSave() {
     if (!carName.trim()) { setError('Please enter your car name'); return; }
     const profile: UserProfile = {
+      ...DEFAULT_PROFILE,
       email,
       carName: carName.trim(),
       ...(carHp      ? { carHp: Number(carHp) }         : {}),

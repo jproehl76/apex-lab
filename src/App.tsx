@@ -33,6 +33,7 @@ import { decodeSession } from '@/lib/shareSession';
 import { config } from '@/config';
 import { readProfile, type UserProfile } from '@/lib/userProfile';
 import { ProfileSetup } from '@/components/ProfileSetup';
+import { AISettings } from '@/components/AISettings';
 import { usePersistedSessions } from '@/lib/usePersistedSessions';
 import { sessionLabel, formatLapTime } from '@/lib/utils';
 import { useMemory } from '@/hooks/useMemory';
@@ -41,6 +42,7 @@ import { findTrackLayout } from '@/assets/trackLayouts';
 import { useShareTarget } from '@/hooks/useShareTarget';
 import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { Settings } from 'lucide-react';
 import React from 'react';
 
 const AUTH_KEY = 'apex-lab-auth-user';
@@ -94,10 +96,11 @@ export default function App() {
     try { const r = localStorage.getItem(AUTH_KEY); return r ? JSON.parse(r) : null; }
     catch { return null; }
   });
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile]               = useState<UserProfile | null>(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [settingsOpen, setSettingsOpen]     = useState(false);
 
-  // Load profile when user logs in
+  // Load user profile from IDB when user logs in
   useEffect(() => {
     if (!user) { setProfile(null); setShowProfileSetup(false); return; }
     readProfile(user.email).then(p => {
@@ -234,7 +237,7 @@ export default function App() {
             <ErrorBoundary><SessionStats sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
           <Section title="Coaching">
-            <ErrorBoundary><CoachingInsights sessions={store.activeSessions} /></ErrorBoundary>
+            <ErrorBoundary><CoachingInsights sessions={store.activeSessions} profile={profile} trackHistory={memory.trackHistory} /></ErrorBoundary>
           </Section>
           <Section title="Lap Times">
             <ErrorBoundary><LapTimesChart sessions={store.activeSessions} /></ErrorBoundary>
@@ -314,6 +317,13 @@ export default function App() {
           onSave={p => { setProfile(p); setShowProfileSetup(false); }}
         />
       )}
+      {settingsOpen && user && (
+        <AISettings
+          email={user.email}
+          onClose={() => setSettingsOpen(false)}
+          onSave={p => { setProfile(p); setSettingsOpen(false); }}
+        />
+      )}
 
       {/* ── HEADER ── */}
       <header className="relative shrink-0 overflow-hidden" style={{
@@ -370,6 +380,14 @@ export default function App() {
                   filter: 'brightness(1.25) drop-shadow(0 0 12px rgba(255,255,255,0.15))',
                 }} />
             )}
+            {/* Settings — opens AISettings drawer */}
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors"
+              title="Settings"
+            >
+              <Settings size={13} />
+            </button>
             {/* ⌘K hint — desktop only */}
             <button
               onClick={() => setPaletteOpen(true)}

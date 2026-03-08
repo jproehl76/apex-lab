@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import type { LoadedSession } from '@/types/session';
 import { KPH_TO_MPH, M_TO_FEET, sessionLabel } from '@/lib/utils';
+import { CoachingChat } from '@/components/CoachingChat';
+import type { UserProfile } from '@/lib/userProfile';
+import type { AppMemory } from '@/lib/memory';
 
 interface Insight {
   id: string;
@@ -83,9 +86,11 @@ function buildInsights(session: LoadedSession): Insight[] {
 
 interface Props {
   sessions: LoadedSession[];
+  profile?: UserProfile | null;
+  trackHistory?: AppMemory['trackHistory'];
 }
 
-export function CoachingInsights({ sessions }: Props) {
+export function CoachingInsights({ sessions, profile, trackHistory }: Props) {
   const insightsBySession = useMemo(
     () => sessions.map(s => ({ session: s, insights: buildInsights(s) })),
     [sessions]
@@ -126,6 +131,13 @@ export function CoachingInsights({ sessions }: Props) {
           )}
         </div>
       ))}
+
+      {/* AI coaching chat — shown below rule-based insights */}
+      <CoachingChat
+        sessions={sessions}
+        profile={profile ?? null}
+        trackHistory={trackHistory ?? []}
+      />
     </div>
   );
 }
