@@ -481,7 +481,7 @@ export default function App() {
           }}
         >
           {/* Left sidebar panel */}
-          <Panel id="sidebar" defaultSize={24} minSize={16} maxSize={40} className="flex flex-col border-r border-border bg-card">
+          <Panel id="sidebar" defaultSize="24" minSize="16" maxSize="40" className="flex flex-col border-r border-border bg-card">
             <div className="shrink-0 p-2.5 space-y-2 border-b border-border">
               <div className="flex gap-2">
                 <div className="flex-1"><DropZone onSessionLoaded={store.addSession} /></div>
