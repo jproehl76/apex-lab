@@ -31,12 +31,12 @@ export function SessionStats({ sessions }: Props) {
             )}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {/* Best lap — special purple card */}
-              <div className="card p-4 col-span-2 sm:col-span-1" style={{ borderColor: 'rgba(168,85,247,0.3)', background: 'rgba(168,85,247,0.06)' }}>
+              <div className="card p-3 sm:p-4 col-span-2 sm:col-span-1 overflow-hidden" style={{ borderColor: 'rgba(168,85,247,0.3)', background: 'rgba(168,85,247,0.06)' }}>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <div className="w-0.5 h-3 rounded-full" style={{ background: '#A855F7' }} />
-                  <span style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#705080' }}>Best Lap</span>
+                  <div className="w-0.5 h-3 rounded-full shrink-0" style={{ background: '#A855F7' }} />
+                  <span className="truncate" style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#705080' }}>Best Lap</span>
                 </div>
-                <div style={{ fontFamily: 'JetBrains Mono', fontSize: '32px', fontWeight: 600, color: '#A855F7', lineHeight: 1, textShadow: '0 0 20px rgba(168,85,247,0.35)' }}>{bestLap}</div>
+                <div className="truncate" style={{ fontFamily: 'JetBrains Mono', fontSize: 'clamp(20px, 5.5vw, 28px)', fontWeight: 600, color: '#A855F7', lineHeight: 1, textShadow: '0 0 20px rgba(168,85,247,0.35)' }}>{bestLap}</div>
                 <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.1em', color: '#9A9AB0', marginTop: 5, textTransform: 'uppercase' }}>
                   {header.analyzed_laps} laps analyzed
                 </div>
@@ -90,14 +90,14 @@ interface KpiCardProps {
 
 function KpiCard({ label, value, valueColor, subtext, dotColor }: KpiCardProps) {
   return (
-    <div className="card p-4 flex flex-col gap-1">
+    <div className="card p-3 sm:p-4 flex flex-col gap-1 overflow-hidden">
       <div className="flex items-center gap-1.5 mb-1">
         {dotColor && <div className="w-0.5 h-3 rounded-full flex-shrink-0" style={{ background: dotColor }} />}
-        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9A9AB0' }}>
+        <span className="truncate" style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9A9AB0' }}>
           {label}
         </span>
       </div>
-      <div style={{ fontFamily: 'JetBrains Mono', fontSize: '26px', fontWeight: 500, color: valueColor ?? '#E0E0EE', lineHeight: 1 }}>
+      <div className="truncate" style={{ fontFamily: 'JetBrains Mono', fontSize: 'clamp(16px, 4.5vw, 26px)', fontWeight: 500, color: valueColor ?? '#E0E0EE', lineHeight: 1 }}>
         {value}
       </div>
       {subtext && (

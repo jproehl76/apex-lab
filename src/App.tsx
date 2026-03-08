@@ -22,6 +22,7 @@ import { WeatherWidget } from '@/components/WeatherWidget';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { CommandPalette } from '@/components/CommandPalette';
 import { PrintButton } from '@/components/PrintButton';
+import { ProgressTab } from '@/components/ProgressTab';
 import { PrintView } from '@/components/PrintView';
 import { SharedSessionView } from '@/components/SharedSessionView';
 import { PanelGroup, Panel, PanelResizeHandle } from '@/components/ui/resizable';
@@ -56,6 +57,7 @@ const DESKTOP_TABS = [
   { id: 'corners',  label: 'Corners'  },
   { id: 'health',   label: 'Health'   },
   { id: 'notes',    label: 'Notes'    },
+  { id: 'progress', label: 'Progress' },
 ];
 
 const MOBILE_TABS = [
@@ -64,6 +66,7 @@ const MOBILE_TABS = [
   { id: 'corners',  label: 'Corners', Icon: () => <span style={{ fontSize: 18 }}>◎</span> },
   { id: 'health',   label: 'Health',  Icon: Heart },
   { id: 'notes',    label: 'Notes',   Icon: () => <span style={{ fontSize: 18 }}>✎</span> },
+  { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 18 }}>↗</span> },
 ];
 
 export default function App() {
@@ -191,6 +194,15 @@ export default function App() {
   const trackLogo    = activeTrackLayout?.logo;
 
   function renderTabContent(tab: string) {
+    if (tab === 'progress') {
+      return (
+        <Section title="Session Progression">
+          <ErrorBoundary>
+            <ProgressTab sessions={store.sessions} trackHistory={memory.trackHistory} />
+          </ErrorBoundary>
+        </Section>
+      );
+    }
     if (store.activeSessions.length === 0) return <EmptyDashboard />;
     switch (tab) {
       case 'session': return (
