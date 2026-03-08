@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { LogOut, Heart, MapIcon, Bell } from 'lucide-react';
+import { LogOut, Heart, MapIcon, Bell, FolderOpen } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
 import { Toaster, toast } from 'sonner';
 import { DropZone } from '@/components/DropZone';
@@ -65,11 +65,11 @@ const DESKTOP_TABS = [
 ];
 
 const MOBILE_TABS = [
-  { id: 'map',      label: 'Map',     Icon: MapIcon },
+  { id: 'load',     label: 'Load',    Icon: FolderOpen },
   { id: 'session',  label: 'Session', Icon: () => <span style={{ fontSize: 18 }}>⊞</span> },
+  { id: 'map',      label: 'Map',     Icon: MapIcon },
   { id: 'corners',  label: 'Corners', Icon: () => <span style={{ fontSize: 18 }}>◎</span> },
   { id: 'health',   label: 'Health',  Icon: Heart },
-  { id: 'notes',    label: 'Notes',   Icon: () => <span style={{ fontSize: 18 }}>✎</span> },
   { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 18 }}>↗</span> },
 ];
 
@@ -439,34 +439,63 @@ export default function App() {
 
       {/* MOBILE layout (< lg): no sidebar, swipe navigation */}
       <div className="flex flex-col flex-1 min-h-0 lg:hidden" {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
-        {store.activeSessions.length > 0 ? (
-          <div className="flex flex-col flex-1 min-h-0">
-            {/* Compact session loading strip */}
-            <div className="shrink-0 p-2 border-b border-border bg-card/60">
-              <div className="flex gap-2">
-                <div className="flex-1 min-w-0"><DropZone compact onSessionLoaded={store.addSession} /></div>
-                <DrivePickerButton onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
-              </div>
+        {activeTab === 'load' ? (
+          /* ── Load Session page ── */
+          <div className="flex-1 overflow-y-auto scroll-touch p-5 pb-[calc(80px+env(safe-area-inset-bottom))] space-y-5">
+            <div>
+              <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F0F0FA' }}>
+                Load Session
+              </h2>
+              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 11, color: '#9A9AB0', marginTop: 3, letterSpacing: '0.05em' }}>
+                RaceChrono CSV or JSON · tap to browse files
+              </p>
             </div>
-            {activeTab === 'map' ? (
-              <div className="flex-1 min-h-0 p-2 pb-[calc(72px+env(safe-area-inset-bottom))]">
-                <TrackHeatMap sessions={store.activeSessions}
-                  selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
-                {renderTabContent(activeTab)}
+
+            <DropZone onSessionLoaded={(name, data) => {
+              const result = store.addSession(name, data);
+              if (result.ok) setActiveTab('session');
+              return result;
+            }} />
+
+            <DrivePickerButton
+              onSessionLoaded={(name, data) => {
+                const result = store.addSession(name, data);
+                if (result.ok) setActiveTab('session');
+                return result;
+              }}
+              onTokenChange={setDriveAccessToken}
+            />
+
+            {store.sessions.length > 0 && (
+              <div className="space-y-3">
+                <div className="h-px bg-border" />
+                <SessionList
+                  sessions={store.sessions}
+                  activeIds={store.activeSessionIds}
+                  onToggle={store.toggleActive}
+                  onRemove={store.removeSession}
+                  onRename={store.renameSession}
+                  onClearAll={store.clearAll}
+                />
+                <button onClick={store.clearSavedSessions}
+                  className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
+                  Clear saved sessions
+                </button>
               </div>
             )}
           </div>
+        ) : activeTab === 'map' ? (
+          <div className="flex-1 min-h-0 p-2 pb-[calc(72px+env(safe-area-inset-bottom))]">
+            <TrackHeatMap sessions={store.activeSessions}
+              selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
+          </div>
         ) : (
-          <main className="flex-1 overflow-y-auto scroll-touch p-4">
-            <div className="mb-4 space-y-2">
-              <DropZone onSessionLoaded={store.addSession} />
-              <DrivePickerButton onSessionLoaded={store.addSession} />
-            </div>
-            <EmptyDashboard />
-          </main>
+          <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
+            {store.activeSessions.length === 0 && activeTab !== 'progress'
+              ? <EmptyDashboard />
+              : renderTabContent(activeTab)
+            }
+          </div>
         )}
       </div>
 
