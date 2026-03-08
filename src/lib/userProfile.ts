@@ -6,6 +6,9 @@ export interface UserProfile {
   carYear?: string;
   carMake?: string;
   carModel?: string;
+  carHp?: number;
+  carWeight?: number;   // lbs
+  carDrivetrain?: 'FWD' | 'RWD' | 'AWD' | '4WD';
   updatedAt: string;
 }
 

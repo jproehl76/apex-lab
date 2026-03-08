@@ -7,10 +7,13 @@ interface Props {
 }
 
 export function ProfileSetup({ email, onSave }: Props) {
-  const [vin, setVin]         = useState('');
-  const [carName, setCarName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [vin, setVin]               = useState('');
+  const [carName, setCarName]       = useState('');
+  const [carHp, setCarHp]           = useState('');
+  const [carWeight, setCarWeight]   = useState('');
+  const [carDrivetrain, setCarDrivetrain] = useState<UserProfile['carDrivetrain']>(undefined);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState('');
 
   async function handleVinLookup() {
     if (vin.length !== 17) { setError('VIN must be 17 characters'); return; }
@@ -27,6 +30,9 @@ export function ProfileSetup({ email, onSave }: Props) {
     const profile: UserProfile = {
       email,
       carName: carName.trim(),
+      ...(carHp      ? { carHp: Number(carHp) }         : {}),
+      ...(carWeight  ? { carWeight: Number(carWeight) }  : {}),
+      ...(carDrivetrain ? { carDrivetrain }              : {}),
       updatedAt: new Date().toISOString(),
     };
     await writeProfile(profile);
@@ -83,6 +89,60 @@ export function ProfileSetup({ email, onSave }: Props) {
             placeholder="e.g. 2025 BMW M3 Competition"
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
+        </div>
+
+        {/* Car specs (optional) */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1.5">
+            <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+              Horsepower
+            </label>
+            <input
+              value={carHp}
+              onChange={e => setCarHp(e.target.value.replace(/\D/g, ''))}
+              placeholder="e.g. 503"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              style={{ fontFamily: 'JetBrains Mono', fontSize: 12 }}
+              inputMode="numeric"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+              Weight (lbs)
+            </label>
+            <input
+              value={carWeight}
+              onChange={e => setCarWeight(e.target.value.replace(/\D/g, ''))}
+              placeholder="e.g. 3828"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              style={{ fontFamily: 'JetBrains Mono', fontSize: 12 }}
+              inputMode="numeric"
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+            Drivetrain
+          </label>
+          <div className="flex gap-2">
+            {(['FWD', 'RWD', 'AWD', '4WD'] as const).map(dt => (
+              <button
+                key={dt}
+                type="button"
+                onClick={() => setCarDrivetrain(carDrivetrain === dt ? undefined : dt)}
+                className="flex-1 py-1.5 rounded-lg border text-xs tracking-wider transition-colors"
+                style={{
+                  borderColor: carDrivetrain === dt ? '#1C69D4' : 'hsl(var(--border))',
+                  background: carDrivetrain === dt ? 'rgba(28,105,212,0.15)' : 'transparent',
+                  color: carDrivetrain === dt ? '#60A5FA' : '#9090B0',
+                  fontFamily: 'BMWTypeNext',
+                  letterSpacing: '0.08em',
+                }}
+              >
+                {dt}
+              </button>
+            ))}
+          </div>
         </div>
 
         {error && (

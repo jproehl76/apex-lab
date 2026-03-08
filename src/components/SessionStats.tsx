@@ -49,6 +49,7 @@ export function SessionStats({ sessions }: Props) {
                 valueColor={rating.color}
                 subtext={rating.label}
                 dotColor={rating.color}
+                quality={Math.max(0, 100 - (consistency.spread_s / 8) * 100)}
               />
 
               {/* Avg Lap */}
@@ -86,11 +87,13 @@ interface KpiCardProps {
   valueColor?: string;
   subtext?: string;
   dotColor?: string;
+  /** 0–100 quality score: 100 = best, shown as thin bottom bar */
+  quality?: number;
 }
 
-function KpiCard({ label, value, valueColor, subtext, dotColor }: KpiCardProps) {
+function KpiCard({ label, value, valueColor, subtext, dotColor, quality }: KpiCardProps) {
   return (
-    <div className="card p-3 sm:p-4 flex flex-col gap-1 overflow-hidden">
+    <div className="card p-3 sm:p-4 flex flex-col gap-1 overflow-hidden relative">
       <div className="flex items-center gap-1.5 mb-1">
         {dotColor && <div className="w-0.5 h-3 rounded-full flex-shrink-0" style={{ background: dotColor }} />}
         <span className="truncate" style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9A9AB0' }}>
@@ -102,6 +105,11 @@ function KpiCard({ label, value, valueColor, subtext, dotColor }: KpiCardProps) 
       </div>
       {subtext && (
         <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.08em', color: '#9A9AB0', marginTop: 3 }}>{subtext}</div>
+      )}
+      {quality !== undefined && (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-border/30">
+          <div className="h-full transition-all duration-500" style={{ width: `${Math.min(100, quality)}%`, background: dotColor ?? '#059669' }} />
+        </div>
       )}
     </div>
   );

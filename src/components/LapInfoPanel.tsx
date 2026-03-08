@@ -1,3 +1,4 @@
+import { AreaChart, Area, YAxis, ResponsiveContainer } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { formatLapTime } from '@/lib/utils';
 import { FF, FS, T } from '@/lib/chartTheme';
@@ -174,21 +175,36 @@ export function LapInfoPanel({ sessions }: Props) {
                 </span>
               </div>
               {/* Lap sparkline */}
-              <div className="relative h-4 flex items-center">
-                <svg width="100%" height="16" style={{ overflow: 'visible' }}>
-                  {lapTimes.map((t, i) => {
-                    const x = (i / Math.max(lapTimes.length - 1, 1)) * 100;
-                    const isBestDot = t === session.data.consistency.best_lap_s;
-                    const normalizedY = ((t - tMin) / tRange) * 12;
-                    return (
-                      <circle key={i}
-                        cx={`${x}%`} cy={normalizedY + 2} r={isBestDot ? 2.5 : 1.5}
-                        fill={isBestDot ? PURPLE : accentColor}
-                        opacity={isBestDot ? 1 : 0.5}
-                      />
-                    );
-                  })}
-                </svg>
+              <div className="h-8">
+                <ResponsiveContainer width="100%" height={32}>
+                  <AreaChart
+                    data={lapTimes.map((t, i) => ({ i, t }))}
+                    margin={{ top: 2, right: 0, bottom: 2, left: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id={`spark-${session.id}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor={accentColor} stopOpacity={0.35} />
+                        <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <YAxis domain={[tMin - tRange * 0.1, tMax + tRange * 0.1]} hide />
+                    <Area
+                      type="monotone"
+                      dataKey="t"
+                      stroke={accentColor}
+                      strokeWidth={1.5}
+                      fill={`url(#spark-${session.id})`}
+                      isAnimationActive={false}
+                      activeDot={false}
+                      dot={(dotProps: any) => {
+                        if (dotProps.payload.t === tMin) {
+                          return <circle key={dotProps.index} cx={dotProps.cx} cy={dotProps.cy} r={3} fill={PURPLE} stroke="none" />;
+                        }
+                        return <g key={dotProps.index} />;
+                      }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
