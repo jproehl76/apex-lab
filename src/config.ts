@@ -1,19 +1,19 @@
 // ── App branding ──────────────────────────────────────────────────────────────
 // These constants identify this app. Keep APP_NAME consistent with the
 // deployed URL and public/manifest.json.
-export const APP_NAME = 'JP Apex Lab';
+export const APP_NAME = 'Apex Lab';
 export const APP_LOGO = '/apex-lab/icons/icon-192.png';
 
 export const config = {
-  appName: 'JP Apex Lab',
-  carName: '2025 BMW G80 M3 Competition xDrive',  // default; overridden by user profile
+  appName: 'Apex Lab',
+  carName: '2021 Toyota GR A91 Supra',  // default; overridden by user profile
   carLogoUrl: null as string | null,
   stripeColors: ['#1C69D4', '#6B2D9E', '#EF3340'] as string[],
   defaultPrimaryColor: '#1C69D4',
   defaultAccentColor: '#A855F7',
-  googleDriveFolderId: '1BrltfQ6HfS5O5Rkb0xU767zSpuCtLsGM',
+  googleDriveFolderId: '1fZOPXu1kO3UsnRE0MB_cba9OPaFVKVBx',
   healthProvider: 'whoop' as 'whoop' | 'strava' | 'oura' | null,
-  whoopWorkerUrl: 'https://frosty-bar-6808.jonathan-proehl.workers.dev',
+  whoopWorkerUrl: '',
   stravaWorkerUrl: '',   // set if healthProvider === 'strava'
   // Oura uses VITE_OURA_PERSONAL_TOKEN from .env — no workerUrl needed
   coachingWorkerUrl: import.meta.env.VITE_COACHING_WORKER_URL ?? '',
