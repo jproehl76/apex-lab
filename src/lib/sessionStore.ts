@@ -83,7 +83,7 @@ export function useSessionStore(): SessionStore {
       setHydrated(true);
     }
     load();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const removeSession = useCallback((id: string) => {
     setSessions(prev => prev.filter(s => s.id !== id));

@@ -135,7 +135,7 @@ export interface TrackMapProps {
 export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, onCornerSelect }: TrackMapProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const session = sessions[0];
-  const trace   = session?.data.gps_trace ?? [];
+  const trace   = useMemo(() => session?.data.gps_trace ?? [], [session]);
 
   const refLayout = useMemo(() => findTrackLayout(session?.data.header.track), [session]);
 

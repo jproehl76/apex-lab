@@ -10,7 +10,8 @@
  * Axes (all pure G-force metrics — consistent unit, comparable scale):
  *   Total G P95 · >0.8G Time % · Peak Lateral · Brake G · Accel G
  */
-import { useMemo } from 'react';
+
+
 import type { LoadedSession } from '@/types/session';
 import { sessionLabel } from '@/lib/utils';
 import { T, FF, FS, SESSION_COLORS } from '@/lib/chartTheme';
@@ -55,14 +56,12 @@ function polygonPath(values: number[]): string {
 }
 
 export function FrictionCircleChart({ sessions }: Props) {
-  const data = useMemo(() => {
-    return METRICS.map(({ key, scale }) =>
-      sessions.map(s => {
-        const raw = s.data.friction_circle[key as keyof typeof s.data.friction_circle] as number;
-        return Math.min(100, (raw / scale) * 100);
-      })
-    );
-  }, [sessions]);
+  const data = METRICS.map(({ key, scale }) =>
+    sessions.map(s => {
+      const raw = s.data.friction_circle[key as keyof typeof s.data.friction_circle] as number;
+      return Math.min(100, (raw / scale) * 100);
+    })
+  );
 
   if (sessions.length === 0) {
     return (

@@ -141,7 +141,7 @@ export function FrictionScatterChart({ sessions }: Props) {
     ctx.lineWidth   = 1;
     ctx.strokeRect(PAD, PAD, W - 2 * PAD, H - 2 * PAD);
 
-  }, [seriesData, hasData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [seriesData, hasData, sessions.length]);
 
   // Draw on data change AND on container resize
   useEffect(() => {

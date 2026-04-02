@@ -57,9 +57,7 @@ export function WeatherWidget({ date, lat, lon }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    setError(false);
-    setData(null);
+    let cancelled = false;
 
     const url = new URL('https://archive-api.open-meteo.com/v1/archive');
     url.searchParams.set('latitude',  lat.toString());
@@ -82,6 +80,7 @@ export function WeatherWidget({ date, lat, lon }: Props) {
     fetch(url.toString())
       .then(r => r.json())
       .then(json => {
+        if (cancelled) return;
         // Use hour 12 (noon) as representative of race-day conditions
         const h = json.hourly;
         const idx = 12;
@@ -107,8 +106,10 @@ export function WeatherWidget({ date, lat, lon }: Props) {
           trackTempEstF: Math.round(tempF + tempF * (wcode === 0 ? 0.45 : 0.25)),
         });
       })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!cancelled) setError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
   }, [date, lat, lon]);
 
   if (loading) return (

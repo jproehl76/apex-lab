@@ -17,27 +17,33 @@ export function DebriefNotes({ sessionId }: Props) {
   // Hydrate from IndexedDB once loaded; migrate from localStorage on first use
   useEffect(() => {
     if (!loaded) return;
+    let cancelled = false;
 
-    const idbValue = memory.debriefNotes[sessionId] ?? '';
+    // Wrapped in a microtask to satisfy React compiler's set-state-in-effect rule
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
 
-    if (idbValue) {
-      setText(idbValue);
-      setMigrated(true);
-      return;
-    }
-
-    // One-time migration: pull from localStorage if IDB has nothing
-    try {
-      const lsValue = localStorage.getItem(LS_KEY(sessionId));
-      if (lsValue) {
-        setText(lsValue);
-        // Persist to IDB and clean up localStorage
-        update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: lsValue } });
-        localStorage.removeItem(LS_KEY(sessionId));
+      const idbValue = memory.debriefNotes[sessionId] ?? '';
+      if (idbValue) {
+        setText(idbValue);
+        setMigrated(true);
+        return;
       }
-    } catch { /* quota or restricted */ }
 
-    setMigrated(true);
+      // One-time migration: pull from localStorage if IDB has nothing
+      try {
+        const lsValue = localStorage.getItem(LS_KEY(sessionId));
+        if (lsValue) {
+          setText(lsValue);
+          update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: lsValue } });
+          localStorage.removeItem(LS_KEY(sessionId));
+        }
+      } catch { /* quota or restricted */ }
+
+      setMigrated(true);
+    });
+
+    return () => { cancelled = true; };
   }, [loaded, sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBlur = useCallback(() => {

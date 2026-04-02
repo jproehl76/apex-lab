@@ -118,12 +118,14 @@ describe('isValidSession', () => {
   });
 
   it('returns false when laps is missing', () => {
-    const { laps: _, ...noLaps } = validSession;
+    const { laps: _laps, ...noLaps } = validSession;
+    void _laps;
     expect(isValidSession(noLaps)).toBe(false);
   });
 
   it('returns false when header is missing', () => {
-    const { header: _, ...noHeader } = validSession;
+    const { header: _header, ...noHeader } = validSession;
+    void _header;
     expect(isValidSession(noHeader)).toBe(false);
   });
 

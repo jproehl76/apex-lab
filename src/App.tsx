@@ -98,14 +98,25 @@ export default function App() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [settingsOpen, setSettingsOpen]     = useState(false);
 
+  // Clear profile when signing out (synchronous, no effect needed)
+  const signOut = useCallback(() => {
+    setUser(null);
+    setProfile(null);
+    setShowProfileSetup(false);
+  }, []);
+
   // Load user profile from IDB when user logs in
+  const userEmail = user?.email;
   useEffect(() => {
-    if (!user) { setProfile(null); setShowProfileSetup(false); return; }
-    readProfile(user.email).then(p => {
+    if (!userEmail) return;
+    let cancelled = false;
+    readProfile(userEmail).then(p => {
+      if (cancelled) return;
       setProfile(p);
       if (!p || !p.carName) setShowProfileSetup(true);
     });
-  }, [user?.email]); // eslint-disable-line
+    return () => { cancelled = true; };
+  }, [userEmail]);
 
   // Feature hooks
   useShareTarget(store);
@@ -384,7 +395,7 @@ export default function App() {
               <img src={user.picture} alt={user.name} className="rounded-full ring-1 ring-border"
                 style={{ width: 'clamp(24px, 3.6vh, 31px)', height: 'clamp(24px, 3.6vh, 31px)' }} />
             )}
-            <button onClick={() => setUser(null)} className="text-muted-foreground hover:text-destructive transition-colors" title="Sign out">
+            <button onClick={signOut} className="text-muted-foreground hover:text-destructive transition-colors" title="Sign out">
               <LogOut size={17} />
             </button>
           </div>
@@ -596,7 +607,7 @@ export default function App() {
         onOpenChange={setPaletteOpen}
         onNavigate={setActiveTab}
         onClearAll={store.clearAll}
-        onSignOut={() => setUser(null)}
+        onSignOut={signOut}
         hasData={store.sessions.length > 0}
       />
     </div>

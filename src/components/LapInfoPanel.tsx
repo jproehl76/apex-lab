@@ -196,7 +196,7 @@ export function LapInfoPanel({ sessions }: Props) {
                       fill={`url(#spark-${session.id})`}
                       isAnimationActive={false}
                       activeDot={false}
-                      dot={(dotProps: any) => {
+                      dot={(dotProps: { payload: { t: number }; index: number; cx: number; cy: number }) => {
                         if (dotProps.payload.t === tMin) {
                           return <circle key={dotProps.index} cx={dotProps.cx} cy={dotProps.cy} r={3} fill={PURPLE} stroke="none" />;
                         }
