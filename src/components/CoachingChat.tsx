@@ -113,7 +113,7 @@ export function CoachingChat({ sessions, profile, trackHistory }: Props) {
     return (
       <div className="rounded-xl border border-border bg-card p-4 mt-4 flex items-center gap-3">
         <Bot size={18} className="text-muted-foreground shrink-0" />
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#9090B0' }}>
+        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 14, color: '#9090B0' }}>
           Add your Anthropic API key in Settings to enable AI coaching.
         </p>
       </div>
@@ -127,12 +127,12 @@ export function CoachingChat({ sessions, profile, trackHistory }: Props) {
       {/* Header bar */}
       <div className="flex items-center gap-2">
         <Bot size={14} className="text-primary shrink-0" />
-        <span style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
+        <span style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
           AI Coaching
         </span>
         {/* Model badge */}
         <span
-          className="ml-auto px-2 py-0.5 rounded-full text-[9px] tracking-wider border border-border"
+          className="ml-auto px-2 py-0.5 rounded-full text-[10px] tracking-wider border border-border"
           style={{ fontFamily: 'JetBrains Mono', color: '#6070B0' }}
         >
           {modelLabel}
@@ -148,7 +148,7 @@ export function CoachingChat({ sessions, profile, trackHistory }: Props) {
               : 'bg-card border border-border'
             }`}>
               {msg.role === 'user' ? (
-                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#9090B0', fontStyle: 'italic' }}>
+                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 14, color: '#9090B0', fontStyle: 'italic' }}>
                   {msg.content.length > 200 ? '(session analysis request)' : msg.content}
                 </p>
               ) : (
@@ -171,7 +171,7 @@ export function CoachingChat({ sessions, profile, trackHistory }: Props) {
                     style={{ animationDelay: `${i * 0.15}s` }} />
                 ))}
               </div>
-              <span style={{ fontFamily: 'BMWTypeNext', fontSize: 11, color: '#6070B0' }}>
+              <span style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: '#6070B0' }}>
                 Analysing your session…
               </span>
             </div>
@@ -219,7 +219,7 @@ export function CoachingChat({ sessions, profile, trackHistory }: Props) {
               placeholder="Ask a follow-up question…"
               disabled={streaming}
               className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
-              style={{ fontFamily: 'BMWTypeNext', fontSize: 12 }}
+              style={{ fontFamily: 'BMWTypeNext', fontSize: 14 }}
             />
             {streaming ? (
               <button

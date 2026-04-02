@@ -18,10 +18,10 @@ export function PrintView({ sessions }: PrintViewProps) {
       <div style={{ borderBottom: '2px solid #1C69D4', paddingBottom: 12, marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>JP Apex Lab</h1>
-            <p style={{ fontSize: 11, color: '#555', marginTop: 2 }}>Session Report</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>JP Apex Lab</h1>
+            <p style={{ fontSize: 13, color: '#555', marginTop: 2 }}>Session Report</p>
           </div>
-          <p style={{ fontSize: 10, color: '#777' }}>
+          <p style={{ fontSize: 12, color: '#777' }}>
             Printed {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -36,8 +36,8 @@ export function PrintView({ sessions }: PrintViewProps) {
           <div key={session.id} style={{ marginBottom: 32, pageBreakAfter: 'always' }}>
             {/* Session header */}
             <div style={{ background: '#f5f5f5', padding: '10px 14px', borderRadius: 6, marginBottom: 16 }}>
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>{header.track}</h2>
-              <p style={{ margin: '2px 0 0', fontSize: 11, color: '#555' }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{header.track}</h2>
+              <p style={{ margin: '2px 0 0', fontSize: 13, color: '#555' }}>
                 {header.date} · {header.analyzed_laps} clean laps ·&nbsp;
                 {sessionLabel(session)}
               </p>
@@ -52,15 +52,15 @@ export function PrintView({ sessions }: PrintViewProps) {
                 { label: 'Std Dev', value: `${consistency.std_dev_s.toFixed(3)}s` },
               ].map(({ label, value }) => (
                 <div key={label} style={{ border: '1px solid #ddd', borderRadius: 4, padding: '8px 12px' }}>
-                  <p style={{ margin: 0, fontSize: 9, color: '#777', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: 15, fontWeight: 700, fontFamily: 'monospace' }}>{value}</p>
+                  <p style={{ margin: 0, fontSize: 10, color: '#777', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{label}</p>
+                  <p style={{ margin: '2px 0 0', fontSize: 17, fontWeight: 700, fontFamily: 'monospace' }}>{value}</p>
                 </div>
               ))}
             </div>
 
             {/* Lap times table */}
-            <h3 style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6, color: '#444' }}>Lap Times</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, marginBottom: 16 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6, color: '#444' }}>Lap Times</h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 16 }}>
               <thead>
                 <tr style={{ background: '#f0f0f0' }}>
                   <th style={{ padding: '4px 8px', textAlign: 'left', border: '1px solid #ddd' }}>Lap</th>
@@ -100,8 +100,8 @@ export function PrintView({ sessions }: PrintViewProps) {
             {/* Corner speeds */}
             {best_lap_corners && best_lap_corners.length > 0 && (
               <>
-                <h3 style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6, color: '#444' }}>Best Lap Corner Analysis</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6, color: '#444' }}>Best Lap Corner Analysis</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: '#f0f0f0' }}>
                       <th style={{ padding: '4px 8px', textAlign: 'left', border: '1px solid #ddd' }}>Corner</th>

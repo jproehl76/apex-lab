@@ -88,7 +88,7 @@ export function DropZone({ onSessionLoaded, compact = false }: DropZoneProps) {
       >
         <input type="file" accept=".json,.csv" multiple className="sr-only" onChange={onInputChange} />
         <Upload size={14} style={{ color: isDragging ? '#3B82F6' : '#9A9AB0' }} />
-        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#9A9AB0', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#9A9AB0', whiteSpace: 'nowrap' }}>
           {isDragging ? 'Drop here' : 'Add Session'}
         </span>
       </label>
@@ -115,10 +115,10 @@ export function DropZone({ onSessionLoaded, compact = false }: DropZoneProps) {
       />
       <Upload size={20} style={{ color: isDragging ? '#3B82F6' : '#9A9AB0' }} />
       <div>
-        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', fontWeight: 600, letterSpacing: '0.05em', color: '#E8E8F0' }}>
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '16px', fontWeight: 600, letterSpacing: '0.05em', color: '#E8E8F0' }}>
           {isDragging ? 'Drop session here' : 'Load Session'}
         </div>
-        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', color: '#9A9AB0', marginTop: 2 }}>
+        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#9A9AB0', marginTop: 2 }}>
           RaceChrono CSV · JSON · tap to browse
         </div>
       </div>

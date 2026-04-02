@@ -123,7 +123,7 @@ function PersonalBestsBoard({ bests }: { bests: TrackBest[] }) {
           </div>
           <div className="px-3 py-2 flex items-end justify-between gap-2">
             <div>
-              <div style={{ fontFamily: FF.mono, fontSize: '22px', fontWeight: 700, color: '#A855F7', lineHeight: 1 }}>
+              <div style={{ fontFamily: FF.mono, fontSize: '24px', fontWeight: 700, color: '#A855F7', lineHeight: 1 }}>
                 {b.bestLap}
               </div>
               <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.ghost, marginTop: 4 }}>

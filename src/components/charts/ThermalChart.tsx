@@ -55,19 +55,19 @@ export function ThermalChart({ sessions }: Props) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: card.color }} />
-                      <span className="text-[10px] tracking-widest text-muted-foreground uppercase">{card.label}</span>
+                      <span className="text-[12px] tracking-widest text-muted-foreground uppercase">{card.label}</span>
                     </div>
-                    <span className="text-[10px] text-muted-foreground/50" style={{ fontFamily: 'JetBrains Mono' }}>
+                    <span className="text-[12px] text-muted-foreground/50" style={{ fontFamily: 'JetBrains Mono' }}>
                       pk {card.peak}{card.unit}
                     </span>
                   </div>
 
                   {/* Current value */}
                   <div className="flex items-baseline gap-1">
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '28px', fontWeight: 600, color: card.color, lineHeight: 1, textShadow: `0 0 20px ${card.color}44` }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '30px', fontWeight: 600, color: card.color, lineHeight: 1, textShadow: `0 0 20px ${card.color}44` }}>
                       {card.current}
                     </span>
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: `${card.color}80` }}>{card.unit}</span>
+                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', color: `${card.color}80` }}>{card.unit}</span>
                   </div>
 
                   {/* Progress bar */}
@@ -75,7 +75,7 @@ export function ThermalChart({ sessions }: Props) {
                     style={{ '--progress-color': card.color } as React.CSSProperties} />
 
                   {/* Start value */}
-                  <p className="text-[10px] text-muted-foreground/40" style={{ fontFamily: 'JetBrains Mono' }}>
+                  <p className="text-[12px] text-muted-foreground/40" style={{ fontFamily: 'JetBrains Mono' }}>
                     start {card.start}{card.unit}
                   </p>
                 </div>

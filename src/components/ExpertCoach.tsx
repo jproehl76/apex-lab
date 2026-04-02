@@ -261,7 +261,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
           {!driveAccessToken && (
             <div className="flex items-center gap-1 text-muted-foreground/50" title="Connect Google Drive for full session history">
               <CloudOff size={12} />
-              <span className="text-[8px] tracking-widest uppercase">No Drive</span>
+              <span className="text-[9px] tracking-widest uppercase">No Drive</span>
             </div>
           )}
         </div>
@@ -275,7 +275,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
                 style={{ width: `${(scanProgress.done / scanProgress.total) * 100}%` }}
               />
             </div>
-            <p className="text-[8px] tracking-widest text-muted-foreground/50 uppercase">
+            <p className="text-[9px] tracking-widest text-muted-foreground/50 uppercase">
               Scanning Drive: {scanProgress.done}/{scanProgress.total} files
             </p>
           </div>
@@ -296,7 +296,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
         {history.length === 0 && !streaming && (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <Bot size={24} className="text-primary/30" />
-            <p className="text-[10px] tracking-widest text-muted-foreground/40 uppercase max-w-[280px]">
+            <p className="text-[12px] tracking-widest text-muted-foreground/40 uppercase max-w-[280px]">
               {selectedTrack === GENERAL_TRACK
                 ? 'Ask about your overall driving progression, track recommendations, or season planning'
                 : `Ask about your performance at ${selectedTrack}`}
@@ -319,7 +319,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
               {msg.role === 'assistant' ? (
                 <MarkdownBlock text={msg.content} />
               ) : (
-                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: '#D0D0E8' }}>{msg.content}</p>
+                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 15, color: '#D0D0E8' }}>{msg.content}</p>
               )}
             </div>
           </div>

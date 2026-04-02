@@ -49,28 +49,22 @@ const AUTH_KEY = 'apex-lab-auth-user';
 
 interface AuthUser { email: string; name: string; picture: string }
 
-// 5 tabs
-// Session  = stats + coaching + lap times
-// Map      = GPS heat map with speed/throttle/brake channels
-// Corners  = corner speeds + detail + friction scatter
-// Coach    = engine thermals + expert coaching
-// Notes    = debrief
+// 5 tabs (desktop): Session, Track, Coach, Notes, Progress
+// 5 tabs (mobile):  Load, Session, Track, Coach, Progress
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
-  { id: 'map',      label: 'Map'      },
-  { id: 'corners',  label: 'Corners'  },
+  { id: 'track',    label: 'Track'    },
   { id: 'coach',    label: 'Coach'    },
   { id: 'notes',    label: 'Notes'    },
   { id: 'progress', label: 'Progress' },
 ];
 
 const MOBILE_TABS = [
-  { id: 'load',     label: 'Load',    Icon: FolderOpen },
-  { id: 'session',  label: 'Session', Icon: () => <span style={{ fontSize: 18 }}>⊞</span> },
-  { id: 'map',      label: 'Map',     Icon: MapIcon },
-  { id: 'corners',  label: 'Corners', Icon: () => <span style={{ fontSize: 18 }}>◎</span> },
-  { id: 'coach',    label: 'Coach',   Icon: GraduationCap },
-  { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 18 }}>↗</span> },
+  { id: 'load',     label: 'Load',     Icon: FolderOpen },
+  { id: 'session',  label: 'Session',  Icon: () => <span style={{ fontSize: 20 }}>⊞</span> },
+  { id: 'track',    label: 'Track',    Icon: MapIcon },
+  { id: 'coach',    label: 'Coach',    Icon: GraduationCap },
+  { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 20 }}>↗</span> },
 ];
 
 export default function App() {
@@ -125,8 +119,10 @@ export default function App() {
 
   useEffect(() => {
     if (!loaded) return;
-    const saved = memory.lastActiveTab || 'session';
-    queueMicrotask(() => setActiveTab(saved === 'health' ? 'coach' : saved));
+    let saved = memory.lastActiveTab || 'session';
+    if (saved === 'health') saved = 'coach';
+    if (saved === 'map' || saved === 'corners') saved = 'track';
+    queueMicrotask(() => setActiveTab(saved));
   }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
 
@@ -140,7 +136,7 @@ export default function App() {
     });
   }, []); // eslint-disable-line
   const bindSwipe = useDrag(({ swipe: [swipeX] }) => {
-    if (activeTab === 'map') return; // leave map gestures to Leaflet
+    if (activeTab === 'track') return; // leave map gestures to Leaflet
     if (swipeX === -1) navigateTab(1);
     if (swipeX === 1) navigateTab(-1);
   }, {
@@ -188,7 +184,7 @@ export default function App() {
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <span style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
+          <span style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             Loading
           </span>
         </div>
@@ -232,22 +228,40 @@ export default function App() {
           <Section title="Coaching">
             <ErrorBoundary><CoachingInsights sessions={store.activeSessions} profile={profile} trackHistory={memory.trackHistory} /></ErrorBoundary>
           </Section>
+          <Section title="Engine Thermals">
+            <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
+          </Section>
           <Section title="Lap Times">
             <ErrorBoundary><LapTimesChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
+          {/* Debrief notes on mobile (desktop has dedicated Notes tab) */}
+          <div className="lg:hidden">
+            <Section title="Debrief Notes">
+              {store.activeSessions.map(s => (
+                <div key={s.id} className="space-y-1 mb-4">
+                  {store.activeSessions.length > 1 && (
+                    <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
+                  )}
+                  <DebriefNotes sessionId={s.id} />
+                </div>
+              ))}
+            </Section>
+          </div>
         </div>
       );
-      case 'corners': return (
+      case 'track': return (
         <div className="space-y-3">
-          {/* Row 1: Corner Apex Speeds — full width */}
+          {/* Heat map with fixed height so corners scroll below */}
+          <div className="h-[55vh] min-h-[300px] max-h-[600px]">
+            <TrackHeatMap sessions={store.activeSessions}
+              selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
+          </div>
           <Section title="Corner Apex Speeds">
             <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          {/* Row 2: Corner Detail — full width */}
           <Section title="Corner Detail">
             <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          {/* Row 3: G-Force Envelope + Friction Circle side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <Section title="G-Force Envelope">
               <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
@@ -259,23 +273,16 @@ export default function App() {
         </div>
       );
       case 'coach': return (
-        <div className="space-y-4">
-          {store.activeSessions.length > 0 && (
-            <Section title="Engine Thermals">
-              <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
-            </Section>
-          )}
-          <Section title="Expert Coach">
-            <ErrorBoundary>
-              <ExpertCoach
-                sessions={store.sessions}
-                profile={profile}
-                userEmail={userEmail ?? ''}
-                driveAccessToken={driveAccessToken}
-              />
-            </ErrorBoundary>
-          </Section>
-        </div>
+        <Section title="Expert Coach">
+          <ErrorBoundary>
+            <ExpertCoach
+              sessions={store.sessions}
+              profile={profile}
+              userEmail={userEmail ?? ''}
+              driveAccessToken={driveAccessToken}
+            />
+          </ErrorBoundary>
+        </Section>
       );
       case 'notes': return (
         <Section title="Debrief Notes">
@@ -390,7 +397,7 @@ export default function App() {
             {/* ⌘K hint — desktop only */}
             <button
               onClick={() => setPaletteOpen(true)}
-              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[10px] tracking-wider"
+              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[12px] tracking-wider"
               title="Command palette (⌘K)"
               style={{ fontFamily: 'JetBrains Mono' }}>
               <span>⌘K</span>
@@ -403,7 +410,7 @@ export default function App() {
             {profile?.carName && (
               <span
                 className="hidden md:block text-muted-foreground"
-                style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               >
                 {profile.carName}
               </span>
@@ -431,10 +438,10 @@ export default function App() {
           /* ── Load Session page ── */
           <div className="flex-1 overflow-y-auto scroll-touch p-5 pb-[calc(80px+env(safe-area-inset-bottom))] space-y-5">
             <div>
-              <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F0F0FA' }}>
+              <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 15, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F0F0FA' }}>
                 Load Session
               </h2>
-              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 11, color: '#9A9AB0', marginTop: 3, letterSpacing: '0.05em' }}>
+              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: '#9A9AB0', marginTop: 3, letterSpacing: '0.05em' }}>
                 RaceChrono CSV or JSON · tap to browse files
               </p>
             </div>
@@ -466,16 +473,11 @@ export default function App() {
                   onClearAll={store.clearAll}
                 />
                 <button onClick={store.clearSavedSessions}
-                  className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
+                  className="text-[10px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
                   Clear saved sessions
                 </button>
               </div>
             )}
-          </div>
-        ) : activeTab === 'map' ? (
-          <div className="flex-1 min-h-0 p-2 pb-[calc(72px+env(safe-area-inset-bottom))]">
-            <TrackHeatMap sessions={store.activeSessions}
-              selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
@@ -515,7 +517,7 @@ export default function App() {
                 />
               )}
               {store.sessions.length === 0 && (
-                <div className="py-0.5 text-[10px] tracking-wider text-muted-foreground uppercase">
+                <div className="py-0.5 text-[12px] tracking-wider text-muted-foreground uppercase">
                   <ol className="list-decimal list-inside space-y-0.5">
                     <li>Export CSV from RaceChrono</li>
                     <li>Drop here or load from Drive</li>
@@ -524,7 +526,7 @@ export default function App() {
               )}
               {store.sessions.length > 0 && (
                 <button onClick={store.clearSavedSessions}
-                  className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
+                  className="text-[10px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
                   Clear saved sessions
                 </button>
               )}
@@ -553,7 +555,7 @@ export default function App() {
                         fontFamily: 'BMWTypeNext',
                       }}>
                       {tab.label}
-                      <span className="absolute top-1 right-1 text-[7px] opacity-0 group-hover:opacity-30 transition-opacity"
+                      <span className="absolute top-1 right-1 text-[8px] opacity-0 group-hover:opacity-30 transition-opacity"
                         style={{ fontFamily: 'JetBrains Mono' }}>{i + 1}</span>
                       {activeTab === tab.id && (
                         <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t"
@@ -562,16 +564,9 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                {activeTab === 'map' ? (
-                  <div className="flex-1 min-h-0 p-2">
-                    <TrackHeatMap sessions={store.activeSessions}
-                      selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
-                  </div>
-                ) : (
-                  <div className="flex-1 overflow-y-auto scroll-touch p-4">
-                    {renderTabContent(activeTab)}
-                  </div>
-                )}
+                <div className="flex-1 overflow-y-auto scroll-touch p-4">
+                  {renderTabContent(activeTab)}
+                </div>
               </div>
             ) : (
               <main className="flex-1 overflow-y-auto scroll-touch p-4">
@@ -611,7 +606,7 @@ export default function App() {
                 className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-100 active:scale-[0.90] active:opacity-70 select-none"
                 style={{ color: active ? '#1C69D4' : 'hsl(var(--muted-foreground))' }}>
                 <tab.Icon size={18} />
-                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
+                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
               </button>
             );
           })}
@@ -645,7 +640,7 @@ function LapList({ sessions }: { sessions: import('@/types/session').LoadedSessi
         return (
           <div key={session.id}>
             {sessions.length > 1 && (
-              <div style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: session.color, marginBottom: 4 }}>
+              <div style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: session.color, marginBottom: 4 }}>
                 {sessionLabel(session)}
               </div>
             )}
@@ -657,13 +652,13 @@ function LapList({ sessions }: { sessions: import('@/types/session').LoadedSessi
                 return (
                   <div key={lap.lap_num} className="flex items-center justify-between px-2 py-0.5 rounded"
                     style={{ background: isBest ? 'rgba(168,85,247,0.08)' : undefined }}>
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', color: isBest ? '#A855F7' : '#9A9AB0', width: 28 }}>
+                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: isBest ? '#A855F7' : '#9A9AB0', width: 28 }}>
                       L{lap.lap_num}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : '#E8E8F0' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : '#E8E8F0' }}>
                       {formatLapTime(lap.lap_time_s)}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: deltaColor, width: 44, textAlign: 'right' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: deltaColor, width: 44, textAlign: 'right' }}>
                       {isBest ? '●' : `+${delta.toFixed(2)}`}
                     </span>
                   </div>
@@ -687,7 +682,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           style={{ background: 'linear-gradient(to bottom, #1C69D4, #A855F7)' }} />
         <span style={{
           fontFamily: 'BMWTypeNext',
-          fontSize: '10px',
+          fontSize: '12px',
           fontWeight: 600,
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
@@ -713,10 +708,10 @@ function EmptyDashboard() {
         ))}
       </div>
       <div className="space-y-1">
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 13, letterSpacing: '0.18em', color: 'hsl(var(--muted-foreground))', opacity: 0.5, textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 15, letterSpacing: '0.18em', color: 'hsl(var(--muted-foreground))', opacity: 0.5, textTransform: 'uppercase' }}>
           No session loaded
         </p>
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.12em', color: 'hsl(var(--muted-foreground))', opacity: 0.3, textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.12em', color: 'hsl(var(--muted-foreground))', opacity: 0.3, textTransform: 'uppercase' }}>
           Drop a RaceChrono CSV or load from Drive
         </p>
       </div>

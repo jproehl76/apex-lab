@@ -14,14 +14,14 @@
 /* ── Type scale ──────────────────────────────────────────────────────────── */
 /* Use these vars for consistent sizing instead of ad-hoc px/em values       */
 :root {
-  --text-2xs:  9px;   /* micro labels, axis ticks */
-  --text-xs:   10px;  /* section headers, tags */
-  --text-sm:   11px;  /* secondary data */
-  --text-base: 13px;  /* default body / table cells */
-  --text-md:   15px;  /* slightly larger labels */
-  --text-lg:   18px;  /* card values */
-  --text-xl:   22px;  /* featured metrics */
-  --text-2xl:  28px;  /* hero numbers */
+  --text-2xs:  10px;  /* micro labels, axis ticks */
+  --text-xs:   12px;  /* section headers, tags */
+  --text-sm:   13px;  /* secondary data */
+  --text-base: 15px;  /* default body / table cells */
+  --text-md:   17px;  /* slightly larger labels */
+  --text-lg:   20px;  /* card values */
+  --text-xl:   24px;  /* featured metrics */
+  --text-2xl:  30px;  /* hero numbers */
 
   --font-ui:   'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
   --font-data: 'JetBrains Mono', 'Menlo', monospace;
@@ -103,7 +103,7 @@
 
   body {
     font-family: 'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     color: #E8E8F0;
     /* Contain overscroll — no browser pull-to-refresh */
     overscroll-behavior-y: contain;

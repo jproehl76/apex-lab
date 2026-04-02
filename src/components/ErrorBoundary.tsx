@@ -34,7 +34,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             <p className="text-xs font-semibold text-destructive mb-0.5" style={{ fontFamily: 'var(--font-ui)' }}>
               Panel error
             </p>
-            <p className="text-[10px] text-muted-foreground truncate" style={{ fontFamily: 'var(--font-data)' }}>
+            <p className="text-[12px] text-muted-foreground truncate" style={{ fontFamily: 'var(--font-data)' }}>
               {this.state.message}
             </p>
           </div>

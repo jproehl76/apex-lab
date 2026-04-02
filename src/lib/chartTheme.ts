@@ -40,12 +40,12 @@ export const FF = {
 // Minimum 10px for any informational text; 11px for axis labels (WCAG best practice).
 // Never use <10px for text that conveys data (reduces to decorative below this floor).
 export const FS = {
-  nano:   10,  // axis tick labels, legend text, tooltip sub-labels
-  small:  11,  // axis tick labels (preferred floor), body labels
-  base:   12,  // section descriptions, table cell text
-  value:  13,  // numeric data values (monospace)
-  large:  17,  // corner card values, key secondary metrics
-  hero:   26,  // best lap time, hero numbers
+  nano:   11,  // axis tick labels, legend text, tooltip sub-labels
+  small:  12,  // axis tick labels (preferred floor), body labels
+  base:   13,  // section descriptions, table cell text
+  value:  15,  // numeric data values (monospace)
+  large:  19,  // corner card values, key secondary metrics
+  hero:   28,  // best lap time, hero numbers
 } as const;
 
 // ── Chart infrastructure ──────────────────────────────────────────────────────

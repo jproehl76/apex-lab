@@ -38,10 +38,10 @@ export function SessionList({ sessions, activeIds, onToggle, onRemove, onRename,
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[12px] font-semibold uppercase tracking-widest text-muted-foreground">
           Sessions ({sessions.length})
         </p>
-        <button onClick={onClearAll} className="text-[10px] tracking-widest uppercase text-muted-foreground/50 hover:text-destructive transition-colors">
+        <button onClick={onClearAll} className="text-[12px] tracking-widest uppercase text-muted-foreground/50 hover:text-destructive transition-colors">
           Clear all
         </button>
       </div>

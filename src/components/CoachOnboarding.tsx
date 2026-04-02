@@ -128,7 +128,7 @@ export function CoachOnboarding({ apiKey, onComplete }: Props) {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="shrink-0 px-3 py-2 border-b border-border">
-        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
+        <span className="text-[12px] tracking-widest text-muted-foreground uppercase">
           Coach Onboarding
         </span>
       </div>
@@ -150,7 +150,7 @@ export function CoachOnboarding({ apiKey, onComplete }: Props) {
               {msg.role === 'assistant' ? (
                 <MarkdownBlock text={msg.content} />
               ) : (
-                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: '#D0D0E8' }}>{msg.content}</p>
+                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 15, color: '#D0D0E8' }}>{msg.content}</p>
               )}
             </div>
           </div>

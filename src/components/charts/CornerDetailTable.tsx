@@ -158,7 +158,7 @@ export function CornerDetailTable({ sessions }: Props) {
         <div className="flex gap-1.5 flex-wrap">
           {sessions.map(s => (
             <button key={s.id} onClick={() => setActiveSessionId(s.id)}
-              className="text-[10px] px-2.5 py-1 rounded border transition-colors tracking-wider uppercase"
+              className="text-[12px] px-2.5 py-1 rounded border transition-colors tracking-wider uppercase"
               style={{
                 borderColor: s.id === activeSessionId ? s.color : 'hsl(var(--border))',
                 color: s.id === activeSessionId ? s.color : 'hsl(var(--muted-foreground))',
@@ -199,12 +199,12 @@ export function CornerDetailTable({ sessions }: Props) {
                 <Td>
                   <div className="flex items-center gap-2">
                     {idx === 0 && (
-                      <span className="text-[8px] px-1 py-0.5 rounded"
+                      <span className="text-[9px] px-1 py-0.5 rounded"
                         style={{ background: '#EF334020', color: '#EF3340', fontFamily: 'BMWTypeNext', letterSpacing: '0.06em' }}>
                         #1
                       </span>
                     )}
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', fontWeight: 600 }}>
+                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '15px', fontWeight: 600 }}>
                       {capitalize(row.name)}
                     </span>
                   </div>

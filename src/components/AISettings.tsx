@@ -109,7 +109,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 14, fontWeight: 700, letterSpacing: '0.08em', color: '#F0F0FA' }}>
+          <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 16, fontWeight: 700, letterSpacing: '0.08em', color: '#F0F0FA' }}>
             Settings
           </h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -126,7 +126,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
 
             {/* ── Car / Profile ─────────────────────────────────────────── */}
             <section className="space-y-3">
-              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#606080' }}>
+              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#606080' }}>
                 Car Profile
               </p>
 
@@ -154,14 +154,14 @@ export function AISettings({ email, onClose, onSave }: Props) {
                 onChange={e => setCarName(e.target.value)}
                 placeholder="Car name (e.g. 2025 Porsche 911 GT3)"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                style={{ fontFamily: 'BMWTypeNext', fontSize: 12 }}
+                style={{ fontFamily: 'BMWTypeNext', fontSize: 14 }}
               />
             </section>
 
             {/* ── AI Coaching ───────────────────────────────────────────── */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
-                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#606080' }}>
+                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#606080' }}>
                   AI Coaching
                 </p>
                 {/* Toggle */}
@@ -180,7 +180,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
                 <div className="space-y-3">
                   {/* API key */}
                   <div className="space-y-1.5">
-                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9090B0' }}>
+                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9090B0' }}>
                       Anthropic API Key
                     </label>
                     <div className="flex gap-2">
@@ -213,16 +213,16 @@ export function AISettings({ email, onClose, onSave }: Props) {
                       </button>
                     </div>
                     {testState === 'fail' && (
-                      <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, color: '#EF3340' }}>{testError}</p>
+                      <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#EF3340' }}>{testError}</p>
                     )}
-                    <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, color: '#505070' }}>
+                    <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#505070' }}>
                       Stored locally in your browser. Never sent anywhere except Anthropic.
                     </p>
                   </div>
 
                   {/* Model selector */}
                   <div className="space-y-1.5">
-                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9090B0' }}>
+                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9090B0' }}>
                       Model
                     </label>
                     <div className="space-y-1.5">
@@ -245,10 +245,10 @@ export function AISettings({ email, onClose, onSave }: Props) {
                             className="mt-0.5 accent-primary"
                           />
                           <div>
-                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, fontWeight: 600, color: modelId === m.id ? '#A8C4F8' : '#E0E0F0' }}>
+                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 14, fontWeight: 600, color: modelId === m.id ? '#A8C4F8' : '#E0E0F0' }}>
                               {m.label}
                             </p>
-                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, color: '#606080', marginTop: 1 }}>
+                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#606080', marginTop: 1 }}>
                               {m.hint}
                             </p>
                           </div>

@@ -118,7 +118,7 @@ export function FrictionCircleChart({ sessions }: Props) {
               {li === LEVELS - 1 && (
                 <text
                   x={CX + 4} y={CY - MAXR - 4}
-                  style={{ fontFamily: FF.sans, fontSize: 8 }}
+                  style={{ fontFamily: FF.sans, fontSize: 9 }}
                   fill={T.muted} textAnchor="start">100</text>
               )}
             </g>
@@ -182,7 +182,7 @@ export function FrictionCircleChart({ sessions }: Props) {
                   y={(ly + li * 11 - (lines.length - 1) * 5).toFixed(1)}
                   textAnchor={anchor}
                   dominantBaseline="middle"
-                  style={{ fontFamily: FF.sans, fontSize: 9 }}
+                  style={{ fontFamily: FF.sans, fontSize: 10 }}
                   fill={T.label}
                   letterSpacing="0.06em"
                 >
@@ -196,7 +196,7 @@ export function FrictionCircleChart({ sessions }: Props) {
                 return (
                   <text x={vx.toFixed(1)} y={vy.toFixed(1)}
                     textAnchor="middle" dominantBaseline="middle"
-                    style={{ fontFamily: FF.mono, fontSize: 9, fontWeight: 700 }}
+                    style={{ fontFamily: FF.mono, fontSize: 10, fontWeight: 700 }}
                     fill={SESSION_COLORS[0]}>
                     {pct}
                   </text>
