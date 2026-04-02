@@ -46,6 +46,8 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
   const scanRan = useRef(false);
 
   const apiKey = profile?.anthropicApiKey;
+  const hasProxy = !!config.coachingWorkerUrl;
+  const canChat = !!apiKey || hasProxy;
   const isOwner = userEmail.toLowerCase() === config.ownerEmail?.toLowerCase();
 
   // ── Auto-scroll ────────────────────────────────────────────────────────────
@@ -136,7 +138,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
 
   // ── Send message ───────────────────────────────────────────────────────────
   const sendMessage = useCallback((text: string) => {
-    if (!text.trim() || loading || !apiKey) return;
+    if (!text.trim() || loading || !canChat) return;
 
     const userMsg: ConversationMessage = { role: 'user', content: text.trim() };
     const nextHistory = [...history, userMsg];
@@ -198,7 +200,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
         },
       }
     );
-  }, [history, loading, apiKey, isOwner, coachingProfile, mergedManifest, selectedTrack, recentSession, bestSession, lastRec]);
+  }, [history, loading, canChat, apiKey, isOwner, coachingProfile, mergedManifest, selectedTrack, recentSession, bestSession, lastRec]);
 
   function handleStop() {
     abortRef.current?.abort();
@@ -209,8 +211,8 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
     setLoading(false);
   }
 
-  // ── No API key ─────────────────────────────────────────────────────────────
-  if (!apiKey) {
+  // ── No API key or proxy ─────────────────────────────────────────────────────
+  if (!canChat) {
     return (
       <div className="flex items-center justify-center p-8 rounded-lg bg-card border border-border">
         <p className="text-xs tracking-widest text-muted-foreground uppercase text-center">
@@ -224,7 +226,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
   if (profileLoaded && !isOwner && !coachingProfile?.onboardingComplete) {
     return (
       <div className="rounded-lg bg-card border border-border overflow-hidden" style={{ height: 500 }}>
-        <CoachOnboarding apiKey={apiKey} onComplete={setCoachingProfile} />
+        <CoachOnboarding apiKey={apiKey ?? ''} onComplete={setCoachingProfile} />
       </div>
     );
   }

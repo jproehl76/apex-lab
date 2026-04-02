@@ -23,7 +23,7 @@ const ALLOWED_MODELS = new Set([
 // ── Simple in-memory rate limiter (resets per Edge instance) ──────────────────
 // For persistent rate limiting across instances use Vercel KV.
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT   = 10;      // requests per window
+const RATE_LIMIT   = 30;      // requests per window
 const WINDOW_MS    = 3_600_000; // 1 hour
 
 function checkRateLimit(key: string): boolean {
