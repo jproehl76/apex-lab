@@ -13,11 +13,6 @@ export interface AppMemory {
     bestLap: string;
     lapCount: number;
   }>;
-  whoopBaselines: {
-    restingHR: number | null;
-    hrv: number | null;
-    lastUpdated: string | null;
-  };
 }
 
 export const DEFAULT_MEMORY: AppMemory = {
@@ -26,7 +21,6 @@ export const DEFAULT_MEMORY: AppMemory = {
   debriefNotes: {},
   preferences: { tempUnit: 'f', chartHeight: 'normal' },
   trackHistory: [],
-  whoopBaselines: { restingHR: null, hrv: null, lastUpdated: null },
 };
 
 const OLD_DB_NAME  = 'm3_dashboard';

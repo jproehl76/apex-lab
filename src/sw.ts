@@ -41,18 +41,6 @@ registerRoute(
   })
 );
 
-// BMW CDN fonts — cache-first, 1 year
-registerRoute(
-  ({ url }) => url.hostname === 'www.bmwusa.com' && url.pathname.endsWith('.woff2'),
-  new CacheFirst({
-    cacheName: 'bmw-fonts',
-    plugins: [
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
-      new ExpirationPlugin({ maxEntries: 10, maxAgeSeconds: 31_536_000 }),
-    ],
-  })
-);
-
 // Open-Meteo weather API — network-first, 30 min TTL
 registerRoute(
   ({ url }) => url.hostname === 'api.open-meteo.com',
@@ -73,7 +61,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
   const url = new URL(event.request.url);
   if (
     event.request.method === 'POST' &&
-    (url.pathname === '/apex-lab/' || url.pathname === '/m3-dashboard')
+    url.pathname === '/apex-lab/'
   ) {
     event.respondWith(
       (async () => {
@@ -117,28 +105,3 @@ async function storeSharePending(filename: string, text: string): Promise<void> 
   });
 }
 
-// ── Web Push ───────────────────────────────────────────────────────────────────
-self.addEventListener('push', (event: PushEvent) => {
-  const data = event.data?.json() as { title?: string; body?: string } | undefined;
-  event.waitUntil(
-    self.registration.showNotification(data?.title ?? 'JP Apex Lab', {
-      body: data?.body ?? 'You have new activity data.',
-      icon: '/apex-lab/icons/icon-192.png',
-      badge: '/apex-lab/icons/icon-192.png',
-      tag: 'apex-push',
-    })
-  );
-});
-
-self.addEventListener('notificationclick', (event: NotificationEvent) => {
-  event.notification.close();
-  event.waitUntil(
-    self.clients
-      .matchAll({ type: 'window', includeUncontrolled: true })
-      .then(windowClients => {
-        const existing = windowClients.find(c => c.url.includes('/apex-lab/'));
-        if (existing) return existing.focus();
-        return self.clients.openWindow('/apex-lab/');
-      })
-  );
-});

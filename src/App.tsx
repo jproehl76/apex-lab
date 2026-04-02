@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { LogOut, Heart, MapIcon, Bell, FolderOpen } from 'lucide-react';
+import { LogOut, MapIcon, FolderOpen, Thermometer } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
 import { DropZone } from '@/components/DropZone';
 import { SessionList } from '@/components/SessionList';
 import { SessionStats } from '@/components/SessionStats';
@@ -17,7 +17,7 @@ import { DebriefNotes } from '@/components/DebriefNotes';
 import { CoachingInsights } from '@/components/CoachingInsights';
 import { DrivePickerButton } from '@/components/DrivePickerButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ReadinessTab } from '@/components/ReadinessTab';
+
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { CommandPalette } from '@/components/CommandPalette';
@@ -27,8 +27,7 @@ import { PrintView } from '@/components/PrintView';
 import { SharedSessionView } from '@/components/SharedSessionView';
 import { PanelGroup, Panel, PanelResizeHandle } from '@/components/ui/resizable';
 import apexLabLogo from '@/assets/jp-apex-lab-logo.png';
-import { handleWhoopCallback } from '@/lib/services/whoopAuth';
-import { handleStravaCallback } from '@/lib/services/stravaAuth';
+
 import { decodeSession } from '@/lib/shareSession';
 import { config } from '@/config';
 import { readProfile, type UserProfile } from '@/lib/userProfile';
@@ -41,7 +40,7 @@ import { LapInfoPanel } from '@/components/LapInfoPanel';
 import { findTrackLayout } from '@/assets/trackLayouts';
 import { useShareTarget } from '@/hooks/useShareTarget';
 import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
+
 import { Settings } from 'lucide-react';
 import React from 'react';
 
@@ -53,7 +52,7 @@ interface AuthUser { email: string; name: string; picture: string }
 // Session  = stats + coaching + lap times
 // Map      = GPS heat map with speed/throttle/brake channels
 // Corners  = corner speeds + detail + friction scatter
-// Health   = thermals + driver readiness
+// Health   = engine thermals
 // Notes    = debrief
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
@@ -69,7 +68,7 @@ const MOBILE_TABS = [
   { id: 'session',  label: 'Session', Icon: () => <span style={{ fontSize: 18 }}>⊞</span> },
   { id: 'map',      label: 'Map',     Icon: MapIcon },
   { id: 'corners',  label: 'Corners', Icon: () => <span style={{ fontSize: 18 }}>◎</span> },
-  { id: 'health',   label: 'Health',  Icon: Heart },
+  { id: 'health',   label: 'Health',  Icon: Thermometer },
   { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 18 }}>↗</span> },
 ];
 
@@ -78,7 +77,6 @@ export default function App() {
   const { memory, loaded, update } = useMemory();
   const [activeTab, setActiveTab] = useState('session');
   const [selectedCornerId, setSelectedCornerId] = useState<string | null>(null);
-  const [healthConnected, setHealthConnected] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [sharedSummary, setSharedSummary] = useState(() => {
     const hash = window.location.hash;
@@ -112,7 +110,6 @@ export default function App() {
   // Feature hooks
   useShareTarget(store);
   useDriveAutoImport(driveAccessToken, store, store.hydrated);
-  const push = usePushNotifications();
 
   useEffect(() => { if (loaded) setActiveTab(memory.lastActiveTab || 'session'); }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
@@ -161,24 +158,6 @@ export default function App() {
     }
   }, [store.activeSessions.map(s => s.id).join(','), loaded]); // eslint-disable-line
 
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    const code = p.get('code'), state = p.get('state');
-    if (code && state) {
-      window.history.replaceState({}, '', window.location.pathname);
-      if (config.healthProvider === 'strava') {
-        handleStravaCallback(code, state).then(ok => {
-          if (ok) { setHealthConnected(true); toast.success('Strava connected'); }
-          else toast.error('Strava connection failed');
-        }).catch(() => toast.error('Strava connection failed'));
-      } else {
-        handleWhoopCallback(code, state).then(ok => {
-          if (ok) { setHealthConnected(true); toast.success('WHOOP connected'); }
-          else toast.error('WHOOP connection failed');
-        }).catch(() => toast.error('WHOOP connection failed'));
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (user) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
@@ -200,8 +179,6 @@ export default function App() {
       </div>
     );
   }
-
-  const sessionDates = store.activeSessions.map(s => s.data.header.date);
 
   // Track branding for header
   const activeTrackLayout = findTrackLayout(store.activeSessions[0]?.data.header.track);
@@ -270,12 +247,6 @@ export default function App() {
           <Section title="Engine Thermals">
             <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          {/* ReadinessTab handles connect state + renders WhoopPanel when connected */}
-          {config.healthProvider !== null && (
-            <Section title="Driver Readiness">
-              <ErrorBoundary><ReadinessTab sessionDates={sessionDates} connectedOverride={healthConnected} /></ErrorBoundary>
-            </Section>
-          )}
         </div>
       );
       case 'notes': return (
@@ -399,17 +370,6 @@ export default function App() {
             {/* Print/PDF — desktop only, shown when sessions loaded */}
             {store.activeSessions.length > 0 && (
               <PrintButton className="hidden lg:flex" />
-            )}
-            {/* Push notification toggle — desktop only, when supported */}
-            {push.isSupported && (
-              <button
-                onClick={() => push.isSubscribed ? push.unsubscribe() : push.subscribe().then(() => toast.success('Notifications enabled'))}
-                disabled={push.isLoading}
-                className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[10px] tracking-wider"
-                title={push.isSubscribed ? 'Disable push notifications' : 'Enable push notifications'}
-                style={{ fontFamily: 'JetBrains Mono', opacity: push.isSubscribed ? 1 : 0.5 }}>
-                <Bell size={11} />
-              </button>
             )}
             {/* Car name — shown when profile is set */}
             {profile?.carName && (
@@ -718,7 +678,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function EmptyDashboard() {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center min-h-[300px]">
-      {/* M stripes as empty state decoration */}
+      {/* Accent stripes as empty state decoration */}
       <div className="flex items-center gap-[4px]" style={{ height: 48, opacity: 0.12 }}>
         {config.stripeColors.map((c, i) => (
           <div key={i} style={{ width: 8, height: '100%', background: c, borderRadius: 1 }} />
