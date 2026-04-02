@@ -126,7 +126,7 @@ export default function App() {
   useEffect(() => {
     if (!loaded) return;
     const saved = memory.lastActiveTab || 'session';
-    setActiveTab(saved === 'health' ? 'coach' : saved);
+    queueMicrotask(() => setActiveTab(saved === 'health' ? 'coach' : saved));
   }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
 
