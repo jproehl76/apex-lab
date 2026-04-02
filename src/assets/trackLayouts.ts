@@ -321,22 +321,50 @@ const sebring: TrackLayout = {
   cornerNames: ['T1', 'T3', 'T5', 'T7', 'T10', 'T13', 'T17'],
 };
 
-// ── Pittsburgh International Race Complex (PittRace) ─────────────────────────
-// Wampum, PA · 2.78 mi · clockwise
-const pittRace: TrackLayout = {
-  name: 'Pittsburgh International Race Complex',
-  aliases: ['pitt race', 'pittrace', 'pirc', 'pittsburgh international', 'wampum'],
-  colors: { primary: '#FFB612', accent: '#101820' },
+// ── Mid-Ohio Sports Car Course ────────────────────────────────────────────────
+// Lexington, OH · 2.258 mi · 13 turns · clockwise
+// Waypoints sourced from OSM ways 444205375, 1315957511-1315957515 (OSM © contributors)
+// Accurate GPS centerline via Overpass API, 2025
+const midOhio: TrackLayout = {
+  name: 'Mid-Ohio Sports Car Course',
+  aliases: ['mid-ohio', 'mid ohio', 'midohio', 'mid_ohio', 'lexington'],
+  colors: { primary: '#d6242e', accent: '#FFFFFF' },
+  logo: 'https://midohio.com/wp-content/uploads/2024/02/mid-ohio-logo-white.svg',
   waypoints: [
-    [40.8912, -80.3680],
-    [40.8920, -80.3668], [40.8928, -80.3655],
-    [40.8930, -80.3638], [40.8925, -80.3622],
-    [40.8915, -80.3610], [40.8905, -80.3615],
-    [40.8898, -80.3628], [40.8895, -80.3645],
-    [40.8898, -80.3660], [40.8906, -80.3672],
-    [40.8912, -80.3680],
+    // S/F — Keyhole exit onto front straight, heading NE (OSM Way 1315957511 exit)
+    [40.6843694, -82.6401586], [40.6874855, -82.6403109], [40.6884307, -82.6402564],
+    // Front straight approach to T1
+    [40.6898041, -82.6396564],
+    // T1 — blind uphill right, heavy braking from 130+ mph
+    [40.6922294, -82.6383810], [40.6923910, -82.6381507], [40.6924271, -82.6378730],
+    // T2 — fast left-hander
+    [40.6920955, -82.6370019],
+    // T3/T4 The Esses — high-speed S-bends, downhill
+    [40.6921090, -82.6365195], [40.6924243, -82.6362632],
+    // T5/T6/T7 Madness — blind crest, off-camber, under bridge
+    [40.6933900, -82.6363079], [40.6936240, -82.6361612], [40.6936906, -82.6358868],
+    [40.6936855, -82.6348702],
+    // T8/T9 — medium right + banked left
+    [40.6940607, -82.6342933], [40.6944740, -82.6338774], [40.6945293, -82.6337073],
+    // T10 Thunder Valley entry — right, downhill braking
+    [40.6945741, -82.6325936], [40.6944545, -82.6322653], [40.6942104, -82.6321025],
+    // T11 Thunder Valley exit (OSM Way 1315957515)
+    [40.6939389, -82.6320465], [40.6926500, -82.6319724], [40.6922429, -82.6320167],
+    [40.6916577, -82.6322860], [40.6909465, -82.6329295], [40.6907241, -82.6330139],
+    [40.6904524, -82.6329417],
+    // T12/T13 Carousel — near-360° right (OSM Way 1315957514)
+    [40.6898048, -82.6323891], [40.6894988, -82.6322524], [40.6892089, -82.6322145],
+    [40.6889672, -82.6323210], [40.6887627, -82.6326777], [40.6887944, -82.6330101],
+    [40.6889377, -82.6332559], [40.6893451, -82.6335813], [40.6894299, -82.6338026],
+    // Back straight heading west (OSM Way 1315957513)
+    [40.6895839, -82.6380309], [40.6895246, -82.6384901], [40.6893597, -82.6388446],
+    [40.6890134, -82.6391683], [40.6885911, -82.6392457],
+    [40.6842882, -82.6389966],
+    // The Keyhole — tight hairpin (OSM Way 1315957511)
+    [40.6839953, -82.6392058], [40.6838814, -82.6396135],
+    [40.6840563, -82.6400212], [40.6843694, -82.6401586],
   ],
-  cornerNames: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9'],
+  cornerNames: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12', 'T13'],
 };
 
 // ── Ozarks International Raceway ──────────────────────────────────────────────
@@ -394,7 +422,7 @@ export const TRACK_LAYOUTS: TrackLayout[] = [
   brainerd,
   ozarks,
   sebring,
-  pittRace,
+  midOhio,
 ];
 
 export function findTrackLayout(trackName: string | undefined): TrackLayout | null {
