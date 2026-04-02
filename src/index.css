@@ -33,27 +33,27 @@
   --tracking-widest: 0.2em;
 }
 
-/* ── BMW TypeNext Latin ──────────────────────────────────────────────────── */
+/* ── UI Font alias ────────────────────────────────────────────────────── */
+/* BMWTypeNext was previously loaded from bmwusa.com CDN.                  */
+/* Now aliased to Barlow Condensed (loaded via Google Fonts in index.html) */
+/* so every `fontFamily: 'BMWTypeNext'` reference continues to work.       */
 @font-face {
   font-family: 'BMWTypeNext';
-  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Thin.woff2') format('woff2');
+  src: local('Barlow Condensed Thin'), local('BarlowCondensed-Thin');
   font-weight: 200;
   font-style: normal;
-  font-display: swap;
 }
 @font-face {
   font-family: 'BMWTypeNext';
-  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Light.woff2') format('woff2');
+  src: local('Barlow Condensed Light'), local('BarlowCondensed-Light');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
 }
 @font-face {
   font-family: 'BMWTypeNext';
-  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Bold.woff2') format('woff2');
+  src: local('Barlow Condensed Bold'), local('BarlowCondensed-Bold');
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
 }
 
 @layer base {
@@ -66,7 +66,7 @@
     --card-foreground:  220 15% 92%;
     --popover:          220 20% 8%;
     --popover-foreground: 220 15% 92%;
-    --primary:          213 75% 46%;    /* BMW blue */
+    --primary:          213 75% 46%;
     --primary-foreground: 0 0% 100%;
     --secondary:        220 18% 12%;
     --secondary-foreground: 220 15% 82%;

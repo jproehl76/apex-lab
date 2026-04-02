@@ -27,7 +27,7 @@ export const S = {
   good:   '#22C55E',  // improvement / fast / good technique
   warn:   '#F59E0B',  // neutral / moderate / no improvement
   bad:    '#EF4444',  // deficit / danger / poor technique  (unified — was EF3340/EF4444)
-  info:   '#1C69D4',  // BMW blue — informational, reference
+  info:   '#1C69D4',  // informational, reference
 } as const;
 
 // ── Font families ─────────────────────────────────────────────────────────────

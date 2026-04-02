@@ -87,7 +87,7 @@ export function ProfileSetup({ email, onSave }: Props) {
           <input
             value={carName}
             onChange={e => setCarName(e.target.value)}
-            placeholder="e.g. 2025 BMW M3 Competition"
+            placeholder="e.g. 2025 Porsche 911 GT3"
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Synthetic RaceChrono Pro CSV v3 — BMW G80 M3 Competition xDrive
-Road Atlanta · 6 laps · 26 channels · full hardware stack simulation
+Synthetic RaceChrono Pro CSV v3 test data generator.
+Road Atlanta, 6 laps, 26 channels, full hardware stack simulation.
 
 Hardware modeled:
-  RaceBox Mini S       25 Hz  — lat, lon, speed, lat_g, long_g, alt, heading
-  OBDLink MX+ CAN      25 Hz  — rpm, wheel speeds, throttle, brake, gear, steer, yaw, lat_accel_can
-  OBDLink MX+ OBD2     ~2 Hz  — oil_temp, trans_temp, coolant, boost, iat, battery
+  RaceBox Mini S       25 Hz  (lat, lon, speed, lat_g, long_g, alt, heading)
+  OBDLink MX+ CAN      25 Hz  (rpm, wheel speeds, throttle, brake, gear, steer, yaw, lat_accel_can)
+  OBDLink MX+ OBD2     ~2 Hz  (oil_temp, trans_temp, coolant, boost, iat, battery)
 
 Raw values stored in metric (hardware native).
 Dashboard converts to Imperial at display time.

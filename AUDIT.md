@@ -1,314 +1,149 @@
-# JP Apex Lab — Full Codebase Audit
+# JP Apex Lab: Codebase Audit & Improvement Plan
 
-**Date:** March 7, 2026
-**Auditor:** Phase 0 systematic review
-**Scope:** Every file under `src/`, all config, all public assets
-
----
-
-## Executive Summary
-
-Well-architected single-user PWA with strong TypeScript discipline and consistent design tokens. Two critical issues plus a set of medium/low concerns. Overall code quality is high — no dead code, proper React patterns, comprehensive error handling.
-
-**Critical:** localStorage used for all session data (iOS PWA data-loss risk)
-**Critical:** Best lap time displayed in 6+ places simultaneously (owner-reported)
-**Medium:** App.tsx is 23.5 KB and needs decomposition
-**Medium:** No service worker caching strategy (PWA shell is not offline-capable)
+**Date:** April 2, 2026
+**Scope:** Full codebase audit, Phase 1 fixes applied, Phase 2 cleanup complete
 
 ---
 
-## Component Dependency Tree
+## Summary of changes made
+
+### Phase 1: Security & Reliability Audit (completed)
+
+**Critical security fixes:**
+- Removed `VITE_WHOOP_CLIENT_SECRET` from GitHub Actions build env (was leaking to client bundle)
+- Fixed CORS bypass in Cloudflare Worker (returned `ALLOWED_ORIGIN` regardless of request origin)
+- Fixed CORS in Vercel coaching proxy (allowlist instead of `*`)
+- Wrapped all `req.json()` calls in worker with try/catch
+- Sanitized error responses (removed internal details from API errors)
+- Fixed Rules of Hooks violations in StravaPanel and WhoopPanel (early return before hooks)
+- Added DOMPurify sanitization to AI coaching chat markdown renderer
+- Replaced `Math.max(...spread)` with loop-based safe min/max (prevents stack overflow with 65k+ samples)
+
+**Reliability fixes:**
+- Cryptographic OAuth state via `crypto.getRandomValues()` (replaced `Math.random()`)
+- Fixed `onDone` double-call in streaming API consumer
+- Fixed IndexedDB `openDB` race condition (concurrent calls now share pending promise)
+- Fixed env var detection (`"undefined"` string check in config.ts)
+- Fixed URL-safe base64 encoding in share session
+- Added `componentDidCatch` logging to ErrorBoundary
+- Added Zod schema validation at JSON parse boundaries (DropZone, DrivePickerButton, healthCache)
+- Token refresh mutex via KV lock in worker
+- SHA-256 hash for push subscription KV keys
+- Fixed VAPID key base64url padding
+
+**Infrastructure:**
+- Added Vitest test suite (63 tests across 4 files)
+- Added pre-deploy lint step to GitHub Actions
+- Deleted dead App.css
+
+### Phase 2: Simplification & Cleanup (completed)
+
+**Health provider removal:**
+- Deleted all health API integration files: whoopApi.ts, whoopAuth.ts, stravaApi.ts, stravaAuth.ts, ouraApi.ts
+- Deleted all health UI components: WhoopPanel.tsx, StravaPanel.tsx, OuraPanel.tsx, ReadinessTab.tsx
+- Deleted healthCache.ts, usePushNotifications.ts hook
+- Deleted health-cache.yml workflow, merge-health-cache.mjs script, gen-vapid-keys.mjs
+- Deleted health-cache.json from public/data and dist/data
+- Cleaned up all imports and references in App.tsx, config.ts, memory.ts, sw.ts
+
+**Cloudflare Worker removal:**
+- Deleted entire workers/ directory (only push notification routes remained after health removal)
+- Removed whoopWorkerUrl and stravaWorkerUrl from config
+- Removed WHOOP_CLIENT_ID from deploy.yml build env
+
+**Brand/car-agnostic cleanup:**
+- Removed BMW G80 M3 specific coaching notes from coachingPrompt.ts
+- Replaced BMWTypeNext font from bmwusa.com CDN with Barlow Condensed alias via @font-face
+- Removed BMW CDN font caching from service worker
+- Set default carName to empty string (set via user profile on first launch)
+- Updated placeholder text (ProfileSetup, AISettings) to use generic examples
+- Removed "BMW blue" comments from chartTheme.ts and index.css
+
+**Infrastructure cleanup:**
+- Deleted old planning documents (3-8-26/ directory, APEX_LAB_MASTER_PLAN.md, BRANCH_*.md)
+- Rewrote SETUP.md (removed all health/push/worker setup tiers)
+- Rewrote README.md (removed BMW/WHOOP references, updated stack list)
+- Simplified setup.mjs script (removed health provider and push notification steps)
+- Cleaned up .env.example (removed health provider env vars)
+- Removed m3-dashboard path from service worker share target handler
+
+---
+
+## Current architecture
 
 ```
-App.tsx (23.5 KB — largest file, needs splitting)
-├── LoginScreen
-│   └── GoogleLogin (@react-oauth/google)
-├── Header (inline in App)
-│   ├── apexLabLogo (img)
-│   ├── BestLapDisplay (inline — DUPLICATE #1)
-│   └── TrackLogo (from findTrackLayout)
-├── Left Sidebar [lg only]
-│   ├── DropZone
-│   ├── DrivePickerButton
-│   ├── SessionList
-│   ├── LapInfoPanel            ← DUPLICATE #2 + #3 (best lap + lap list)
-│   └── LapList (inline fn)    ← DUPLICATE #4
-├── Mobile Loading Strip [<lg]
-│   ├── DropZone (compact)
-│   └── DrivePickerButton
-├── Tab Content (renderTabContent)
-│   ├── 'session'
-│   │   ├── WeatherWidget
-│   │   ├── SessionStats        ← DUPLICATE #5 (best lap card)
-│   │   ├── CoachingInsights
-│   │   └── LapTimesChart       ← DUPLICATE #6 (best lap reference line)
-│   ├── 'corners'
-│   │   ├── CornerSpeedChart
-│   │   ├── CornerDetailTable
-│   │   ├── FrictionCircleChart
-│   │   └── FrictionScatterChart
-│   ├── 'health'
-│   │   ├── ThermalChart
-│   │   └── ReadinessTab → WhoopPanel | StravaPanel | OuraPanel
-│   ├── 'notes'
-│   │   └── DebriefNotes (per session)
-│   └── 'map'
-│       └── TrackHeatMap (Leaflet)
-├── Mobile Bottom Nav (inline)
-└── InstallPrompt
+GitHub Pages (static PWA)
+  + Google OAuth (sign-in + Drive)
+  + Anthropic API (direct browser or Vercel Edge Function proxy)
+  + OpenStreetMap Overpass API (track geometry)
+  + Open-Meteo (weather)
+
+No Cloudflare Worker. No backend database.
+All user data stored in browser IndexedDB.
 ```
 
----
+### Key files
 
-## Component Inventory
-
-| Component | File | Size | Purpose | State | Issues |
-|-----------|------|------|---------|-------|--------|
-| App | App.tsx | 23.5 KB | Root layout + tab router | React state: activeTab, healthConnected, user | Too large; inline LapList, Section, EmptyDashboard |
-| LoginScreen | LoginScreen.tsx | 1.8 KB | Google OAuth UI | None | Car name still shows below logo |
-| DropZone | DropZone.tsx | 3.6 KB | CSV/JSON upload | isDragging | compact prop added recently |
-| DrivePickerButton | DrivePickerButton.tsx | 2.1 KB | Google Drive picker | accessToken, loading | None |
-| SessionList | SessionList.tsx | 3.3 KB | Session list + rename/toggle | None (callbacks) | None |
-| SessionStats | SessionStats.tsx | 3.4 KB | Summary cards | None | **BEST LAP #5** |
-| LapInfoPanel | LapInfoPanel.tsx | 7.5 KB | F1-style lap breakdown | None | **BEST LAP #2+3**; mixes FS tokens + hardcoded px |
-| DebriefNotes | DebriefNotes.tsx | 1.5 KB | Notes textarea | localStorage key `notes:{id}` | localStorage (should be IndexedDB — already in memory.ts) |
-| CoachingInsights | CoachingInsights.tsx | 3.8 KB | Text coaching tips | None | None |
-| ReadinessTab | ReadinessTab.tsx | 2.0 KB | Health provider router | None | None |
-| WhoopPanel | WhoopPanel.tsx | 15 KB | WHOOP metrics | connected, loading, data, error | 20+ inline style objects |
-| StravaPanel | StravaPanel.tsx | ~8 KB | Strava activities | connected, loading, activities | None |
-| OuraPanel | OuraPanel.tsx | ~7 KB | Oura readiness | loading, data, error | None |
-| WeatherWidget | WeatherWidget.tsx | ~5 KB | Track weather | loading, data | None |
-| InstallPrompt | InstallPrompt.tsx | 1.1 KB | PWA install banner | dismissed (localStorage) | localStorage |
-| ErrorBoundary | ErrorBoundary.tsx | 1.0 KB | Error fallback | hasError | Not wrapping all charts |
-| LapTimesChart | charts/LapTimesChart.tsx | 4.2 KB | Lap time line chart | None | **BEST LAP #6** (reference line) |
-| CornerSpeedChart | charts/CornerSpeedChart.tsx | 5.8 KB | Apex speed bar chart | selectedCorner | None |
-| CornerDetailTable | charts/CornerDetailTable.tsx | 8.9 KB | All corner metrics | sortKey, sortDir | `minWidth: 560` hardcoded |
-| FrictionCircleChart | charts/FrictionCircleChart.tsx | ~4 KB | Lateral vs long G scatter | None | Possible duplicate of FrictionScatterChart |
-| FrictionScatterChart | charts/FrictionScatterChart.tsx | ~4 KB | G force distribution | None | Possible duplicate |
-| ThermalChart | charts/ThermalChart.tsx | 3.8 KB | Oil/trans/coolant bars | None | None |
-| TrackHeatMap | charts/TrackHeatMap.tsx | 15+ KB | Leaflet GPS overlay | channel, zoom, tiles | Most complex component; no offline tile cache |
-| TrackMapChart | charts/TrackMapChart.tsx | ~5 KB | OSM geometry map | None | None |
+| File | Purpose |
+|------|---------|
+| src/App.tsx | Main app shell, tab routing, all layout |
+| src/config.ts | App branding, Drive folder ID, coaching proxy URL |
+| src/lib/parseRacechronoCsv.ts | CSV parser (RaceChrono v3 format) |
+| src/lib/services/coachingApi.ts | Anthropic API streaming client |
+| src/lib/services/coachingPrompt.ts | System prompt and session data formatter |
+| src/lib/db.ts | IndexedDB wrapper |
+| src/lib/memory.ts | Cross-session memory (IDB) |
+| src/lib/sessionStore.ts | Session state management |
+| src/sw.ts | Service worker (Workbox) |
+| api/coaching.ts | Vercel Edge Function proxy for Anthropic API |
 
 ---
 
-## Route / Navigation Map
+## Remaining improvements
 
-No React Router — navigation is tab-based state in App.tsx.
+### High priority
 
-| Tab ID | Label | Mobile | Desktop | Content |
-|--------|-------|--------|---------|---------|
-| `session` | Session | ✓ | ✓ | Weather + Summary + Coaching + Lap times |
-| `map` | Map | ✓ | ✓ | Full-height TrackHeatMap |
-| `corners` | Corners | ✓ | ✓ | Corner speeds + detail + friction |
-| `health` | Health | ✓ | ✓ | Thermals + readiness provider |
-| `notes` | Notes | ✓ | ✓ | Debrief text per session |
+1. **Heart rate from CSV**: RaceChrono captures BLE heart rate data (from WHOOP strap) as a `heart_rate` channel in CSV exports. The parser does not currently extract this channel. Adding HR parsing + visualization would replace the deleted cloud API integrations with a simpler, local-only approach.
 
-**Last active tab** persists in IndexedDB (via useMemory).
+2. **App.tsx decomposition**: At ~700 lines, App.tsx handles layout, routing, state, and inline components. Extract: Header, MobileNav, DesktopLayout, LapList, Section, EmptyDashboard into separate files.
 
----
+3. **Font migration**: BMWTypeNext is aliased to Barlow Condensed via @font-face. A full migration would rename the font references throughout the codebase to use a CSS variable (e.g. `var(--font-ui)`) instead of hardcoded `fontFamily: 'BMWTypeNext'` in 100+ locations.
 
-## State Management
+### Medium priority
 
-| State | Where | Mechanism | iOS Safe? |
-|-------|-------|-----------|-----------|
-| Active tab | App.tsx + memory.ts | IndexedDB | ✓ |
-| User auth | App.tsx | localStorage `m3-auth-user` | ⚠️ |
-| Sessions metadata | usePersistedSessions | localStorage `m3-sessions-v1` | ❌ |
-| Session data | usePersistedSessions | localStorage `session:{id}` | ❌ |
-| Active session IDs | usePersistedSessions | localStorage | ❌ |
-| WHOOP tokens | whoopAuth.ts | localStorage `whoop-tokens` | ⚠️ |
-| Strava tokens | stravaAuth.ts | localStorage `strava-tokens` | ⚠️ |
-| Debrief notes | DebriefNotes.tsx | localStorage `notes:{id}` | ❌ (duplicated in memory.ts!) |
-| Health connected | App.tsx | React state (lost on refresh) | ⚠️ |
-| Track history | memory.ts | IndexedDB | ✓ |
-| Preferences | memory.ts | IndexedDB | ✓ |
-| Install dismissed | InstallPrompt.tsx | localStorage | ❌ |
+4. **CSV parser deep audit against v3 spec**: Validate column name detection handles all RaceChrono channel identifiers, sparse data interpolation, mixed sample rates (25 Hz GPS + 2 Hz OBD), and proper null/NaN handling for channels that go offline.
 
-### Prop Drilling Chains (max depth found: 3)
+5. **Multi-track extensibility**: Add track layout definitions for Road America, Brainerd International Raceway. The existing track layout system (src/assets/trackLayouts/) supports this but only has Road Atlanta data.
 
-No chains deeper than 3 levels detected. Callbacks are passed directly.
+6. **Inline style consolidation**: Many components use inline `style={{ fontFamily: 'BMWTypeNext', ... }}` objects. Move these to Tailwind utility classes or a shared style constants file.
+
+7. **Test coverage expansion**: Current tests cover utils, CSV parsing, share encoding, and corner detection. Add tests for: session store CRUD, memory persistence, coaching prompt generation, config validation.
+
+### Low priority
+
+8. **Lazy-load chart components**: LapTimesChart, CornerSpeedChart, FrictionCircleChart, TrackHeatMap are all bundled. Use `React.lazy()` + Suspense to code-split the charting libraries.
+
+9. **Accessibility audit**: Tab navigation, ARIA labels on interactive elements, keyboard-only usage of the command palette and session list.
+
+10. **PWA offline support**: The service worker precaches built assets but does not cache session data for offline viewing. IndexedDB data is available offline, but the app needs a "last loaded session" display mode.
 
 ---
 
-## Data Sources
+## localStorage keys in use
 
-| Source | Type | Integration | Status | Error Handling |
-|--------|------|-------------|--------|----------------|
-| RaceChrono CSV | File upload | DropZone → parseRacechronoCsv | ✓ Working | toast.error on failure |
-| RaceChrono CSV | Google Drive | DrivePickerButton → Drive API | ✓ Working | toast.error on failure |
-| WHOOP API | OAuth2 (Cloudflare proxy) | whoopAuth + whoopApi | ✓ Working | Error state shown |
-| Strava API | OAuth2 (Cloudflare proxy) | stravaAuth + stravaApi | ✓ Working | Error state shown |
-| Oura API | PAT (env var) | ouraApi | ✓ Working | Setup message shown |
-| Open-Meteo | REST (no key) | WeatherWidget | ✓ Working | Silent fail |
-| OpenStreetMap | Overpass API | osmTrackFetch | ✓ Working | None detected |
-| Track layouts | Static TS | trackLayouts.ts | ✓ Working | Fallback to null |
-| Track photos | Static base64 | trackPhoto.ts | ✓ Working | None needed |
+| Key | File | Notes |
+|-----|------|-------|
+| `apex-lab-auth-user` | App.tsx | Google auth user object |
+| `apex-sidebar-layout` | App.tsx | Desktop panel sizes |
+| `drive:imported-ids` | useDriveAutoImport.ts | Set of auto-imported Drive file IDs |
+| `drive:auto-checked` | useDriveAutoImport.ts | Timestamp of last auto-check |
+| `notes:{sessionId}` | DebriefNotes.tsx | Per-session debrief notes |
+| `install_prompt_dismissed` | InstallPrompt.tsx | PWA install prompt dismissed flag |
 
----
+## IndexedDB databases
 
-## Best Lap Time — All 6 Duplication Instances
-
-This is owner-reported. Each instance shows `consistency.best_lap_s` in a different way:
-
-| # | Location | Display | Visible On | Verdict |
-|---|----------|---------|-----------|---------|
-| 1 | App.tsx header (centered) | Large purple number + "Best Lap" label | Desktop only (hidden md:flex) | **REMOVE** — redundant with #2 |
-| 2 | SessionStats.tsx | Large card with lap count | Session tab | **KEEP** — primary authoritative display |
-| 3 | LapInfoPanel.tsx | F1-style per-session | Desktop left sidebar | **KEEP** — different context (per-session comparison) |
-| 4 | LapList (App.tsx inline) | Purple ● marker on best row | Desktop left sidebar | **KEEP** — lap-level identification, not a standalone metric |
-| 5 | LapTimesChart.tsx | Dashed reference line | Session tab chart | **KEEP** — visual reference within chart, not a labeled metric |
-| 6 | LapInfoPanel consistency bar | Dot marking best position | Desktop left sidebar | **KEEP** — part of sparkline, not standalone |
-
-**Conclusion:** Only instance #1 (header center display) is a true redundant standalone metric. The others serve distinct purposes. Remove the header center display.
-
----
-
-## localStorage Usage — Full Inventory
-
-```
-Key                        Size est.   Component              Fix
-─────────────────────────────────────────────────────────────────
-m3-auth-user               ~300 B      App.tsx:64             → IndexedDB memory.ts
-m3-sessions-v1             ~5 KB       usePersistedSessions   → IndexedDB
-session:{id}               ~1-10 MB    usePersistedSessions   → IndexedDB
-notes:{sessionId}          ~2 KB       DebriefNotes           → memory.ts (already there)
-install_prompt_dismissed   ~5 B        InstallPrompt          → memory.ts
-strava-tokens              ~500 B      stravaAuth.ts          → memory.ts (acceptable for OAuth)
-strava-oauth-state         ~10 B       stravaAuth.ts          ✓ sessionStorage (correct)
-whoop-tokens               ~500 B      whoopAuth.ts           → memory.ts
-whoop-oauth-state          ~10 B       whoopAuth.ts           ✓ sessionStorage (correct)
-```
-
-**Total estimated localStorage usage:** Up to 30 MB (10 sessions × 3 MB avg)
-**iOS PWA limit:** ~5-10 MB before eviction risk
-**Result:** Data loss is possible on iOS with more than 2-3 large sessions loaded.
-
----
-
-## CSS / Styling Audit
-
-### Inline Style Hotspots
-
-| File | Inline style count | Primary issue |
-|------|--------------------|---------------|
-| App.tsx | ~25 | Header bg gradient, clamp() sizes, track colors |
-| WhoopPanel.tsx | ~40 | Dynamic color computations on every render |
-| LapInfoPanel.tsx | ~20 | Mixes `FS.small` tokens with hardcoded px |
-| CornerDetailTable.tsx | ~10 | `minWidth: 560` hardcoded |
-| StravaPanel.tsx | ~15 | All inline, no Tailwind |
-
-### Hardcoded Values to Extract
-
-- `fontSize: '10px'` → `FS.nano` (use existing token)
-- `fontSize: '20px'`, `'26px'` → `FS.large`, `FS.hero`
-- `minWidth: 560` → responsive class
-- `height: clamp(72px, ...)` → CSS custom property
-
-### Design Token Usage (Positive)
-
-`chartTheme.ts` provides `T`, `S`, `FF`, `FS`, `CHANNEL_COLORS`, `SESSION_COLORS`, `AXIS_STYLE`, `TOOLTIP_STYLE`. Chart components use these consistently. Non-chart components mostly ignore them.
-
----
-
-## Service Worker Status
-
-`public/sw.js` (883 bytes) — placeholder only:
-```js
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', () => self.clients.matchAll().then(...));
-// No fetch handler → no caching
-```
-
-App shell is **not cached**. Second visit fetches everything from network. This must be replaced with vite-plugin-pwa.
-
----
-
-## Bundle Analysis
-
-| Chunk | Est. Size | Notes |
-|-------|-----------|-------|
-| vendor (React) | ~250 KB | Code-split ✓ |
-| charts (Recharts) | ~180 KB | Code-split ✓ |
-| d3 | ~160 KB | Code-split ✓ |
-| app (main) | ~150 KB | Includes all components eagerly |
-| CSS (Tailwind) | ~68 KB | Purged ✓ |
-| **Total** | **~808 KB** | Near chunk size warning (800 KB) |
-
-**No lazy loading** of chart components. All load on first visit.
-
----
-
-## UX Issues (Prioritized)
-
-### Critical
-1. **Data loss on iOS** — localStorage sessions can be evicted. Users lose sessions without warning.
-2. **No offline support** — app fails completely with no network after first load.
-
-### High
-3. **Best lap header duplicate** — same number shown in header AND SessionStats card simultaneously on desktop.
-4. **Car name still in login screen** — LoginScreen still renders `config.carName` below logo — brand-specific content in a tool meant for all drivers.
-
-### Medium
-5. **WhoopPanel 40+ inline styles** — computed on every render, no memoization.
-6. **CornerDetailTable horizontal scroll** — `minWidth: 560` on mobile causes unexpected scroll.
-7. **No loading skeleton** — charts show nothing while data processes. No skeleton or spinner.
-8. **FrictionCircle vs FrictionScatter** — two friction charts in the Corners tab; unclear differentiation.
-9. **Empty 'map' tab on desktop** — when no session loaded, map tab shows EmptyDashboard but mobile loading strip is above it; visually confusing.
-
-### Low
-10. **App.tsx 23.5 KB** — inline LapList, Section, EmptyDashboard should be extracted.
-11. **LapInfoPanel font size inconsistency** — `FS.small` mixed with hardcoded `'20px'`.
-12. **DebriefNotes uses localStorage** despite memory.ts already having `debriefNotes` in IndexedDB.
-13. **InstallPrompt uses localStorage** — minor, easy fix.
-14. **WhoopPanel shows "Connect WHOOP"** even when `config.healthProvider !== 'whoop'` — handled by ReadinessTab but WhoopPanel itself has its own connect button.
-15. **Track photo base64 file** — `src/assets/trackPhoto.ts` is ~272 KB of base64 strings, inflating the JS bundle.
-
----
-
-## What Already Works Well
-
-- TypeScript strict mode throughout ✓
-- WCAG AA contrast compliance on dark background ✓
-- Safe area inset handling in header ✓
-- PWA manifest correct (icons, display, theme) ✓
-- OAuth state tokens in sessionStorage (correct) ✓
-- chartTheme.ts as single source of truth for chart styling ✓
-- ErrorBoundary wrapping critical views ✓
-- CSV parser is robust with outlier detection ✓
-- Responsive layout with clamp() throughout ✓
-- No prop drilling chains >3 levels ✓
-
----
-
-## Recommended Fix Sequence
-
-| Priority | Task | Phase | Effort |
-|----------|------|-------|--------|
-| 1 | Migrate session + auth storage to IndexedDB | Phase 8 | Medium |
-| 2 | Remove header best lap duplicate | Phase 6 | Trivial |
-| 3 | Remove car name from login screen | Phase 6 | Trivial |
-| 4 | Replace service worker with vite-plugin-pwa | Phase 8 | Low |
-| 5 | PWA shell + safe area polish | Phase 1 | Low (mostly done) |
-| 6 | Implement drag/drop grid (react-grid-layout) | Phase 2 | High |
-| 7 | Bottom tab bar + sidebar navigation | Phase 4 | Medium |
-| 8 | Touch gesture system | Phase 3 | Medium |
-| 9 | Typography system (system fonts) | Phase 5 | Low |
-| 10 | Desktop power features (⌘+K, shortcuts) | Phase 7 | Medium |
-| 11 | Lazy-load charts | Phase 8 | Low |
-| 12 | Extract App.tsx sub-components | Phase 9 | Low |
-| 13 | Fix DebriefNotes localStorage → memory.ts | Phase 8 | Trivial |
-
----
-
-## Trivial Fixes to Apply Immediately (Pre-Phase 1)
-
-These are safe, low-risk improvements that can be committed immediately:
-
-1. **Remove header best lap display** (App.tsx:245-268) — owner-reported duplicate
-2. **Remove car name from LoginScreen** — generic tool, not car-specific
-3. **Fix DebriefNotes** — use memory.ts instead of its own localStorage key
-4. **Fix InstallPrompt** — use memory.ts instead of localStorage
-
----
-
-*Audit complete. No code was modified during this phase. All findings are observational.*
+| Database | Store | Key pattern | File |
+|----------|-------|-------------|------|
+| `apex-lab-v1` | `sessions` | `session:{id}`, `__meta`, `share:pending` | db.ts, sw.ts |
+| `apex_lab_v1` | `memory` | `apex_lab_memory_v1` | memory.ts |
+| `apex-lab-profiles` | `profiles` | email address | userProfile.ts |

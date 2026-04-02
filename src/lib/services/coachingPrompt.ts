@@ -52,12 +52,6 @@ Identify which corners drive the most lap-time variance.
 With consistent fundamentals in place, suggest marginal gains: reference point refinement,
 weight transfer management, sector sequencing, or driver fitness factors.
 
-## BMW G80 M3 Specific Notes
-- xDrive AWD system: monitor front/rear torque delta; heavy understeer = too much front torque
-- Active M Differential: expect rear lateral G asymmetry under hard acceleration
-- Carbon ceramic brakes (if equipped): optimal >200 °C, fade risk <100 °C on cold laps
-- Oil pressure drop at high G in long high-speed corners is normal; sustained temps >120 °C are not
-
 ## Response Style
 - Be specific: cite actual numbers from the session data
 - Prioritise: lead with the single most impactful improvement
