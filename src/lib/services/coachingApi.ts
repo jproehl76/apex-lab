@@ -10,6 +10,7 @@ export type ConversationMessage = { role: 'user' | 'assistant'; content: string 
 export interface CoachingOptions {
   apiKey?: string;            // user's own Anthropic key (browser → Anthropic direct)
   modelId: ModelId;
+  maxTokens?: number;         // default 2048
   signal?: AbortSignal;
   conversationHistory: ConversationMessage[];
   onChunk: (text: string) => void;
@@ -134,7 +135,7 @@ export async function getCoachingAnalysis(
   userMessage: string,
   options: CoachingOptions
 ): Promise<void> {
-  const { apiKey, modelId, signal, conversationHistory, onChunk, onDone, onError } = options;
+  const { apiKey, modelId, maxTokens = 2048, signal, conversationHistory, onChunk, onDone, onError } = options;
 
   const messages: ConversationMessage[] = [
     ...conversationHistory,
@@ -143,7 +144,7 @@ export async function getCoachingAnalysis(
 
   const body = JSON.stringify({
     model:      modelId,
-    max_tokens: 2048,
+    max_tokens: maxTokens,
     stream:     true,
     system:     systemPrompt,
     messages,

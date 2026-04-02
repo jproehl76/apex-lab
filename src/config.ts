@@ -16,4 +16,5 @@ export const config = {
   // ↑ Vercel (or other) proxy that forwards to Anthropic with the server-side key.
   //   Set VITE_COACHING_WORKER_URL=https://<your-app>.vercel.app in .env
   //   Leave empty if users supply their own Anthropic key via Settings.
+  ownerEmail: 'jonathan.proehl@gmail.com',
 };

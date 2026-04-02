@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { LogOut, MapIcon, FolderOpen, Thermometer } from 'lucide-react';
+import { LogOut, MapIcon, FolderOpen, GraduationCap } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
 import { Toaster } from 'sonner';
 import { DropZone } from '@/components/DropZone';
@@ -40,6 +40,7 @@ import { LapInfoPanel } from '@/components/LapInfoPanel';
 import { findTrackLayout } from '@/assets/trackLayouts';
 import { useShareTarget } from '@/hooks/useShareTarget';
 import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
+import { ExpertCoach } from '@/components/ExpertCoach';
 
 import { Settings } from 'lucide-react';
 import React from 'react';
@@ -52,13 +53,13 @@ interface AuthUser { email: string; name: string; picture: string }
 // Session  = stats + coaching + lap times
 // Map      = GPS heat map with speed/throttle/brake channels
 // Corners  = corner speeds + detail + friction scatter
-// Health   = engine thermals
+// Coach    = engine thermals + expert coaching
 // Notes    = debrief
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
   { id: 'map',      label: 'Map'      },
   { id: 'corners',  label: 'Corners'  },
-  { id: 'health',   label: 'Health'   },
+  { id: 'coach',    label: 'Coach'    },
   { id: 'notes',    label: 'Notes'    },
   { id: 'progress', label: 'Progress' },
 ];
@@ -68,7 +69,7 @@ const MOBILE_TABS = [
   { id: 'session',  label: 'Session', Icon: () => <span style={{ fontSize: 18 }}>⊞</span> },
   { id: 'map',      label: 'Map',     Icon: MapIcon },
   { id: 'corners',  label: 'Corners', Icon: () => <span style={{ fontSize: 18 }}>◎</span> },
-  { id: 'health',   label: 'Health',  Icon: Thermometer },
+  { id: 'coach',    label: 'Coach',   Icon: GraduationCap },
   { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 18 }}>↗</span> },
 ];
 
@@ -122,7 +123,11 @@ export default function App() {
   useShareTarget(store);
   useDriveAutoImport(driveAccessToken, store, store.hydrated);
 
-  useEffect(() => { if (loaded) setActiveTab(memory.lastActiveTab || 'session'); }, [loaded]); // eslint-disable-line
+  useEffect(() => {
+    if (!loaded) return;
+    const saved = memory.lastActiveTab || 'session';
+    setActiveTab(saved === 'health' ? 'coach' : saved);
+  }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
 
   // Swipe left/right to navigate tabs on mobile
@@ -253,10 +258,22 @@ export default function App() {
           </div>
         </div>
       );
-      case 'health': return (
+      case 'coach': return (
         <div className="space-y-4">
-          <Section title="Engine Thermals">
-            <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
+          {store.activeSessions.length > 0 && (
+            <Section title="Engine Thermals">
+              <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
+            </Section>
+          )}
+          <Section title="Expert Coach">
+            <ErrorBoundary>
+              <ExpertCoach
+                sessions={store.sessions}
+                profile={profile}
+                userEmail={userEmail ?? ''}
+                driveAccessToken={driveAccessToken}
+              />
+            </ErrorBoundary>
           </Section>
         </div>
       );
