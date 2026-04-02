@@ -21,6 +21,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, message };
   }
 
+  override componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    console.error('[ErrorBoundary]', error, info.componentStack);
+  }
+
   override render() {
     if (this.state.hasError) {
       return this.props.fallback ?? (

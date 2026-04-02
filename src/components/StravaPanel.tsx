@@ -160,8 +160,6 @@ function AggregateRow({ activities }: { activities: StravaActivity[] }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function StravaPanel({ sessionDates, connectedOverride }: Props) {
-  if (!STRAVA_CLIENT_ID) return null;
-
   const [connected, setConnected] = useState<boolean>(() => isStravaConnected());
   const [loading, setLoading] = useState(false);
   const [activities, setActivities] = useState<StravaActivity[]>([]);
@@ -172,7 +170,7 @@ export function StravaPanel({ sessionDates, connectedOverride }: Props) {
   }, [connectedOverride]);
 
   useEffect(() => {
-    if (!connected || sessionDates.length === 0) return;
+    if (!STRAVA_CLIENT_ID || !connected || sessionDates.length === 0) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -205,6 +203,8 @@ export function StravaPanel({ sessionDates, connectedOverride }: Props) {
     setActivities([]);
     setError(null);
   }
+
+  if (!STRAVA_CLIENT_ID) return null;
 
   if (!connected) {
     return (

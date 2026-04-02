@@ -327,8 +327,6 @@ function DriverCard({ day }: { day: WhoopDayData }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
-  if (!CLIENT_ID) return null;
-
   const [connected, setConnected] = useState<boolean>(() => isWhoopConnected());
   const [loading, setLoading]     = useState<boolean>(false);
   const [data, setData]           = useState<WhoopDayData[]>([]);
@@ -339,7 +337,7 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
   }, [connectedOverride]);
 
   useEffect(() => {
-    if (!connected || sessionDates.length === 0) return;
+    if (!CLIENT_ID || !connected || sessionDates.length === 0) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -367,6 +365,8 @@ export function WhoopPanel({ sessionDates, connectedOverride }: Props) {
     setData([]);
     setError(null);
   }
+
+  if (!CLIENT_ID) return null;
 
   if (!connected) {
     return (

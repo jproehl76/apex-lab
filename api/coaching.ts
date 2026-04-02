@@ -39,20 +39,30 @@ function checkRateLimit(key: string): boolean {
 }
 
 // ── CORS headers ──────────────────────────────────────────────────────────────
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+const ALLOWED_ORIGINS = new Set([
+  'https://jproehl76.github.io',
+  'http://localhost:5173',
+  'http://localhost:4173',
+]);
+
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.has(origin) ? origin : '';
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
 
 // ── Handler ───────────────────────────────────────────────────────────────────
 export default async function handler(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: CORS });
+    return new Response(null, { status: 204, headers: corsHeaders(req) });
   }
 
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405, headers: CORS });
+    return new Response('Method not allowed', { status: 405, headers: corsHeaders(req) });
   }
 
   // ── Parse body ────────────────────────────────────────────────────────────
@@ -68,7 +78,7 @@ export default async function handler(req: Request): Promise<Response> {
   try {
     body = await req.json() as typeof body;
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: CORS });
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: corsHeaders(req) });
   }
 
   // ── Validate model ────────────────────────────────────────────────────────
@@ -76,7 +86,7 @@ export default async function handler(req: Request): Promise<Response> {
   if (!ALLOWED_MODELS.has(model)) {
     return new Response(
       JSON.stringify({ error: `Model '${model}' is not allowed` }),
-      { status: 400, headers: CORS }
+      { status: 400, headers: corsHeaders(req) }
     );
   }
 
@@ -90,7 +100,7 @@ export default async function handler(req: Request): Promise<Response> {
   if (!checkRateLimit(key)) {
     return new Response(
       JSON.stringify({ error: 'Rate limit exceeded. Try again in an hour.' }),
-      { status: 429, headers: CORS }
+      { status: 429, headers: corsHeaders(req) }
     );
   }
 
@@ -98,8 +108,8 @@ export default async function handler(req: Request): Promise<Response> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: 'Server misconfiguration: ANTHROPIC_API_KEY not set' }),
-      { status: 500, headers: CORS }
+      JSON.stringify({ error: 'Server configuration error' }),
+      { status: 500, headers: corsHeaders(req) }
     );
   }
 
@@ -123,9 +133,10 @@ export default async function handler(req: Request): Promise<Response> {
   return new Response(upstream.body, {
     status:  upstream.status,
     headers: {
-      ...CORS,
+      ...corsHeaders(req),
       'Content-Type': upstream.headers.get('Content-Type') ?? 'text/event-stream',
       'Cache-Control': 'no-cache',
+      'Vary': 'Origin',
     },
   });
 }

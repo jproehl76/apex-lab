@@ -1,10 +1,19 @@
 import { useState, useCallback } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
+import { z } from 'zod';
 import { HardDrive, Loader2 } from 'lucide-react';
 import { openDrivePicker, fetchDriveFileContent } from '@/lib/services/googleDrive';
 import type { SessionSummary } from '@/types/session';
 import { parseRacechronoCsv } from '@/lib/parseRacechronoCsv';
+
+const sessionSummarySchema = z.object({
+  header: z.object({
+    track: z.string(),
+    date: z.string(),
+  }),
+  laps: z.array(z.unknown()),
+});
 
 interface Props {
   onSessionLoaded: (filename: string, data: SessionSummary) => { ok: boolean; error?: string };
@@ -41,7 +50,13 @@ export function DrivePickerButton({ onSessionLoaded, onTokenChange }: Props) {
       if (isCsv) {
         parsed = parseRacechronoCsv(content);
       } else {
-        parsed = JSON.parse(content) as SessionSummary;
+        const raw = JSON.parse(content);
+        const validation = sessionSummarySchema.safeParse(raw);
+        if (!validation.success) {
+          toast.error('The Drive file is not a valid session file.');
+          return;
+        }
+        parsed = raw as SessionSummary;
       }
       const result = onSessionLoaded(selection.filename, parsed);
       if (!result.ok) {

@@ -27,8 +27,10 @@ const CORS_HEADERS = origin => ({
 
 function cors(req, env) {
   const allowed = env.ALLOWED_ORIGIN || '*';
-  const origin = req.headers.get('Origin') || '*';
-  return CORS_HEADERS(allowed === '*' ? '*' : (origin === allowed ? origin : allowed));
+  if (allowed === '*') return CORS_HEADERS('*');
+  const origin = req.headers.get('Origin') || '';
+  if (origin !== allowed) return null; // origin mismatch — block
+  return CORS_HEADERS(origin);
 }
 
 function json(data, status = 200, headers = {}) {
@@ -41,7 +43,9 @@ function json(data, status = 200, headers = {}) {
 // ── WHOOP OAuth ───────────────────────────────────────────────────────────────
 
 async function whoopToken(req, env) {
-  const { code, redirect_uri } = await req.json();
+  let body;
+  try { body = await req.json(); } catch { return json({ error: 'invalid_json' }, 400); }
+  const { code, redirect_uri } = body;
   const params = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
@@ -62,7 +66,9 @@ async function whoopToken(req, env) {
 }
 
 async function whoopRefresh(req, env) {
-  const { refresh_token } = await req.json();
+  let body;
+  try { body = await req.json(); } catch { return json({ error: 'invalid_json' }, 400); }
+  const { refresh_token } = body;
   const params = new URLSearchParams({
     grant_type: 'refresh_token',
     refresh_token,
@@ -97,6 +103,16 @@ async function whoopData(req, env) {
   );
 
   if (apiRes.status === 401) {
+    // Mutex: skip refresh if another request refreshed within the last 30 seconds
+    const lockRaw = await env.APEX_KV.get('whoop:refresh_lock');
+    if (lockRaw) {
+      const lockedAt = parseInt(lockRaw, 10);
+      if (Date.now() - lockedAt < 30_000) {
+        return json({ error: 'token_refresh_in_progress' }, 202);
+      }
+    }
+    await env.APEX_KV.put('whoop:refresh_lock', String(Date.now()), { expirationTtl: 60 });
+
     // Try refresh
     const params = new URLSearchParams({
       grant_type: 'refresh_token',
@@ -112,6 +128,7 @@ async function whoopData(req, env) {
     if (!refreshRes.ok) return json({ error: 'refresh_failed' }, 401);
     const newTokens = await refreshRes.json();
     await env.APEX_KV.put('whoop:tokens', JSON.stringify(newTokens));
+    await env.APEX_KV.delete('whoop:refresh_lock');
     return json({ error: 'token_refreshed_retry' }, 202);
   }
 
@@ -135,7 +152,8 @@ async function stravaWebhookVerify(req, env) {
 }
 
 async function stravaWebhookReceive(req, env) {
-  const event = await req.json();
+  let event;
+  try { event = await req.json(); } catch { return json({ error: 'invalid_json' }, 400); }
 
   if (event.object_type === 'activity' && event.aspect_type === 'create') {
     const existing = await env.APEX_KV.get('strava:activities');
@@ -156,20 +174,28 @@ async function stravaActivities(env) {
 
 // ── Web Push ───────────────────────────────────────────────────────────────────
 
+async function endpointKey(endpoint) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
+  const hex = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return `push:${hex.slice(0, 32)}`;
+}
+
 async function pushSubscribe(req, env) {
-  const sub = await req.json();
+  let sub;
+  try { sub = await req.json(); } catch { return json({ error: 'invalid_json' }, 400); }
   const endpoint = sub.endpoint;
   if (!endpoint) return json({ error: 'invalid_subscription' }, 400);
-  const key = `push:${btoa(endpoint).slice(0, 40)}`;
+  const key = await endpointKey(endpoint);
   await env.APEX_KV.put(key, JSON.stringify(sub), { expirationTtl: 86_400 * 365 });
   return json({ ok: true });
 }
 
 async function pushUnsubscribe(req, env) {
-  const sub = await req.json();
+  let sub;
+  try { sub = await req.json(); } catch { return json({ error: 'invalid_json' }, 400); }
   const endpoint = sub.endpoint;
   if (!endpoint) return json({ error: 'invalid_subscription' }, 400);
-  const key = `push:${btoa(endpoint).slice(0, 40)}`;
+  const key = await endpointKey(endpoint);
   await env.APEX_KV.delete(key);
   return json({ ok: true });
 }
@@ -213,7 +239,9 @@ async function sendWebPush(env, subscription, payload) {
   const signingInput = `${b64url(header)}.${b64url(claims)}`;
 
   // Import private key
-  const privateKeyBytes = Uint8Array.from(atob(env.VAPID_PRIVATE_KEY.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  let b64 = env.VAPID_PRIVATE_KEY.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  const privateKeyBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
   const privateKey = await crypto.subtle.importKey(
     'pkcs8', privateKeyBytes.buffer,
     { name: 'ECDSA', namedCurve: 'P-256' },
@@ -252,6 +280,10 @@ export default {
     const method = req.method;
     const corsH = cors(req, env);
 
+    if (!corsH) {
+      return new Response('Forbidden', { status: 403 });
+    }
+
     if (method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsH });
     }
@@ -268,7 +300,8 @@ export default {
       else if (path === '/push/subscribe' && method === 'DELETE') res = await pushUnsubscribe(req, env);
       else res = json({ error: 'not_found' }, 404);
     } catch (err) {
-      res = json({ error: 'internal_error', message: err.message }, 500);
+      console.error('[apex-worker] Internal error:', err);
+      res = json({ error: 'internal_error' }, 500);
     }
 
     // Attach CORS headers to response

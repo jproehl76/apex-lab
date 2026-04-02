@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, Send, Square, ChevronRight } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import type { LoadedSession } from '@/types/session';
 import type { UserProfile } from '@/lib/userProfile';
 import type { ConversationMessage } from '@/lib/services/coachingApi';
@@ -7,10 +8,10 @@ import { buildSessionSummary, getCoachingAnalysis } from '@/lib/services/coachin
 import { AVAILABLE_MODELS } from '@/lib/services/modelConfig';
 import type { AppMemory } from '@/lib/memory';
 
-// ── Minimal markdown renderer (no external lib) ────────────────────────────
+// ── Minimal markdown renderer ───────────────────────────────────────────────
 
 function renderMarkdown(text: string): string {
-  return text
+  const raw = text
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/^## (.+)$/gm, '<h3 class="md-h3">$1</h3>')
     .replace(/^### (.+)$/gm, '<h4 class="md-h4">$1</h4>')
@@ -21,7 +22,8 @@ function renderMarkdown(text: string): string {
     .replace(/<\/ul><ul>/g, '')
     .replace(/\n{2,}/g, '</p><p>')
     .replace(/\n/g, '<br>')
-    .replace(/^(?!<[h|u|p|l])(.+)$/gm, '$1');
+    .replace(/^(?!<[hulp])(.+)$/gm, '$1');
+  return DOMPurify.sanitize(`<p>${raw}</p>`, { USE_PROFILES: { html: true } });
 }
 
 function MarkdownBlock({ text }: { text: string }) {
@@ -29,7 +31,7 @@ function MarkdownBlock({ text }: { text: string }) {
     <div
       className="coaching-md"
       style={{ fontFamily: 'BMWTypeNext', fontSize: 13, lineHeight: 1.65, color: '#D0D0E8' }}
-      dangerouslySetInnerHTML={{ __html: `<p>${renderMarkdown(text)}</p>` }}
+      dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }}
     />
   );
 }

@@ -1,3 +1,11 @@
+import { z } from 'zod';
+
+const healthCacheSchema = z.object({
+  updatedAt: z.string(),
+  oura: z.array(z.unknown()).nullable(),
+  whoop: z.array(z.unknown()).nullable(),
+});
+
 export interface OuraDayData {
   date: string;
   readiness_score: number | null;
@@ -34,7 +42,10 @@ export async function loadHealthCache(): Promise<HealthCache | null> {
   try {
     const res = await fetch(`${import.meta.env.BASE_URL}data/health-cache.json`);
     if (!res.ok) { _cache = 'failed'; return null; }
-    _cache = await res.json() as HealthCache;
+    const raw = await res.json();
+    const validation = healthCacheSchema.safeParse(raw);
+    if (!validation.success) { _cache = 'failed'; return null; }
+    _cache = raw as HealthCache;
     return _cache;
   } catch {
     _cache = 'failed';

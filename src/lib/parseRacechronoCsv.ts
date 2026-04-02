@@ -75,6 +75,20 @@ function percentile(arr: number[], p: number): number {
   return sorted[Math.min(idx, sorted.length - 1)];
 }
 
+function safeMax(arr: number[]): number {
+  if (arr.length === 0) return -Infinity;
+  let max = arr[0];
+  for (let i = 1; i < arr.length; i++) if (arr[i] > max) max = arr[i];
+  return max;
+}
+
+function safeMin(arr: number[]): number {
+  if (arr.length === 0) return Infinity;
+  let min = arr[0];
+  for (let i = 1; i < arr.length; i++) if (arr[i] < min) min = arr[i];
+  return min;
+}
+
 function rollingMean(arr: number[], window: number): number[] {
   const result: number[] = [];
   for (let i = 0; i < arr.length; i++) {
@@ -320,15 +334,15 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
     }
 
     // Peak G values
-    const peakLatG = lat_gs.length > 0 ? Math.max(...lat_gs.map(Math.abs)) : 0;
+    const peakLatG = lat_gs.length > 0 ? safeMax(lat_gs.map(Math.abs)) : 0;
     const brakingGs = long_gs.filter(g => g < 0);
-    const peakLongGBrake = brakingGs.length > 0 ? Math.max(...brakingGs.map(v => Math.abs(v))) : 0;
+    const peakLongGBrake = brakingGs.length > 0 ? safeMax(brakingGs.map(v => Math.abs(v))) : 0;
 
     lapDataList.push({
       lap_num: lapNum,
       lap_time_s: isFinite(lapTime) ? lapTime : 0,
       sector_times: [],
-      max_speed_kph: speeds.length > 0 ? Math.max(...speeds) : 0,
+      max_speed_kph: speeds.length > 0 ? safeMax(speeds) : 0,
       avg_speed_kph: speeds.length > 0 ? mean(speeds) : 0,
       coast_time_s: coastTime,
       total_g_mean: totalGs.length > 0 ? mean(totalGs) : 0,
@@ -433,11 +447,11 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
     const entrySpeeds = entryRows.map(r => r.spd).filter(isFinite);
     const exitSpeeds = exitRows.map(r => r.spd).filter(isFinite);
     const allSpeeds = cRows.map(r => r.spd).filter(v => isFinite(v));
-    const minSpd = allSpeeds.length > 0 ? Math.min(...allSpeeds) : 0;
+    const minSpd = allSpeeds.length > 0 ? safeMin(allSpeeds) : 0;
     const minSpdIdx = cRows.findIndex(r => r.spd === minSpd);
 
     const latGs = cRows.map(r => Math.abs(r.lat_g)).filter(isFinite);
-    const peakLatG = latGs.length > 0 ? Math.max(...latGs) : 0;
+    const peakLatG = latGs.length > 0 ? safeMax(latGs) : 0;
 
     // Brake point: look back up to 150m before corner start
     const cornerStartDist = cDists[0] ?? 0;
@@ -501,8 +515,8 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
 
   // ── Consistency ───────────────────────────────────────────────────────────────
   const nonOutlierTimes = nonOutlierLaps.map(l => l.lap_time_s);
-  const bestLapS = nonOutlierTimes.length > 0 ? Math.min(...nonOutlierTimes) : 0;
-  const worstLapS = nonOutlierTimes.length > 0 ? Math.max(...nonOutlierTimes) : 0;
+  const bestLapS = nonOutlierTimes.length > 0 ? safeMin(nonOutlierTimes) : 0;
+  const worstLapS = nonOutlierTimes.length > 0 ? safeMax(nonOutlierTimes) : 0;
   const meanLapS = mean(nonOutlierTimes);
   const medianLapS = median(nonOutlierTimes);
   const spreadS = worstLapS - bestLapS;
@@ -544,7 +558,7 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
       if (cRows.length === 0) continue;
 
       const speeds = cRows.map(r => r.spd).filter(isFinite);
-      const minSpd = speeds.length > 0 ? Math.min(...speeds) : 0;
+      const minSpd = speeds.length > 0 ? safeMin(speeds) : 0;
       perLapMinSpeeds.push(minSpd);
 
       // Brake point
@@ -575,7 +589,7 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
 
     cornerConsistency[cd.id] = {
       name: cd.name,
-      min_speed_best: bestCorner?.min_speed_kph ?? (perLapMinSpeeds.length > 0 ? Math.max(...perLapMinSpeeds) : 0),
+      min_speed_best: bestCorner?.min_speed_kph ?? (perLapMinSpeeds.length > 0 ? safeMax(perLapMinSpeeds) : 0),
       min_speed_avg: mean(perLapMinSpeeds),
       min_speed_std: stdDev(perLapMinSpeeds),
       min_speed_delta: (bestCorner?.min_speed_kph ?? 0) - mean(perLapMinSpeeds),
@@ -615,7 +629,7 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
     if (vals.length === 0) continue;
 
     const startVal = vals[0];
-    const peakVal = Math.max(...vals);
+    const peakVal = safeMax(vals);
     const endVal = vals[vals.length - 1];
 
     const peakIdx = (r: Row) => (r[key] as number) === peakVal;
@@ -657,10 +671,10 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
   const frictionCircle: FrictionCircle = {
     total_g_mean: mean(frictionTotalGs),
     total_g_p95: percentile(frictionTotalGs, 95),
-    total_g_max: frictionTotalGs.length > 0 ? Math.max(...frictionTotalGs) : 0,
-    peak_lat_g: frictionRows.length > 0 ? Math.max(...frictionRows.map(r => Math.abs(r.lat_g || 0))) : 0,
-    peak_long_g_brake: frictionRows.length > 0 ? Math.max(...frictionRows.map(r => Math.abs(Math.min(r.long_g || 0, 0)))) : 0,
-    peak_long_g_accel: frictionRows.length > 0 ? Math.max(...frictionRows.map(r => Math.max(r.long_g || 0, 0))) : 0,
+    total_g_max: frictionTotalGs.length > 0 ? safeMax(frictionTotalGs) : 0,
+    peak_lat_g: frictionRows.length > 0 ? safeMax(frictionRows.map(r => Math.abs(r.lat_g || 0))) : 0,
+    peak_long_g_brake: frictionRows.length > 0 ? safeMax(frictionRows.map(r => Math.abs(Math.min(r.long_g || 0, 0)))) : 0,
+    peak_long_g_accel: frictionRows.length > 0 ? safeMax(frictionRows.map(r => Math.max(r.long_g || 0, 0))) : 0,
     time_above_08g_pct: frictionTotalGs.length > 0 ? (frictionTotalGs.filter(g => g > 0.8).length / frictionTotalGs.length) * 100 : 0,
     time_above_10g_pct: frictionTotalGs.length > 0 ? (frictionTotalGs.filter(g => g > 1.0).length / frictionTotalGs.length) * 100 : 0,
     scatter_points: frictionRows
@@ -690,9 +704,9 @@ export function parseRacechronoCsv(csvText: string): SessionSummary {
 
       xdrive = {
         front_rear_delta_mean_pct: mean(frDeltas),
-        front_rear_delta_max_pct: Math.max(...frDeltas),
-        front_lr_delta_max_kph: Math.max(...xRows.map(r => Math.abs(r.ws_fl - r.ws_fr))),
-        rear_lr_delta_max_kph: Math.max(...xRows.map(r => Math.abs(r.ws_rl - r.ws_rr))),
+        front_rear_delta_max_pct: safeMax(frDeltas),
+        front_lr_delta_max_kph: safeMax(xRows.map(r => Math.abs(r.ws_fl - r.ws_fr))),
+        rear_lr_delta_max_kph: safeMax(xRows.map(r => Math.abs(r.ws_rl - r.ws_rr))),
       };
     }
   }

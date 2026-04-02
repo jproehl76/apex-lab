@@ -21,7 +21,9 @@ interface TokenResponse {
 }
 
 function generateState(): string {
-  return Math.random().toString(36).substring(2, 10);
+  const buf = new Uint8Array(8);
+  crypto.getRandomValues(buf);
+  return Array.from(buf, b => b.toString(36).padStart(2, '0')).join('').slice(0, 16);
 }
 
 function loadTokens(): WhoopTokens | null {

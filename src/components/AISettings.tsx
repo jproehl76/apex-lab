@@ -37,15 +37,17 @@ export function AISettings({ email, onClose, onSave }: Props) {
       setAiEnabled(p.aiCoachingEnabled);
       setApiKey(p.anthropicApiKey ?? '');
       setModelId(p.preferredModel ?? DEFAULT_MODEL);
-    });
+    }).catch(() => { setLoading(false); });
   }, [email]);
 
   async function handleVinLookup() {
     if (vin.length !== 17) return;
     setVinLoading(true);
-    const result = await lookupVin(vin.toUpperCase());
+    try {
+      const result = await lookupVin(vin.toUpperCase());
+      if (result) setCarName(`${result.year} ${result.make} ${result.model}`.trim());
+    } catch { /* VIN lookup failed silently */ }
     setVinLoading(false);
-    if (result) setCarName(`${result.year} ${result.make} ${result.model}`.trim());
   }
 
   async function handleTestKey() {
@@ -90,11 +92,13 @@ export function AISettings({ email, onClose, onSave }: Props) {
       preferredModel:    modelId,
       updatedAt:         new Date().toISOString(),
     };
-    await writeProfile(updated);
-    setProfile(updated);
-    onSave(updated);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      await writeProfile(updated);
+      setProfile(updated);
+      onSave(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch { /* write failed */ }
   }
 
   return (

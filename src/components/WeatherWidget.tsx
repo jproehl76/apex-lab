@@ -77,7 +77,7 @@ export function WeatherWidget({ date, lat, lon }: Props) {
     url.searchParams.set('temperature_unit', 'fahrenheit');
     url.searchParams.set('windspeed_unit', 'mph');
     url.searchParams.set('precipitation_unit', 'inch');
-    url.searchParams.set('timezone', 'America/New_York');
+    url.searchParams.set('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
 
     fetch(url.toString())
       .then(r => r.json())

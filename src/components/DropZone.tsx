@@ -1,8 +1,17 @@
 import { useCallback, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from 'zod';
 import type { SessionSummary } from '@/types/session';
 import { parseRacechronoCsv } from '@/lib/parseRacechronoCsv';
+
+const sessionSummarySchema = z.object({
+  header: z.object({
+    track: z.string(),
+    date: z.string(),
+  }),
+  laps: z.array(z.unknown()),
+});
 
 interface DropZoneProps {
   onSessionLoaded: (filename: string, data: SessionSummary) => { ok: boolean; error?: string };
@@ -34,8 +43,13 @@ export function DropZone({ onSessionLoaded, compact = false }: DropZoneProps) {
             toast.error(result.error ?? 'Unknown error.');
           }
         } else {
-          const parsed = JSON.parse(content);
-          const result = onSessionLoaded(file.name, parsed);
+          const raw = JSON.parse(content);
+          const validation = sessionSummarySchema.safeParse(raw);
+          if (!validation.success) {
+            toast.error(`"${file.name}" is not a valid session file.`);
+            return;
+          }
+          const result = onSessionLoaded(file.name, raw as SessionSummary);
           if (result.ok) {
             toast.success(`Loaded: ${file.name}`);
           } else {

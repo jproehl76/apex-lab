@@ -85,6 +85,9 @@ async function consumeAnthropicStream(
   const decoder = new TextDecoder();
   let   buffer  = '';
 
+  let finished = false;
+  const done_ = () => { if (!finished) { finished = true; onDone(); } };
+
   try {
     while (true) {
       if (signal?.aborted) { reader.cancel(); break; }
@@ -98,7 +101,7 @@ async function consumeAnthropicStream(
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const raw = line.slice(6).trim();
-        if (raw === '[DONE]') { onDone(); return; }
+        if (raw === '[DONE]') { done_(); return; }
         try {
           const parsed = JSON.parse(raw) as {
             type: string;
@@ -111,13 +114,13 @@ async function consumeAnthropicStream(
             onError(new Error(parsed.error?.message ?? 'Anthropic stream error'));
             return;
           } else if (parsed.type === 'message_stop') {
-            onDone();
+            done_();
             return;
           }
         } catch { /* skip malformed SSE lines */ }
       }
     }
-    onDone();
+    done_();
   } catch (err) {
     if (signal?.aborted) return; // normal cancellation
     onError(err instanceof Error ? err : new Error(String(err)));

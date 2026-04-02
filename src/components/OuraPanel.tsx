@@ -271,7 +271,7 @@ export function OuraPanel({ sessionDates }: Props) {
       if (OURA_TOKEN) {
         try {
           const result = await fetchOuraDataForDates(sessionDates);
-          if (!cancelled) { setData(result); setCacheAge(null); }
+          if (!cancelled) { setData(result); setCacheAge(null); setLoading(false); }
           return;
         } catch { /* fall through to cache */ }
       }

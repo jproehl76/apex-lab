@@ -1,6 +1,7 @@
 import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { buildShareUrl } from '@/lib/shareSession';
+import { formatLapTime } from '@/lib/utils';
 import type { LoadedSession } from '@/types/session';
 
 interface ShareButtonProps {
@@ -44,8 +45,3 @@ export function ShareButton({ session, className = '' }: ShareButtonProps) {
   );
 }
 
-function formatLapTime(s: number): string {
-  const m = Math.floor(s / 60);
-  const rem = (s % 60).toFixed(3).padStart(6, '0');
-  return `${m}:${rem}`;
-}
