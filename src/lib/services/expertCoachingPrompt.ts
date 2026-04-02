@@ -1,7 +1,7 @@
 import type { CoachingProfile, SessionManifestEntry } from '@/lib/coachingStore';
 import { formatLapTime } from '@/lib/utils';
 
-export const EXPERT_COACHING_MODEL = 'claude-sonnet-4-20250514';
+export const EXPERT_COACHING_MODEL = 'claude-sonnet-4-6' as const;
 
 // ── System prompt sections ──────────────────────────────────────────────────
 
