@@ -16,11 +16,59 @@ function renderMarkdown(text: string): string {
   return DOMPurify.sanitize(`<p>${raw}</p>`, { USE_PROFILES: { html: true } });
 }
 
+const mdStyles = `
+  .coaching-md {
+    font-family: BMWTypeNext, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #D0D0E8;
+  }
+  .coaching-md p { margin-bottom: 0.75em; }
+  .coaching-md p:last-child { margin-bottom: 0; }
+  .coaching-md h3 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #F0F0FA;
+    margin: 1.2em 0 0.5em;
+  }
+  .coaching-md h3:first-child { margin-top: 0; }
+  .coaching-md h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #C8C8E0;
+    margin: 1em 0 0.4em;
+  }
+  .coaching-md strong {
+    color: #F0F0FA;
+    font-weight: 600;
+  }
+  .coaching-md ul {
+    margin: 0.5em 0;
+    padding-left: 1.4em;
+  }
+  .coaching-md li {
+    margin-bottom: 0.3em;
+  }
+  .coaching-md li::marker {
+    color: #6B6B88;
+  }
+`;
+
+let stylesInjected = false;
+function injectStyles() {
+  if (stylesInjected) return;
+  stylesInjected = true;
+  const style = document.createElement('style');
+  style.textContent = mdStyles;
+  document.head.appendChild(style);
+}
+
 export function MarkdownBlock({ text }: { text: string }) {
+  injectStyles();
   return (
     <div
       className="coaching-md"
-      style={{ fontFamily: 'BMWTypeNext', fontSize: 13, lineHeight: 1.65, color: '#D0D0E8' }}
       dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }}
     />
   );
