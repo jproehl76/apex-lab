@@ -531,8 +531,8 @@ export default function App() {
                 </button>
               )}
             </div>
-            <LapInfoPanel sessions={store.activeSessions} />
             <div className="flex-1 min-h-0 overflow-y-auto scroll-touch">
+              <LapInfoPanel sessions={store.activeSessions} />
               <LapList sessions={store.activeSessions} />
             </div>
           </Panel>
