@@ -77,7 +77,6 @@ export function FrictionScatterChart({ sessions }: Props) {
     ctx.fillStyle = cc.canvasBg;
     ctx.fillRect(0, 0, W, H);
 
-    const isDark = resolvedTheme === 'dark';
 
     // ── G-force rings ──────────────────────────────────────────────────────────
     const rings = [0.4, 0.8, 1.0, 1.2];
@@ -85,21 +84,21 @@ export function FrictionScatterChart({ sessions }: Props) {
       const r = unitPx * g;
       ctx.beginPath();
       ctx.arc(ox, oy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = g === 1.0 ? (isDark ? '#2E2E48' : '#B0B3C0') : (isDark ? '#1C1C2C' : '#D0D3DE');
+      ctx.strokeStyle = g === 1.0 ? '#2E2E48' : '#1C1C2C';
       ctx.lineWidth   = g === 1.0 ? 1.5 : 0.75;
       ctx.setLineDash(g === 0.4 ? [3, 5] : []);
       ctx.stroke();
       ctx.setLineDash([]);
 
       // Ring label (right side)
-      ctx.fillStyle  = g === 1.0 ? cc.t.muted : (isDark ? '#2A2A40' : '#B0B3C0');
+      ctx.fillStyle  = g === 1.0 ? cc.t.muted : '#2A2A40';
       ctx.font       = `${FS.nano}px ${FF.sans}`;
       ctx.textAlign  = 'left';
       ctx.fillText(`${g}G`, ox + r + 3, oy - 3);
     });
 
     // ── Crosshairs ────────────────────────────────────────────────────────────
-    ctx.strokeStyle = isDark ? '#1E1E2E' : '#D0D3DE';
+    ctx.strokeStyle = '#1E1E2E';
     ctx.lineWidth   = 0.75;
     ctx.beginPath();
     ctx.moveTo(PAD, oy); ctx.lineTo(W - PAD, oy);
@@ -108,7 +107,7 @@ export function FrictionScatterChart({ sessions }: Props) {
 
     // ── Quadrant labels ───────────────────────────────────────────────────────
     ctx.font      = `${FS.nano}px ${FF.sans}`;
-    ctx.fillStyle = isDark ? '#252538' : '#B0B3C0';
+    ctx.fillStyle = '#252538';
     ctx.textAlign = 'center';
     ctx.fillText('BRAKE', ox, PAD + 11);
     ctx.fillText('ACCEL', ox, H - PAD - 5);
@@ -142,7 +141,7 @@ export function FrictionScatterChart({ sessions }: Props) {
     }
 
     // ── Axis border ───────────────────────────────────────────────────────────
-    ctx.strokeStyle = isDark ? '#1A1A28' : '#D0D3DE';
+    ctx.strokeStyle = '#1A1A28';
     ctx.lineWidth   = 1;
     ctx.strokeRect(PAD, PAD, W - 2 * PAD, H - 2 * PAD);
 

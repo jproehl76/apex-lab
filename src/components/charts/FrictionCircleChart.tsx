@@ -59,7 +59,6 @@ function polygonPath(values: number[]): string {
 export function FrictionCircleChart({ sessions }: Props) {
   const { resolvedTheme } = useTheme();
   const cc = useChartColors(resolvedTheme);
-  const isDark = resolvedTheme === 'dark';
 
   const data = METRICS.map(({ key, scale }) =>
     sessions.map(s => {
@@ -119,7 +118,7 @@ export function FrictionCircleChart({ sessions }: Props) {
           const d   = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + 'Z';
           return (
             <g key={li}>
-              <path d={d} fill="none" stroke={isDark ? '#1C1C2C' : '#D0D3DE'} strokeWidth={li === LEVELS - 1 ? 1.5 : 0.75} />
+              <path d={d} fill="none" stroke="#1C1C2C" strokeWidth={li === LEVELS - 1 ? 1.5 : 0.75} />
               {li === LEVELS - 1 && (
                 <text
                   x={CX + 4} y={CY - MAXR - 4}
@@ -139,7 +138,7 @@ export function FrictionCircleChart({ sessions }: Props) {
               key={m.key}
               x1={CX} y1={CY}
               x2={x.toFixed(1)} y2={y.toFixed(1)}
-              stroke={isDark ? '#1E1E30' : '#D0D3DE'} strokeWidth={1}
+              stroke="#1E1E30" strokeWidth={1}
             />
           );
         })}

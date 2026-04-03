@@ -2,29 +2,15 @@
 //
 // All components should import from here.  Never hardcode a color or font size
 // that belongs in this file directly in a component.
-//
-// Theme-aware: components that need to render differently in light/dark should
-// call useChartColors(resolvedTheme) which returns the correct color set.
-// Static exports (T, AXIS_STYLE, etc.) remain dark-themed defaults for backward compat.
 
 import { useMemo } from 'react';
 
-// ── Text hierarchy (dark defaults — backward compat) ─────────────────────────
+// ── Text hierarchy ───────────────────────────────────────────────────────────
 export const T = {
   fg:     '#E8E8F0',  // primary foreground: data values, main content
   label:  '#C0C0D4',  // labels: section headers, legends, axis tick labels  (~9:1)
   muted:  '#9A9AB0',  // muted: units, captions, tooltip sub-labels           (~5.5:1)
   ghost:  '#5A5A72',  // ghost: decorative dashes, placeholders               (~2.5:1)
-} as const;
-
-// ── Dual theme text hierarchies ─────────────────────────────────────────────
-const T_DARK = T;
-
-const T_LIGHT = {
-  fg:     '#1A1D2E',  // primary foreground
-  label:  '#3A3D4E',  // labels
-  muted:  '#6A6D7E',  // muted
-  ghost:  '#B0B3C0',  // decorative
 } as const;
 
 // ── Status / performance colors ───────────────────────────────────────────────
@@ -159,66 +145,18 @@ export interface ChartColors {
   surfaceBg: string;
 }
 
-export function useChartColors(resolvedTheme: 'light' | 'dark'): ChartColors {
-  return useMemo(() => {
-    if (resolvedTheme === 'dark') {
-      return {
-        t: T_DARK,
-        axisStyle: AXIS_STYLE,
-        gridStyle: GRID_STYLE,
-        tooltipStyle: { ...TOOLTIP_STYLE },
-        tooltipHeaderStyle: { ...TOOLTIP_HEADER_STYLE },
-        legendLabelStyle: { ...LEGEND_LABEL_STYLE },
-        canvasBg: '#08080E',
-        cardBg: '#0B0B14',
-        borderColor: '#1E1E2E',
-        surfaceBg: '#0E0E1A',
-      };
-    }
-    // Light mode
-    const tl = T_LIGHT;
-    return {
-      t: tl,
-      axisStyle: {
-        tick:     { fill: tl.label, fontSize: FS.small, fontFamily: FF.sans, letterSpacing: '0.05em' },
-        axisLine: { stroke: '#D0D3DE' },
-        tickLine: { stroke: '#D0D3DE' },
-      },
-      gridStyle: {
-        stroke:          '#E8EBF0',
-        strokeDasharray: 'none' as const,
-        vertical:        false,
-      },
-      tooltipStyle: {
-        backgroundColor: '#FFFFFF',
-        border:          '1px solid #D0D3DE',
-        borderRadius:    '6px',
-        padding:         '10px 14px',
-        boxShadow:       '0 4px 16px rgba(0,0,0,0.1)',
-        fontFamily:      FF.sans,
-        fontSize:        `${FS.small}px`,
-        letterSpacing:   '0.04em',
-        color:           tl.fg,
-      },
-      tooltipHeaderStyle: {
-        marginBottom:   6,
-        color:          tl.muted,
-        fontSize:       `${FS.nano}px`,
-        letterSpacing:  '0.1em',
-        textTransform:  'uppercase' as const,
-        fontFamily:     FF.sans,
-      },
-      legendLabelStyle: {
-        fontFamily:    FF.sans,
-        fontSize:      `${FS.small}px`,
-        letterSpacing: '0.08em',
-        color:         tl.label,
-        textTransform: 'uppercase' as const,
-      },
-      canvasBg: '#F5F6F8',
-      cardBg: '#FFFFFF',
-      borderColor: '#D0D3DE',
-      surfaceBg: '#F0F1F5',
-    };
-  }, [resolvedTheme]);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function useChartColors(_resolvedTheme: 'dark'): ChartColors {
+  return useMemo(() => ({
+    t: T,
+    axisStyle: AXIS_STYLE,
+    gridStyle: GRID_STYLE,
+    tooltipStyle: { ...TOOLTIP_STYLE },
+    tooltipHeaderStyle: { ...TOOLTIP_HEADER_STYLE },
+    legendLabelStyle: { ...LEGEND_LABEL_STYLE },
+    canvasBg: '#08080E',
+    cardBg: '#0B0B14',
+    borderColor: '#1E1E2E',
+    surfaceBg: '#0E0E1A',
+  }), []);
 }
