@@ -9,21 +9,24 @@ const DB_VERSION = 1;
 const STORE = 'sessions';
 
 let _db: IDBDatabase | null = null;
+let _dbPromise: Promise<IDBDatabase> | null = null;
 
 function openDB(): Promise<IDBDatabase> {
   if (_db) return Promise.resolve(_db);
-  return new Promise((resolve, reject) => {
+  if (_dbPromise) return _dbPromise;
+  _dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       req.result.createObjectStore(STORE);
     };
     req.onsuccess = () => {
       _db = req.result;
-      _db.onclose = () => { _db = null; };
+      _db.onclose = () => { _db = null; _dbPromise = null; };
       resolve(_db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => { _dbPromise = null; reject(req.error); };
   });
+  return _dbPromise;
 }
 
 export async function dbGet<T>(key: string): Promise<T | undefined> {

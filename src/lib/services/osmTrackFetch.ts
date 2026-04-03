@@ -51,10 +51,14 @@ export async function fetchOsmTrackLayout(
 
   const lats = trace.map(p => p.lat);
   const lons = trace.map(p => p.lon);
-  const [s, w, n, e] = padBbox(
-    Math.min(...lats), Math.min(...lons),
-    Math.max(...lats), Math.max(...lons)
-  );
+  let minLat = lats[0], maxLat = lats[0], minLon = lons[0], maxLon = lons[0];
+  for (let i = 1; i < lats.length; i++) {
+    if (lats[i] < minLat) minLat = lats[i];
+    if (lats[i] > maxLat) maxLat = lats[i];
+    if (lons[i] < minLon) minLon = lons[i];
+    if (lons[i] > maxLon) maxLon = lons[i];
+  }
+  const [s, w, n, e] = padBbox(minLat, minLon, maxLat, maxLon);
 
   const cacheKey = `${CACHE_PREFIX}${s.toFixed(3)},${w.toFixed(3)},${n.toFixed(3)},${e.toFixed(3)}`;
   const cached = sessionStorage.getItem(cacheKey);
@@ -105,7 +109,7 @@ out body;`;
     const waypoints: [number, number][] = combined.map(nd => [nd.lat, nd.lon]);
     const result: OsmTrackData = { waypoints, source: 'openstreetmap' };
 
-    sessionStorage.setItem(cacheKey, JSON.stringify(result));
+    try { sessionStorage.setItem(cacheKey, JSON.stringify(result)); } catch { /* quota exceeded */ }
     return result;
   } catch (err) {
     console.warn('[osmTrackFetch] Failed:', err);

@@ -2,12 +2,29 @@
   "name": "JP Apex Lab",
   "short_name": "Apex Lab",
   "description": "Track telemetry and session analysis dashboard",
+  "id": "/apex-lab/",
   "start_url": "/apex-lab/",
   "scope": "/apex-lab/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#0F0F14",
   "theme_color": "#0F0F14",
+  "screenshots": [
+    {
+      "src": "/apex-lab/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "JP Apex Lab desktop dashboard"
+    },
+    {
+      "src": "/apex-lab/screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "JP Apex Lab mobile view"
+    }
+  ],
   "icons": [
     { "src": "/apex-lab/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/apex-lab/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

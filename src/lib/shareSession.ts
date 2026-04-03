@@ -54,13 +54,15 @@ function buildSummary(session: LoadedSession): ShareSummary {
 /** Encode a session to a URL-safe base64 string */
 export function encodeSession(session: LoadedSession): string {
   const summary = buildSummary(session);
-  return btoa(encodeURIComponent(JSON.stringify(summary)));
+  return btoa(encodeURIComponent(JSON.stringify(summary)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /** Decode a share hash back to ShareSummary. Returns null on any error. */
 export function decodeSession(encoded: string): ShareSummary | null {
   try {
-    const json = decodeURIComponent(atob(encoded));
+    const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(atob(b64));
     const parsed = JSON.parse(json) as ShareSummary;
     if (parsed.v !== 1 || !parsed.track || !parsed.date) return null;
     return parsed;
@@ -72,7 +74,7 @@ export function decodeSession(encoded: string): ShareSummary | null {
 /** Format the shareable URL for the current page */
 export function buildShareUrl(session: LoadedSession): string {
   const encoded = encodeSession(session);
-  const base = `${window.location.origin}/apex-lab/`;
+  const base = `${window.location.origin}${import.meta.env.BASE_URL}`;
   return `${base}#share=${encoded}`;
 }
 

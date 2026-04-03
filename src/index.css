@@ -11,17 +11,18 @@
 }
 
 
-/* ── Type scale ──────────────────────────────────────────────────────────── */
+/* ── Text scale ──────────────────────────────────────────────────────────── */
 /* Use these vars for consistent sizing instead of ad-hoc px/em values       */
 :root {
-  --text-2xs:  9px;   /* micro labels, axis ticks */
-  --text-xs:   10px;  /* section headers, tags */
-  --text-sm:   11px;  /* secondary data */
-  --text-base: 13px;  /* default body / table cells */
-  --text-md:   15px;  /* slightly larger labels */
-  --text-lg:   18px;  /* card values */
-  --text-xl:   22px;  /* featured metrics */
-  --text-2xl:  28px;  /* hero numbers */
+  --text-scale: 1;
+  --text-2xs:  calc(10px * var(--text-scale));  /* micro labels, axis ticks */
+  --text-xs:   calc(12px * var(--text-scale));  /* section headers, tags */
+  --text-sm:   calc(13px * var(--text-scale));  /* secondary data */
+  --text-base: calc(15px * var(--text-scale));  /* default body / table cells */
+  --text-md:   calc(17px * var(--text-scale));  /* slightly larger labels */
+  --text-lg:   calc(20px * var(--text-scale));  /* card values */
+  --text-xl:   calc(24px * var(--text-scale));  /* featured metrics */
+  --text-2xl:  calc(30px * var(--text-scale));  /* hero numbers */
 
   --font-ui:   'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
   --font-data: 'JetBrains Mono', 'Menlo', monospace;
@@ -33,31 +34,31 @@
   --tracking-widest: 0.2em;
 }
 
-/* ── BMW TypeNext Latin ──────────────────────────────────────────────────── */
+/* ── UI Font alias ────────────────────────────────────────────────────── */
+/* BMWTypeNext was previously loaded from bmwusa.com CDN.                  */
+/* Now aliased to Barlow Condensed (loaded via Google Fonts in index.html) */
+/* so every `fontFamily: 'BMWTypeNext'` reference continues to work.       */
 @font-face {
   font-family: 'BMWTypeNext';
-  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Thin.woff2') format('woff2');
+  src: local('Barlow Condensed Thin'), local('BarlowCondensed-Thin');
   font-weight: 200;
   font-style: normal;
-  font-display: swap;
 }
 @font-face {
   font-family: 'BMWTypeNext';
-  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Light.woff2') format('woff2');
+  src: local('Barlow Condensed Light'), local('BarlowCondensed-Light');
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
 }
 @font-face {
   font-family: 'BMWTypeNext';
-  src: url('https://www.bmwusa.com/etc.clientlibs/bmwusa/clientlibs/clientlib-site/resources/bmwusa-clientlibs/bmwusa-common/fonts/BMWTypeNextLatin/BMWTypeNextLatin-Bold.woff2') format('woff2');
+  src: local('Barlow Condensed Bold'), local('BarlowCondensed-Bold');
   font-weight: 700;
   font-style: normal;
-  font-display: swap;
 }
 
 @layer base {
-  /* ── shadcn/ui dark theme variables ─────────────────────────────────────── */
+  /* ── Dark mode (only mode) ──────────────────────────────────────────────── */
   :root {
     color-scheme: dark;
     --background:       220 20% 5%;
@@ -66,7 +67,7 @@
     --card-foreground:  220 15% 92%;
     --popover:          220 20% 8%;
     --popover-foreground: 220 15% 92%;
-    --primary:          213 75% 46%;    /* BMW blue */
+    --primary:          207 76% 52%;
     --primary-foreground: 0 0% 100%;
     --secondary:        220 18% 12%;
     --secondary-foreground: 220 15% 82%;
@@ -78,8 +79,22 @@
     --destructive-foreground: 0 0% 100%;
     --border:           220 18% 13%;
     --input:            220 18% 13%;
-    --ring:             213 75% 46%;
+    --ring:             207 76% 52%;
     --radius:           0.5rem;
+
+    /* Chart-specific */
+    --chart-grid:       220 18% 9%;
+    --chart-axis:       220 18% 16%;
+    --chart-tooltip-bg: 220 20% 8%;
+    --chart-tooltip-border: 220 18% 16%;
+
+    /* Surface scale */
+    --surface-void:      230 25% 3%;
+    --surface-base:      228 18% 5%;
+    --surface-card:      225 15% 9%;
+    --surface-elevated:  223 14% 13%;
+    --surface-overlay:   220 13% 16%;
+    --surface-highlight: 218 12% 20%;
   }
 
   * {
@@ -97,14 +112,14 @@
 
   html, body, #root {
     height: 100%;
-    background: #0A0A12;
+    background: hsl(var(--background));
     overscroll-behavior: none;
   }
 
   body {
     font-family: 'BMWTypeNext', 'Barlow Condensed', system-ui, sans-serif;
-    font-size: 14px;
-    color: #E8E8F0;
+    font-size: 16px;
+    color: hsl(var(--foreground));
     /* Contain overscroll — no browser pull-to-refresh */
     overscroll-behavior-y: contain;
   }
@@ -121,10 +136,19 @@
     user-select: text;
   }
 
+  /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #2A2A38; border-radius: 2px; }
   ::-webkit-scrollbar-thumb:hover { background: #3A3A4C; }
+}
+
+/* ── Theme transition ──────────────────────────────────────────────────── */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease !important;
 }
 
 @layer components {
@@ -184,7 +208,7 @@
 .leaflet-corner-label::before,
 .leaflet-corner-label::after { display: none !important; }
 
-/* Attribution control — keep visible but minimal */
+/* Attribution control */
 .leaflet-control-attribution {
   font-size: 8px !important;
   background: rgba(8,8,14,0.7) !important;
@@ -192,7 +216,7 @@
 }
 .leaflet-control-attribution a { color: #5A5A72 !important; }
 
-/* Zoom controls — dark theme */
+/* Zoom controls */
 .leaflet-control-zoom a {
   background: rgba(14,14,26,0.9) !important;
   border-color: #1E1E2E !important;

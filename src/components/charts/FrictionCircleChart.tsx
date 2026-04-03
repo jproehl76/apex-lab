@@ -10,10 +10,12 @@
  * Axes (all pure G-force metrics — consistent unit, comparable scale):
  *   Total G P95 · >0.8G Time % · Peak Lateral · Brake G · Accel G
  */
-import { useMemo } from 'react';
+
+
 import type { LoadedSession } from '@/types/session';
 import { sessionLabel } from '@/lib/utils';
-import { T, FF, FS, SESSION_COLORS } from '@/lib/chartTheme';
+import { T, FF, FS, SESSION_COLORS, useChartColors } from '@/lib/chartTheme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props { sessions: LoadedSession[] }
 
@@ -55,14 +57,15 @@ function polygonPath(values: number[]): string {
 }
 
 export function FrictionCircleChart({ sessions }: Props) {
-  const data = useMemo(() => {
-    return METRICS.map(({ key, scale }) =>
-      sessions.map(s => {
-        const raw = s.data.friction_circle[key as keyof typeof s.data.friction_circle] as number;
-        return Math.min(100, (raw / scale) * 100);
-      })
-    );
-  }, [sessions]);
+  const { resolvedTheme } = useTheme();
+  const cc = useChartColors(resolvedTheme);
+
+  const data = METRICS.map(({ key, scale }) =>
+    sessions.map(s => {
+      const raw = s.data.friction_circle[key as keyof typeof s.data.friction_circle] as number;
+      return Math.min(100, (raw / scale) * 100);
+    })
+  );
 
   if (sessions.length === 0) {
     return (
@@ -119,8 +122,8 @@ export function FrictionCircleChart({ sessions }: Props) {
               {li === LEVELS - 1 && (
                 <text
                   x={CX + 4} y={CY - MAXR - 4}
-                  style={{ fontFamily: FF.sans, fontSize: 8 }}
-                  fill={T.muted} textAnchor="start">100</text>
+                  style={{ fontFamily: FF.sans, fontSize: 9 }}
+                  fill={cc.t.muted} textAnchor="start">100</text>
               )}
             </g>
           );
@@ -155,7 +158,7 @@ export function FrictionCircleChart({ sessions }: Props) {
                 const radius = (data[mi][si] / 100) * MAXR;
                 const [x, y] = toXY(angle, radius);
                 return (
-                  <circle key={mi} cx={x} cy={y} r={3} fill={color} stroke="#08080E" strokeWidth={1} />
+                  <circle key={mi} cx={x} cy={y} r={3} fill={color} stroke={cc.canvasBg} strokeWidth={1} />
                 );
               })}
             </g>
@@ -183,8 +186,8 @@ export function FrictionCircleChart({ sessions }: Props) {
                   y={(ly + li * 11 - (lines.length - 1) * 5).toFixed(1)}
                   textAnchor={anchor}
                   dominantBaseline="middle"
-                  style={{ fontFamily: FF.sans, fontSize: 9 }}
-                  fill={T.label}
+                  style={{ fontFamily: FF.sans, fontSize: 10 }}
+                  fill={cc.t.label}
                   letterSpacing="0.06em"
                 >
                   {line.toUpperCase()}
@@ -197,7 +200,7 @@ export function FrictionCircleChart({ sessions }: Props) {
                 return (
                   <text x={vx.toFixed(1)} y={vy.toFixed(1)}
                     textAnchor="middle" dominantBaseline="middle"
-                    style={{ fontFamily: FF.mono, fontSize: 9, fontWeight: 700 }}
+                    style={{ fontFamily: FF.mono, fontSize: 10, fontWeight: 700 }}
                     fill={SESSION_COLORS[0]}>
                     {pct}
                   </text>

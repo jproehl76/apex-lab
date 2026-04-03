@@ -10,6 +10,7 @@ export type ConversationMessage = { role: 'user' | 'assistant'; content: string 
 export interface CoachingOptions {
   apiKey?: string;            // user's own Anthropic key (browser → Anthropic direct)
   modelId: ModelId;
+  maxTokens?: number;         // default 2048
   signal?: AbortSignal;
   conversationHistory: ConversationMessage[];
   onChunk: (text: string) => void;
@@ -85,6 +86,9 @@ async function consumeAnthropicStream(
   const decoder = new TextDecoder();
   let   buffer  = '';
 
+  let finished = false;
+  const done_ = () => { if (!finished) { finished = true; onDone(); } };
+
   try {
     while (true) {
       if (signal?.aborted) { reader.cancel(); break; }
@@ -98,7 +102,7 @@ async function consumeAnthropicStream(
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const raw = line.slice(6).trim();
-        if (raw === '[DONE]') { onDone(); return; }
+        if (raw === '[DONE]') { done_(); return; }
         try {
           const parsed = JSON.parse(raw) as {
             type: string;
@@ -111,13 +115,13 @@ async function consumeAnthropicStream(
             onError(new Error(parsed.error?.message ?? 'Anthropic stream error'));
             return;
           } else if (parsed.type === 'message_stop') {
-            onDone();
+            done_();
             return;
           }
         } catch { /* skip malformed SSE lines */ }
       }
     }
-    onDone();
+    done_();
   } catch (err) {
     if (signal?.aborted) return; // normal cancellation
     onError(err instanceof Error ? err : new Error(String(err)));
@@ -131,7 +135,7 @@ export async function getCoachingAnalysis(
   userMessage: string,
   options: CoachingOptions
 ): Promise<void> {
-  const { apiKey, modelId, signal, conversationHistory, onChunk, onDone, onError } = options;
+  const { apiKey, modelId, maxTokens = 2048, signal, conversationHistory, onChunk, onDone, onError } = options;
 
   const messages: ConversationMessage[] = [
     ...conversationHistory,
@@ -140,7 +144,7 @@ export async function getCoachingAnalysis(
 
   const body = JSON.stringify({
     model:      modelId,
-    max_tokens: 2048,
+    max_tokens: maxTokens,
     stream:     true,
     system:     systemPrompt,
     messages,

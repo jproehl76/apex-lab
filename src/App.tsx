@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { LogOut, Heart, MapIcon, Bell, FolderOpen } from 'lucide-react';
+import { LogOut, MapIcon, GraduationCap } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
 import { DropZone } from '@/components/DropZone';
 import { SessionList } from '@/components/SessionList';
 import { SessionStats } from '@/components/SessionStats';
@@ -17,7 +17,7 @@ import { DebriefNotes } from '@/components/DebriefNotes';
 import { CoachingInsights } from '@/components/CoachingInsights';
 import { DrivePickerButton } from '@/components/DrivePickerButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ReadinessTab } from '@/components/ReadinessTab';
+
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { CommandPalette } from '@/components/CommandPalette';
@@ -27,8 +27,7 @@ import { PrintView } from '@/components/PrintView';
 import { SharedSessionView } from '@/components/SharedSessionView';
 import { PanelGroup, Panel, PanelResizeHandle } from '@/components/ui/resizable';
 import apexLabLogo from '@/assets/jp-apex-lab-logo.png';
-import { handleWhoopCallback } from '@/lib/services/whoopAuth';
-import { handleStravaCallback } from '@/lib/services/stravaAuth';
+
 import { decodeSession } from '@/lib/shareSession';
 import { config } from '@/config';
 import { readProfile, type UserProfile } from '@/lib/userProfile';
@@ -41,44 +40,46 @@ import { LapInfoPanel } from '@/components/LapInfoPanel';
 import { findTrackLayout } from '@/assets/trackLayouts';
 import { useShareTarget } from '@/hooks/useShareTarget';
 import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useDriveNotesSync } from '@/hooks/useDriveNotesSync';
+import { ExpertCoach } from '@/components/ExpertCoach';
+
 import { Settings } from 'lucide-react';
 import React from 'react';
+import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
 
 const AUTH_KEY = 'apex-lab-auth-user';
 
 interface AuthUser { email: string; name: string; picture: string }
 
-// 5 tabs
-// Session  = stats + coaching + lap times
-// Map      = GPS heat map with speed/throttle/brake channels
-// Corners  = corner speeds + detail + friction scatter
-// Health   = thermals + driver readiness
-// Notes    = debrief
+// 4 tabs (desktop + mobile): Session, Track, Coach, Progress
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
-  { id: 'map',      label: 'Map'      },
-  { id: 'corners',  label: 'Corners'  },
-  { id: 'health',   label: 'Health'   },
-  { id: 'notes',    label: 'Notes'    },
+  { id: 'track',    label: 'Track'    },
+  { id: 'coach',    label: 'Coach'    },
   { id: 'progress', label: 'Progress' },
 ];
 
 const MOBILE_TABS = [
-  { id: 'load',     label: 'Load',    Icon: FolderOpen },
-  { id: 'session',  label: 'Session', Icon: () => <span style={{ fontSize: 18 }}>⊞</span> },
-  { id: 'map',      label: 'Map',     Icon: MapIcon },
-  { id: 'corners',  label: 'Corners', Icon: () => <span style={{ fontSize: 18 }}>◎</span> },
-  { id: 'health',   label: 'Health',  Icon: Heart },
-  { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 18 }}>↗</span> },
+  { id: 'session',  label: 'Session',  Icon: () => <span style={{ fontSize: 20 }}>⊞</span> },
+  { id: 'track',    label: 'Track',    Icon: MapIcon },
+  { id: 'coach',    label: 'Coach',    Icon: GraduationCap },
+  { id: 'progress', label: 'Progress', Icon: () => <span style={{ fontSize: 20 }}>↗</span> },
 ];
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
+  );
+}
+
+function AppInner() {
+  const { resolvedTheme } = useTheme();
   const store = usePersistedSessions();
   const { memory, loaded, update } = useMemory();
   const [activeTab, setActiveTab] = useState('session');
   const [selectedCornerId, setSelectedCornerId] = useState<string | null>(null);
-  const [healthConnected, setHealthConnected] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [sharedSummary, setSharedSummary] = useState(() => {
     const hash = window.location.hash;
@@ -100,21 +101,40 @@ export default function App() {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [settingsOpen, setSettingsOpen]     = useState(false);
 
+  // Clear profile when signing out (synchronous, no effect needed)
+  const signOut = useCallback(() => {
+    setUser(null);
+    setProfile(null);
+    setShowProfileSetup(false);
+  }, []);
+
   // Load user profile from IDB when user logs in
+  const userEmail = user?.email;
   useEffect(() => {
-    if (!user) { setProfile(null); setShowProfileSetup(false); return; }
-    readProfile(user.email).then(p => {
+    if (!userEmail) return;
+    let cancelled = false;
+    readProfile(userEmail).then(p => {
+      if (cancelled) return;
       setProfile(p);
       if (!p || !p.carName) setShowProfileSetup(true);
     });
-  }, [user?.email]); // eslint-disable-line
+    return () => { cancelled = true; };
+  }, [userEmail]);
 
   // Feature hooks
   useShareTarget(store);
   useDriveAutoImport(driveAccessToken, store, store.hydrated);
-  const push = usePushNotifications();
+  const { syncToCloud } = useDriveNotesSync(driveAccessToken, memory, loaded, update);
 
-  useEffect(() => { if (loaded) setActiveTab(memory.lastActiveTab || 'session'); }, [loaded]); // eslint-disable-line
+  useEffect(() => {
+    if (!loaded) return;
+    let saved = memory.lastActiveTab || 'session';
+    if (saved === 'health') saved = 'coach';
+    if (saved === 'map' || saved === 'corners') saved = 'track';
+    if (saved === 'load') saved = 'session';
+    if (saved === 'notes') saved = 'session';
+    queueMicrotask(() => setActiveTab(saved));
+  }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
 
   // Swipe left/right to navigate tabs on mobile
@@ -127,7 +147,7 @@ export default function App() {
     });
   }, []); // eslint-disable-line
   const bindSwipe = useDrag(({ swipe: [swipeX] }) => {
-    if (activeTab === 'map') return; // leave map gestures to Leaflet
+    if (activeTab === 'track') return; // leave map gestures to Leaflet
     if (swipeX === -1) navigateTab(1);
     if (swipeX === 1) navigateTab(-1);
   }, {
@@ -161,24 +181,6 @@ export default function App() {
     }
   }, [store.activeSessions.map(s => s.id).join(','), loaded]); // eslint-disable-line
 
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    const code = p.get('code'), state = p.get('state');
-    if (code && state) {
-      window.history.replaceState({}, '', window.location.pathname);
-      if (config.healthProvider === 'strava') {
-        handleStravaCallback(code, state).then(ok => {
-          if (ok) { setHealthConnected(true); toast.success('Strava connected'); }
-          else toast.error('Strava connection failed');
-        }).catch(() => toast.error('Strava connection failed'));
-      } else {
-        handleWhoopCallback(code, state).then(ok => {
-          if (ok) { setHealthConnected(true); toast.success('WHOOP connected'); }
-          else toast.error('WHOOP connection failed');
-        }).catch(() => toast.error('WHOOP connection failed'));
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (user) localStorage.setItem(AUTH_KEY, JSON.stringify(user));
@@ -193,15 +195,13 @@ export default function App() {
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <span style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
+          <span style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             Loading
           </span>
         </div>
       </div>
     );
   }
-
-  const sessionDates = store.activeSessions.map(s => s.data.header.date);
 
   // Track branding for header
   const activeTrackLayout = findTrackLayout(store.activeSessions[0]?.data.header.track);
@@ -239,22 +239,38 @@ export default function App() {
           <Section title="Coaching">
             <ErrorBoundary><CoachingInsights sessions={store.activeSessions} profile={profile} trackHistory={memory.trackHistory} /></ErrorBoundary>
           </Section>
+          <Section title="Engine Thermals">
+            <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
+          </Section>
           <Section title="Lap Times">
             <ErrorBoundary><LapTimesChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
+          {/* Debrief notes (all breakpoints) */}
+          <Section title="Debrief Notes">
+            {store.activeSessions.map(s => (
+              <div key={s.id} className="space-y-1 mb-4">
+                {store.activeSessions.length > 1 && (
+                  <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
+                )}
+                <DebriefNotes sessionId={s.id} onCloudSync={syncToCloud} />
+              </div>
+            ))}
+          </Section>
         </div>
       );
-      case 'corners': return (
+      case 'track': return (
         <div className="space-y-3">
-          {/* Row 1: Corner Apex Speeds — full width */}
+          {/* Heat map with fixed height so corners scroll below */}
+          <div className="h-[55vh] min-h-[300px] max-h-[600px]">
+            <TrackHeatMap sessions={store.activeSessions}
+              selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
+          </div>
           <Section title="Corner Apex Speeds">
             <ErrorBoundary><CornerSpeedChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          {/* Row 2: Corner Detail — full width */}
           <Section title="Corner Detail">
             <ErrorBoundary><CornerDetailTable sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          {/* Row 3: G-Force Envelope + Friction Circle side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <Section title="G-Force Envelope">
               <ErrorBoundary><FrictionCircleChart sessions={store.activeSessions} /></ErrorBoundary>
@@ -265,29 +281,17 @@ export default function App() {
           </div>
         </div>
       );
-      case 'health': return (
-        <div className="space-y-4">
-          <Section title="Engine Thermals">
-            <ErrorBoundary><ThermalChart sessions={store.activeSessions} /></ErrorBoundary>
-          </Section>
-          {/* ReadinessTab handles connect state + renders WhoopPanel when connected */}
-          {config.healthProvider !== null && (
-            <Section title="Driver Readiness">
-              <ErrorBoundary><ReadinessTab sessionDates={sessionDates} connectedOverride={healthConnected} /></ErrorBoundary>
-            </Section>
-          )}
-        </div>
-      );
-      case 'notes': return (
-        <Section title="Debrief Notes">
-          {store.activeSessions.map(s => (
-            <div key={s.id} className="space-y-1 mb-4">
-              {store.activeSessions.length > 1 && (
-                <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
-              )}
-              <DebriefNotes sessionId={s.id} />
-            </div>
-          ))}
+      case 'coach': return (
+        <Section title="Expert Coach">
+          <ErrorBoundary>
+            <ExpertCoach
+              sessions={store.sessions}
+              profile={profile}
+              userEmail={userEmail ?? ''}
+              driveAccessToken={driveAccessToken}
+              debriefNotes={memory.debriefNotes}
+            />
+          </ErrorBoundary>
         </Section>
       );
       default: return null;
@@ -302,14 +306,14 @@ export default function App() {
           setSharedSummary(null);
           window.history.replaceState({}, '', window.location.pathname);
         }} />
-        <Toaster position="bottom-right" richColors />
+        <Toaster position="bottom-right" richColors theme={resolvedTheme} />
       </>
     );
   }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="bottom-right" richColors theme={resolvedTheme} />
       <PrintView sessions={store.activeSessions} />
       {showProfileSetup && user && (
         <ProfileSetup
@@ -332,17 +336,9 @@ export default function App() {
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
       }}>
-        {/* CSS motorsport background — adapts to track colors */}
+        {/* CSS motorsport background — adapts to track colors + theme */}
         <div className="absolute inset-0" style={{
-          background: `
-            linear-gradient(105deg,
-              #0E0E1A 0%,
-              #121220 22%,
-              ${trackPrimary}38 52%,
-              ${trackAccent}20 75%,
-              #0E0E1A 100%
-            )
-          `,
+          background: `linear-gradient(105deg, #0E0E1A 0%, #121220 22%, ${trackPrimary}38 52%, ${trackAccent}20 75%, #0E0E1A 100%)`,
         }} />
         {/* Subtle diagonal stripe texture */}
         <div className="absolute inset-0" style={{
@@ -391,7 +387,7 @@ export default function App() {
             {/* ⌘K hint — desktop only */}
             <button
               onClick={() => setPaletteOpen(true)}
-              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[10px] tracking-wider"
+              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[12px] tracking-wider"
               title="Command palette (⌘K)"
               style={{ fontFamily: 'JetBrains Mono' }}>
               <span>⌘K</span>
@@ -400,22 +396,11 @@ export default function App() {
             {store.activeSessions.length > 0 && (
               <PrintButton className="hidden lg:flex" />
             )}
-            {/* Push notification toggle — desktop only, when supported */}
-            {push.isSupported && (
-              <button
-                onClick={() => push.isSubscribed ? push.unsubscribe() : push.subscribe().then(() => toast.success('Notifications enabled'))}
-                disabled={push.isLoading}
-                className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded border border-border text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors text-[10px] tracking-wider"
-                title={push.isSubscribed ? 'Disable push notifications' : 'Enable push notifications'}
-                style={{ fontFamily: 'JetBrains Mono', opacity: push.isSubscribed ? 1 : 0.5 }}>
-                <Bell size={11} />
-              </button>
-            )}
             {/* Car name — shown when profile is set */}
             {profile?.carName && (
               <span
                 className="hidden md:block text-muted-foreground"
-                style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               >
                 {profile.carName}
               </span>
@@ -424,7 +409,7 @@ export default function App() {
               <img src={user.picture} alt={user.name} className="rounded-full ring-1 ring-border"
                 style={{ width: 'clamp(24px, 3.6vh, 31px)', height: 'clamp(24px, 3.6vh, 31px)' }} />
             )}
-            <button onClick={() => setUser(null)} className="text-muted-foreground hover:text-destructive transition-colors" title="Sign out">
+            <button onClick={signOut} className="text-muted-foreground hover:text-destructive transition-colors" title="Sign out">
               <LogOut size={17} />
             </button>
           </div>
@@ -439,64 +424,19 @@ export default function App() {
 
       {/* MOBILE layout (< lg): no sidebar, swipe navigation */}
       <div className="flex flex-col flex-1 min-h-0 lg:hidden" {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
-        {activeTab === 'load' ? (
-          /* ── Load Session page ── */
-          <div className="flex-1 overflow-y-auto scroll-touch p-5 pb-[calc(80px+env(safe-area-inset-bottom))] space-y-5">
-            <div>
-              <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 13, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F0F0FA' }}>
-                Load Session
-              </h2>
-              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 11, color: '#9A9AB0', marginTop: 3, letterSpacing: '0.05em' }}>
-                RaceChrono CSV or JSON · tap to browse files
-              </p>
+        <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
+          {/* Compact load row at top of mobile content */}
+          <div className="flex gap-2 mb-3">
+            <div className="flex-1">
+              <DropZone compact onSessionLoaded={store.addSession} />
             </div>
-
-            <DropZone onSessionLoaded={(name, data) => {
-              const result = store.addSession(name, data);
-              if (result.ok) setActiveTab('session');
-              return result;
-            }} />
-
-            <DrivePickerButton
-              onSessionLoaded={(name, data) => {
-                const result = store.addSession(name, data);
-                if (result.ok) setActiveTab('session');
-                return result;
-              }}
-              onTokenChange={setDriveAccessToken}
-            />
-
-            {store.sessions.length > 0 && (
-              <div className="space-y-3">
-                <div className="h-px bg-border" />
-                <SessionList
-                  sessions={store.sessions}
-                  activeIds={store.activeSessionIds}
-                  onToggle={store.toggleActive}
-                  onRemove={store.removeSession}
-                  onRename={store.renameSession}
-                  onClearAll={store.clearAll}
-                />
-                <button onClick={store.clearSavedSessions}
-                  className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
-                  Clear saved sessions
-                </button>
-              </div>
-            )}
+            <DrivePickerButton compact onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
           </div>
-        ) : activeTab === 'map' ? (
-          <div className="flex-1 min-h-0 p-2 pb-[calc(72px+env(safe-area-inset-bottom))]">
-            <TrackHeatMap sessions={store.activeSessions}
-              selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
-          </div>
-        ) : (
-          <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
-            {store.activeSessions.length === 0 && activeTab !== 'progress'
-              ? <EmptyDashboard />
-              : renderTabContent(activeTab)
-            }
-          </div>
-        )}
+          {store.activeSessions.length === 0 && activeTab !== 'progress'
+            ? <EmptyDashboard />
+            : renderTabContent(activeTab)
+          }
+        </div>
       </div>
 
       {/* DESKTOP layout (>= lg): resizable sidebar + main */}
@@ -513,8 +453,8 @@ export default function App() {
           <Panel id="sidebar" defaultSize="24" minSize="16" maxSize="40" className="flex flex-col border-r border-border bg-card">
             <div className="shrink-0 p-2.5 space-y-2 border-b border-border">
               <div className="flex gap-2">
-                <div className="flex-1"><DropZone onSessionLoaded={store.addSession} /></div>
-                <DrivePickerButton onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
+                <div className="flex-1"><DropZone compact onSessionLoaded={store.addSession} /></div>
+                <DrivePickerButton compact onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
               </div>
               {store.sessions.length > 0 && (
                 <SessionList
@@ -527,7 +467,7 @@ export default function App() {
                 />
               )}
               {store.sessions.length === 0 && (
-                <div className="py-0.5 text-[10px] tracking-wider text-muted-foreground uppercase">
+                <div className="py-0.5 text-[12px] tracking-wider text-muted-foreground uppercase">
                   <ol className="list-decimal list-inside space-y-0.5">
                     <li>Export CSV from RaceChrono</li>
                     <li>Drop here or load from Drive</li>
@@ -536,13 +476,13 @@ export default function App() {
               )}
               {store.sessions.length > 0 && (
                 <button onClick={store.clearSavedSessions}
-                  className="text-[9px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
+                  className="text-[10px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
                   Clear saved sessions
                 </button>
               )}
             </div>
-            <LapInfoPanel sessions={store.activeSessions} />
             <div className="flex-1 min-h-0 overflow-y-auto scroll-touch">
+              <LapInfoPanel sessions={store.activeSessions} />
               <LapList sessions={store.activeSessions} />
             </div>
           </Panel>
@@ -561,29 +501,22 @@ export default function App() {
                       title={`${tab.label} (${i + 1})`}
                       className="group relative px-4 py-2.5 text-xs tracking-[0.15em] uppercase transition-colors"
                       style={{
-                        color: activeTab === tab.id ? '#F0F0FA' : 'hsl(var(--muted-foreground))',
+                        color: activeTab === tab.id ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
                         fontFamily: 'BMWTypeNext',
                       }}>
                       {tab.label}
-                      <span className="absolute top-1 right-1 text-[7px] opacity-0 group-hover:opacity-30 transition-opacity"
+                      <span className="absolute top-1 right-1 text-[8px] opacity-0 group-hover:opacity-30 transition-opacity"
                         style={{ fontFamily: 'JetBrains Mono' }}>{i + 1}</span>
                       {activeTab === tab.id && (
                         <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t"
-                          style={{ background: 'linear-gradient(to right, #1C69D4, #A855F7)' }} />
+                          style={{ background: 'linear-gradient(to right, hsl(var(--primary)), #A855F7)' }} />
                       )}
                     </button>
                   ))}
                 </div>
-                {activeTab === 'map' ? (
-                  <div className="flex-1 min-h-0 p-2">
-                    <TrackHeatMap sessions={store.activeSessions}
-                      selectedCornerId={selectedCornerId} onCornerSelect={setSelectedCornerId} />
-                  </div>
-                ) : (
-                  <div className="flex-1 overflow-y-auto scroll-touch p-4">
-                    {renderTabContent(activeTab)}
-                  </div>
-                )}
+                <div className="flex-1 overflow-y-auto scroll-touch p-4">
+                  {renderTabContent(activeTab)}
+                </div>
               </div>
             ) : (
               <main className="flex-1 overflow-y-auto scroll-touch p-4">
@@ -610,7 +543,7 @@ export default function App() {
               style={{
                 width: activeTab === tab.id ? 16 : 4,
                 height: 3,
-                background: activeTab === tab.id ? '#1C69D4' : 'rgba(255,255,255,0.15)',
+                background: activeTab === tab.id ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.15)',
               }} />
           ))}
         </div>
@@ -621,9 +554,9 @@ export default function App() {
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                 className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-100 active:scale-[0.90] active:opacity-70 select-none"
-                style={{ color: active ? '#1C69D4' : 'hsl(var(--muted-foreground))' }}>
+                style={{ color: active ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
                 <tab.Icon size={18} />
-                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
+                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
               </button>
             );
           })}
@@ -636,7 +569,7 @@ export default function App() {
         onOpenChange={setPaletteOpen}
         onNavigate={setActiveTab}
         onClearAll={store.clearAll}
-        onSignOut={() => setUser(null)}
+        onSignOut={signOut}
         hasData={store.sessions.length > 0}
       />
     </div>
@@ -657,7 +590,7 @@ function LapList({ sessions }: { sessions: import('@/types/session').LoadedSessi
         return (
           <div key={session.id}>
             {sessions.length > 1 && (
-              <div style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: session.color, marginBottom: 4 }}>
+              <div style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: session.color, marginBottom: 4 }}>
                 {sessionLabel(session)}
               </div>
             )}
@@ -669,13 +602,13 @@ function LapList({ sessions }: { sessions: import('@/types/session').LoadedSessi
                 return (
                   <div key={lap.lap_num} className="flex items-center justify-between px-2 py-0.5 rounded"
                     style={{ background: isBest ? 'rgba(168,85,247,0.08)' : undefined }}>
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', color: isBest ? '#A855F7' : '#9A9AB0', width: 28 }}>
+                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: isBest ? '#A855F7' : 'hsl(var(--muted-foreground))', width: 28 }}>
                       L{lap.lap_num}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : '#E8E8F0' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : 'hsl(var(--foreground))' }}>
                       {formatLapTime(lap.lap_time_s)}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '10px', color: deltaColor, width: 44, textAlign: 'right' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: deltaColor, width: 44, textAlign: 'right' }}>
                       {isBest ? '●' : `+${delta.toFixed(2)}`}
                     </span>
                   </div>
@@ -696,10 +629,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <div>
       <div className="flex items-center gap-2 mb-2.5">
         <div className="w-[3px] h-3 rounded-full shrink-0"
-          style={{ background: 'linear-gradient(to bottom, #1C69D4, #A855F7)' }} />
+          style={{ background: 'linear-gradient(to bottom, hsl(var(--primary)), #A855F7)' }} />
         <span style={{
           fontFamily: 'BMWTypeNext',
-          fontSize: '10px',
+          fontSize: '12px',
           fontWeight: 600,
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
@@ -718,17 +651,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function EmptyDashboard() {
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center min-h-[300px]">
-      {/* M stripes as empty state decoration */}
+      {/* Accent stripes as empty state decoration */}
       <div className="flex items-center gap-[4px]" style={{ height: 48, opacity: 0.12 }}>
         {config.stripeColors.map((c, i) => (
           <div key={i} style={{ width: 8, height: '100%', background: c, borderRadius: 1 }} />
         ))}
       </div>
       <div className="space-y-1">
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 13, letterSpacing: '0.18em', color: 'hsl(var(--muted-foreground))', opacity: 0.5, textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 15, letterSpacing: '0.18em', color: 'hsl(var(--muted-foreground))', opacity: 0.5, textTransform: 'uppercase' }}>
           No session loaded
         </p>
-        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.12em', color: 'hsl(var(--muted-foreground))', opacity: 0.3, textTransform: 'uppercase' }}>
+        <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.12em', color: 'hsl(var(--muted-foreground))', opacity: 0.3, textTransform: 'uppercase' }}>
           Drop a RaceChrono CSV or load from Drive
         </p>
       </div>

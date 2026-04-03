@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useMemory } from '@/hooks/useMemory';
+import type { DebriefNote } from '@/lib/memory';
 
-const MAX_CHARS = 2000;
+const MAX_CHARS = 5000;
 const LS_KEY = (id: string) => `notes:${id}`;
 
 interface Props {
   sessionId: string;
+  onCloudSync?: (notes: Record<string, DebriefNote>) => void;
 }
 
-export function DebriefNotes({ sessionId }: Props) {
+export function DebriefNotes({ sessionId, onCloudSync }: Props) {
   const { memory, loaded, update } = useMemory();
   const [text, setText] = useState('');
   const [saved, setSaved] = useState(false);
@@ -17,35 +19,46 @@ export function DebriefNotes({ sessionId }: Props) {
   // Hydrate from IndexedDB once loaded; migrate from localStorage on first use
   useEffect(() => {
     if (!loaded) return;
+    let cancelled = false;
 
-    const idbValue = memory.debriefNotes[sessionId] ?? '';
+    // Wrapped in a microtask to satisfy React compiler's set-state-in-effect rule
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
 
-    if (idbValue) {
-      setText(idbValue);
-      setMigrated(true);
-      return;
-    }
-
-    // One-time migration: pull from localStorage if IDB has nothing
-    try {
-      const lsValue = localStorage.getItem(LS_KEY(sessionId));
-      if (lsValue) {
-        setText(lsValue);
-        // Persist to IDB and clean up localStorage
-        update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: lsValue } });
-        localStorage.removeItem(LS_KEY(sessionId));
+      const entry = memory.debriefNotes[sessionId];
+      const idbValue = entry?.text ?? '';
+      if (idbValue) {
+        setText(idbValue);
+        setMigrated(true);
+        return;
       }
-    } catch { /* quota or restricted */ }
 
-    setMigrated(true);
+      // One-time migration: pull from localStorage if IDB has nothing
+      try {
+        const lsValue = localStorage.getItem(LS_KEY(sessionId));
+        if (lsValue) {
+          setText(lsValue);
+          const note: DebriefNote = { text: lsValue, updatedAt: Date.now() };
+          update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: note } });
+          localStorage.removeItem(LS_KEY(sessionId));
+        }
+      } catch { /* quota or restricted */ }
+
+      setMigrated(true);
+    });
+
+    return () => { cancelled = true; };
   }, [loaded, sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBlur = useCallback(() => {
     const trimmed = text.slice(0, MAX_CHARS);
-    update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: trimmed } });
+    const note: DebriefNote = { text: trimmed, updatedAt: Date.now() };
+    const next = { ...memory.debriefNotes, [sessionId]: note };
+    update({ debriefNotes: next });
+    onCloudSync?.(next);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  }, [sessionId, text, memory.debriefNotes, update]);
+  }, [sessionId, text, memory.debriefNotes, update, onCloudSync]);
 
   const remaining = MAX_CHARS - text.length;
 

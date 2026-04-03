@@ -12,7 +12,8 @@ import {
 import type { LoadedSession } from '@/types/session';
 import type { AppMemory } from '@/lib/memory';
 import { formatLapTime, sessionLabel } from '@/lib/utils';
-import { FF, FS, T, S, SESSION_COLORS } from '@/lib/chartTheme';
+import { FF, FS, T, S, SESSION_COLORS, useChartColors } from '@/lib/chartTheme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   sessions: LoadedSession[];
@@ -96,7 +97,7 @@ function buildPersonalBests(
   return [...byTrack.values()].sort((a, b) => a.track.localeCompare(b.track));
 }
 
-function PersonalBestsBoard({ bests }: { bests: TrackBest[] }) {
+function PersonalBestsBoard({ bests, cc }: { bests: TrackBest[]; cc: ReturnType<typeof useChartColors> }) {
   if (bests.length === 0) {
     return (
       <div className="flex items-center justify-center h-24 rounded-lg border border-border/40"
@@ -111,27 +112,27 @@ function PersonalBestsBoard({ bests }: { bests: TrackBest[] }) {
       {bests.map(b => (
         <div key={b.track}
           className="rounded-lg border border-border/60 overflow-hidden"
-          style={{ background: '#0B0B14' }}>
+          style={{ background: cc.cardBg }}>
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40"
-            style={{ background: '#0D0D18' }}>
-            <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.12em', textTransform: 'uppercase', color: T.muted }}>
+            style={{ background: cc.surfaceBg }}>
+            <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.12em', textTransform: 'uppercase', color: cc.t.muted }}>
               {b.track}
             </span>
-            <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.ghost }}>
+            <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: cc.t.ghost }}>
               {b.sessions} session{b.sessions !== 1 ? 's' : ''}
             </span>
           </div>
           <div className="px-3 py-2 flex items-end justify-between gap-2">
             <div>
-              <div style={{ fontFamily: FF.mono, fontSize: '22px', fontWeight: 700, color: '#A855F7', lineHeight: 1 }}>
+              <div style={{ fontFamily: FF.mono, fontSize: `${FS.hero}px`, fontWeight: 700, color: '#A855F7', lineHeight: 1 }}>
                 {b.bestLap}
               </div>
-              <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.ghost, marginTop: 4 }}>
+              <div style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: cc.t.ghost, marginTop: 4 }}>
                 {b.lapCount} laps · {formatDate(b.date)}
               </div>
             </div>
             <div className="shrink-0 w-1 h-8 rounded-full"
-              style={{ background: 'linear-gradient(to bottom, #A855F7, #1C69D4)' }} />
+              style={{ background: 'linear-gradient(to bottom, #A855F7, hsl(var(--primary)))' }} />
           </div>
         </div>
       ))}
@@ -221,7 +222,7 @@ function ProgressionTooltip({ active, payload, label }: ProgressionTooltipProps)
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded border border-border p-2 space-y-1"
-      style={{ background: '#0E0E1A', fontFamily: FF.sans, fontSize: `${FS.nano}px` }}>
+      style={{ background: 'hsl(var(--popover))', fontFamily: FF.sans, fontSize: `${FS.nano}px` }}>
       <div style={{ color: T.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</div>
       {payload.map(p => (
         <div key={p.name} className="flex items-center gap-2">
@@ -236,7 +237,7 @@ function ProgressionTooltip({ active, payload, label }: ProgressionTooltipProps)
   );
 }
 
-function LapTimeProgressionChart({ points, tracks }: { points: ProgressPoint[]; tracks: string[] }) {
+function LapTimeProgressionChart({ points, tracks, cc }: { points: ProgressPoint[]; tracks: string[]; cc: ReturnType<typeof useChartColors> }) {
   if (points.length < 2) {
     return (
       <div className="flex items-center justify-center h-40 rounded-lg border border-border/40"
@@ -270,17 +271,17 @@ function LapTimeProgressionChart({ points, tracks }: { points: ProgressPoint[]; 
       </p>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={points} margin={{ top: 8, right: 16, bottom: 0, left: 4 }}>
-          <CartesianGrid strokeDasharray="3 6" stroke="#1C1C2C" vertical={false} />
+          <CartesianGrid strokeDasharray="3 6" stroke={cc.gridStyle.stroke} vertical={false} />
           <XAxis
             dataKey="dateLabel"
-            tick={{ fontFamily: FF.sans, fontSize: FS.nano, fill: T.muted }}
+            tick={{ fontFamily: FF.sans, fontSize: FS.nano, fill: cc.t.muted }}
             axisLine={false} tickLine={false}
           />
           <YAxis
             domain={yDomain}
             reversed
             tickFormatter={formatYAxisTick}
-            tick={{ fontFamily: FF.mono, fontSize: FS.nano, fill: T.muted }}
+            tick={{ fontFamily: FF.mono, fontSize: FS.nano, fill: cc.t.muted }}
             axisLine={false} tickLine={false}
             width={52}
           />
@@ -365,7 +366,7 @@ function ConsistencyTooltip({ active, payload }: ConsistencyTooltipProps) {
   const d = payload[0]!.payload;
   return (
     <div className="rounded border border-border p-2 space-y-1"
-      style={{ background: '#0E0E1A', fontFamily: FF.sans, fontSize: `${FS.nano}px` }}>
+      style={{ background: 'hsl(var(--popover))', fontFamily: FF.sans, fontSize: `${FS.nano}px` }}>
       <div style={{ color: T.muted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{d.sessionLabel}</div>
       <div className="flex items-center gap-2">
         <span style={{ color: T.label }}>Std Dev</span>
@@ -391,7 +392,7 @@ function stdDevColor(v: number): string {
   return S.bad;
 }
 
-function ConsistencyTrendChart({ points }: { points: ConsistencyPoint[] }) {
+function ConsistencyTrendChart({ points, cc }: { points: ConsistencyPoint[]; cc: ReturnType<typeof useChartColors> }) {
   if (points.length < 2) {
     return (
       <div className="flex items-center justify-center h-40 rounded-lg border border-border/40"
@@ -413,16 +414,16 @@ function ConsistencyTrendChart({ points }: { points: ConsistencyPoint[] }) {
       </p>
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={points} margin={{ top: 8, right: 16, bottom: 0, left: 4 }}>
-          <CartesianGrid strokeDasharray="3 6" stroke="#1C1C2C" vertical={false} />
+          <CartesianGrid strokeDasharray="3 6" stroke={cc.gridStyle.stroke} vertical={false} />
           <XAxis
             dataKey="dateLabel"
-            tick={{ fontFamily: FF.sans, fontSize: FS.nano, fill: T.muted }}
+            tick={{ fontFamily: FF.sans, fontSize: FS.nano, fill: cc.t.muted }}
             axisLine={false} tickLine={false}
           />
           <YAxis
             domain={[0, yMax]}
             tickFormatter={v => `${v.toFixed(1)}s`}
-            tick={{ fontFamily: FF.mono, fontSize: FS.nano, fill: T.muted }}
+            tick={{ fontFamily: FF.mono, fontSize: FS.nano, fill: cc.t.muted }}
             axisLine={false} tickLine={false}
             width={40}
           />
@@ -470,6 +471,8 @@ function SubSection({ title, children }: { title: string; children: React.ReactN
 import React from 'react';
 
 export function ProgressTab({ sessions, trackHistory }: Props) {
+  const { resolvedTheme } = useTheme();
+  const cc = useChartColors(resolvedTheme);
   const bests = useMemo(() => buildPersonalBests(trackHistory, sessions), [trackHistory, sessions]);
   const { points: progressPoints, tracks } = useMemo(
     () => buildProgressionData(trackHistory, sessions),
@@ -483,15 +486,15 @@ export function ProgressTab({ sessions, trackHistory }: Props) {
   return (
     <div className="space-y-8">
       <SubSection title="Personal Bests">
-        <PersonalBestsBoard bests={bests} />
+        <PersonalBestsBoard bests={bests} cc={cc} />
       </SubSection>
 
       <SubSection title="Lap Time Progression">
-        <LapTimeProgressionChart points={progressPoints} tracks={tracks} />
+        <LapTimeProgressionChart points={progressPoints} tracks={tracks} cc={cc} />
       </SubSection>
 
       <SubSection title="Consistency Trend">
-        <ConsistencyTrendChart points={consistencyPoints} />
+        <ConsistencyTrendChart points={consistencyPoints} cc={cc} />
       </SubSection>
     </div>
   );

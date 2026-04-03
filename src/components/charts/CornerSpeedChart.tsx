@@ -4,7 +4,8 @@ import {
 } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { kphToMph, sessionLabel } from '@/lib/utils';
-import { CHART_MARGINS, CHART_MARGINS_MOBILE, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, TOOLTIP_HEADER_STYLE, LEGEND_LABEL_STYLE, SESSION_COLORS, T, FF, FS, S, axisLabel } from '@/lib/chartTheme';
+import { CHART_MARGINS, CHART_MARGINS_MOBILE, TOOLTIP_STYLE, TOOLTIP_HEADER_STYLE, LEGEND_LABEL_STYLE, SESSION_COLORS, T, FF, FS, S, axisLabel, useChartColors } from '@/lib/chartTheme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   sessions: LoadedSession[];
@@ -35,8 +36,8 @@ function buildChartData(sessions: LoadedSession[]): CornerRow[] {
 function CustomTooltip({ active, payload, label, sessions }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ ...TOOLTIP_STYLE, minWidth: 160 }}>
-      <p style={TOOLTIP_HEADER_STYLE}>{label}</p>
+    <div style={{ ...TOOLTIP_STYLE, minWidth: 160 } as React.CSSProperties}>
+      <p style={TOOLTIP_HEADER_STYLE as React.CSSProperties}>{label}</p>
       {payload.map((entry: { dataKey: string; value: number }) => {
         const s = sessions.find((s: LoadedSession) => s.id === entry.dataKey);
         return (
@@ -62,6 +63,9 @@ function heatColor(value: number, min: number, max: number): string {
 }
 
 export function CornerSpeedChart({ sessions }: Props) {
+  const { resolvedTheme } = useTheme();
+  const cc = useChartColors(resolvedTheme);
+
   if (sessions.length === 0) {
     return (
       <div className="flex h-48 items-center justify-center">
@@ -112,12 +116,12 @@ export function CornerSpeedChart({ sessions }: Props) {
       {/* Apex speed bar chart */}
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={data} margin={isMobile ? CHART_MARGINS_MOBILE : CHART_MARGINS} barCategoryGap="28%">
-          <CartesianGrid stroke={GRID_STYLE.stroke} vertical={false} />
-          <XAxis dataKey="label" tick={AXIS_STYLE.tick} axisLine={AXIS_STYLE.axisLine} tickLine={AXIS_STYLE.tickLine} />
+          <CartesianGrid stroke={cc.gridStyle.stroke} vertical={false} />
+          <XAxis dataKey="label" tick={cc.axisStyle.tick} axisLine={cc.axisStyle.axisLine} tickLine={cc.axisStyle.tickLine} />
           <YAxis
-            tick={AXIS_STYLE.tick}
-            axisLine={AXIS_STYLE.axisLine}
-            tickLine={AXIS_STYLE.tickLine}
+            tick={cc.axisStyle.tick}
+            axisLine={cc.axisStyle.axisLine}
+            tickLine={cc.axisStyle.tickLine}
             label={axisLabel('MPH', 'insideLeft')}
             domain={['auto', 'auto']}
             width={isMobile ? 36 : 48}

@@ -16,7 +16,8 @@ import { useRef, useEffect, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import type { LoadedSession, FrictionScatterPoint } from '@/types/session';
 import { sessionLabel } from '@/lib/utils';
-import { T, FF, FS, S, SESSION_COLORS } from '@/lib/chartTheme';
+import { T, FF, FS, S, SESSION_COLORS, useChartColors } from '@/lib/chartTheme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props { sessions: LoadedSession[] }
 
@@ -32,6 +33,8 @@ function heatColor(totalG: number): string {
 }
 
 export function FrictionScatterChart({ sessions }: Props) {
+  const { resolvedTheme } = useTheme();
+  const cc = useChartColors(resolvedTheme);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -71,8 +74,9 @@ export function FrictionScatterChart({ sessions }: Props) {
     const unitPx = xScale(1) - xScale(0); // pixels per 1G
 
     // Background
-    ctx.fillStyle = '#08080E';
+    ctx.fillStyle = cc.canvasBg;
     ctx.fillRect(0, 0, W, H);
+
 
     // ── G-force rings ──────────────────────────────────────────────────────────
     const rings = [0.4, 0.8, 1.0, 1.2];
@@ -87,7 +91,7 @@ export function FrictionScatterChart({ sessions }: Props) {
       ctx.setLineDash([]);
 
       // Ring label (right side)
-      ctx.fillStyle  = g === 1.0 ? T.muted : '#2A2A40';
+      ctx.fillStyle  = g === 1.0 ? cc.t.muted : '#2A2A40';
       ctx.font       = `${FS.nano}px ${FF.sans}`;
       ctx.textAlign  = 'left';
       ctx.fillText(`${g}G`, ox + r + 3, oy - 3);
@@ -113,7 +117,7 @@ export function FrictionScatterChart({ sessions }: Props) {
     ctx.fillText('RIGHT', W - PAD - 3, oy - 5);
 
     // ── Axis tick labels ──────────────────────────────────────────────────────
-    ctx.fillStyle = T.muted;
+    ctx.fillStyle = cc.t.muted;
     ctx.font      = `${FS.nano}px ${FF.sans}`;
     [-1, 1].forEach(v => {
       ctx.textAlign  = 'center';
@@ -141,7 +145,7 @@ export function FrictionScatterChart({ sessions }: Props) {
     ctx.lineWidth   = 1;
     ctx.strokeRect(PAD, PAD, W - 2 * PAD, H - 2 * PAD);
 
-  }, [seriesData, hasData]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [seriesData, hasData, sessions.length, cc, resolvedTheme]);
 
   // Draw on data change AND on container resize
   useEffect(() => {

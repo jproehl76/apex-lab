@@ -8,8 +8,8 @@ export const config = {
   appName: 'Apex Lab',
   carName: '2021 Toyota GR A91 Supra',  // default; overridden by user profile
   carLogoUrl: null as string | null,
-  stripeColors: ['#1C69D4', '#6B2D9E', '#EF3340'] as string[],
-  defaultPrimaryColor: '#1C69D4',
+  stripeColors: ['#16588E', '#E7222E', '#81C4FF'] as string[],
+  defaultPrimaryColor: '#16588E',
   defaultAccentColor: '#A855F7',
   googleDriveFolderId: '1fZOPXu1kO3UsnRE0MB_cba9OPaFVKVBx',
   healthProvider: 'whoop' as 'whoop' | 'strava' | 'oura' | null,
@@ -20,4 +20,5 @@ export const config = {
   // ↑ Vercel (or other) proxy that forwards to Anthropic with the server-side key.
   //   Set VITE_COACHING_WORKER_URL=https://<your-app>.vercel.app in .env
   //   Leave empty if users supply their own Anthropic key via Settings.
+  ownerEmail: 'jonathan.proehl@gmail.com',
 };

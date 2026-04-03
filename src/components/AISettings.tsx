@@ -3,6 +3,8 @@ import { X, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react';
 import type { UserProfile } from '@/lib/userProfile';
 import { readProfile, writeProfile, lookupVin } from '@/lib/userProfile';
 import { AVAILABLE_MODELS, DEFAULT_MODEL } from '@/lib/services/modelConfig';
+import { useTheme } from '@/lib/ThemeContext';
+
 
 interface Props {
   email: string;
@@ -37,15 +39,17 @@ export function AISettings({ email, onClose, onSave }: Props) {
       setAiEnabled(p.aiCoachingEnabled);
       setApiKey(p.anthropicApiKey ?? '');
       setModelId(p.preferredModel ?? DEFAULT_MODEL);
-    });
+    }).catch(() => { setLoading(false); });
   }, [email]);
 
   async function handleVinLookup() {
     if (vin.length !== 17) return;
     setVinLoading(true);
-    const result = await lookupVin(vin.toUpperCase());
+    try {
+      const result = await lookupVin(vin.toUpperCase());
+      if (result) setCarName(`${result.year} ${result.make} ${result.model}`.trim());
+    } catch { /* VIN lookup failed silently */ }
     setVinLoading(false);
-    if (result) setCarName(`${result.year} ${result.make} ${result.model}`.trim());
   }
 
   async function handleTestKey() {
@@ -90,11 +94,13 @@ export function AISettings({ email, onClose, onSave }: Props) {
       preferredModel:    modelId,
       updatedAt:         new Date().toISOString(),
     };
-    await writeProfile(updated);
-    setProfile(updated);
-    onSave(updated);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      await writeProfile(updated);
+      setProfile(updated);
+      onSave(updated);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch { /* write failed */ }
   }
 
   return (
@@ -105,7 +111,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 14, fontWeight: 700, letterSpacing: '0.08em', color: '#F0F0FA' }}>
+          <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 16, fontWeight: 700, letterSpacing: '0.08em', color: 'hsl(var(--foreground))' }}>
             Settings
           </h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -120,9 +126,12 @@ export function AISettings({ email, onClose, onSave }: Props) {
         ) : (
           <div className="p-5 space-y-6">
 
+            {/* ── Text Size ─────────────────────────────────────────── */}
+            <TextSizeSection />
+
             {/* ── Car / Profile ─────────────────────────────────────────── */}
             <section className="space-y-3">
-              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#606080' }}>
+              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
                 Car Profile
               </p>
 
@@ -148,16 +157,16 @@ export function AISettings({ email, onClose, onSave }: Props) {
               <input
                 value={carName}
                 onChange={e => setCarName(e.target.value)}
-                placeholder="Car name (e.g. 2025 BMW M3 Competition)"
+                placeholder="Car name (e.g. 2025 Porsche 911 GT3)"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                style={{ fontFamily: 'BMWTypeNext', fontSize: 12 }}
+                style={{ fontFamily: 'BMWTypeNext', fontSize: 14 }}
               />
             </section>
 
             {/* ── AI Coaching ───────────────────────────────────────────── */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
-                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#606080' }}>
+                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
                   AI Coaching
                 </p>
                 {/* Toggle */}
@@ -176,7 +185,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
                 <div className="space-y-3">
                   {/* API key */}
                   <div className="space-y-1.5">
-                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9090B0' }}>
+                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
                       Anthropic API Key
                     </label>
                     <div className="flex gap-2">
@@ -209,16 +218,16 @@ export function AISettings({ email, onClose, onSave }: Props) {
                       </button>
                     </div>
                     {testState === 'fail' && (
-                      <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, color: '#EF3340' }}>{testError}</p>
+                      <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: 'hsl(var(--destructive))' }}>{testError}</p>
                     )}
-                    <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, color: '#505070' }}>
+                    <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: 'hsl(var(--muted-foreground))' }}>
                       Stored locally in your browser. Never sent anywhere except Anthropic.
                     </p>
                   </div>
 
                   {/* Model selector */}
                   <div className="space-y-1.5">
-                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9090B0' }}>
+                    <label style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
                       Model
                     </label>
                     <div className="space-y-1.5">
@@ -230,7 +239,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
                               ? 'border-primary/40 bg-primary/8'
                               : 'border-border hover:border-border/80'
                           }`}
-                          style={{ background: modelId === m.id ? 'rgba(28,105,212,0.08)' : undefined }}
+                          style={{ background: modelId === m.id ? 'hsl(var(--primary) / 0.08)' : undefined }}
                         >
                           <input
                             type="radio"
@@ -241,10 +250,10 @@ export function AISettings({ email, onClose, onSave }: Props) {
                             className="mt-0.5 accent-primary"
                           />
                           <div>
-                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, fontWeight: 600, color: modelId === m.id ? '#A8C4F8' : '#E0E0F0' }}>
+                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 14, fontWeight: 600, color: modelId === m.id ? 'hsl(var(--primary))' : 'hsl(var(--foreground))' }}>
                               {m.label}
                             </p>
-                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, color: '#606080', marginTop: 1 }}>
+                            <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: 'hsl(var(--muted-foreground))', marginTop: 1 }}>
                               {m.hint}
                             </p>
                           </div>
@@ -271,7 +280,7 @@ export function AISettings({ email, onClose, onSave }: Props) {
             onClick={handleSave}
             className="flex-1 py-2.5 rounded-lg text-sm text-white transition-colors flex items-center justify-center gap-2"
             style={{
-              background: 'linear-gradient(to right, #1C69D4, #6B2D9E)',
+              background: 'linear-gradient(to right, hsl(var(--primary)), #A855F7)',
               fontFamily: 'BMWTypeNext',
               letterSpacing: '0.1em',
             }}
@@ -282,5 +291,41 @@ export function AISettings({ email, onClose, onSave }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+const SCALE_OPTIONS: { value: 0.9 | 1.0 | 1.1 | 1.25; label: string }[] = [
+  { value: 0.9,  label: 'Small' },
+  { value: 1.0,  label: 'Default' },
+  { value: 1.1,  label: 'Large' },
+  { value: 1.25, label: 'Extra Large' },
+];
+
+function TextSizeSection() {
+  const { textScale, setTextScale } = useTheme();
+
+  return (
+    <section className="space-y-3">
+      <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
+        Text Size
+      </p>
+      <div className="flex gap-2">
+        {SCALE_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setTextScale(value)}
+            className="flex-1 py-2 rounded-lg border text-xs tracking-wider transition-colors"
+            style={{
+              borderColor: textScale === value ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+              background: textScale === value ? 'hsl(var(--primary) / 0.1)' : 'transparent',
+              color: textScale === value ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+              fontFamily: 'BMWTypeNext',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

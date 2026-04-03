@@ -47,17 +47,17 @@ export function ProfileSetup({ email, onSave }: Props) {
         style={{ fontFamily: 'BMWTypeNext' }}
       >
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#F0F0FA', letterSpacing: '0.05em' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'hsl(var(--foreground))', letterSpacing: '0.05em' }}>
             Welcome to JP Apex Lab
           </h2>
-          <p style={{ fontSize: 11, color: '#9090B0', marginTop: 4, letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: 13, color: 'hsl(var(--muted-foreground))', marginTop: 4, letterSpacing: '0.05em' }}>
             Tell us about your car to personalise the dashboard
           </p>
         </div>
 
         {/* VIN lookup */}
         <div className="space-y-2">
-          <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             VIN (optional — auto-fills car name)
           </label>
           <div className="flex gap-2">
@@ -67,7 +67,7 @@ export function ProfileSetup({ email, onSave }: Props) {
               placeholder="17-character VIN"
               maxLength={17}
               className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              style={{ fontFamily: 'JetBrains Mono', fontSize: 12, letterSpacing: '0.05em' }}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: 14, letterSpacing: '0.05em' }}
             />
             <button
               onClick={handleVinLookup}
@@ -81,13 +81,13 @@ export function ProfileSetup({ email, onSave }: Props) {
 
         {/* Car name */}
         <div className="space-y-2">
-          <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             Car Name
           </label>
           <input
             value={carName}
             onChange={e => setCarName(e.target.value)}
-            placeholder="e.g. 2025 BMW M3 Competition"
+            placeholder="e.g. 2025 Porsche 911 GT3"
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -95,7 +95,7 @@ export function ProfileSetup({ email, onSave }: Props) {
         {/* Car specs (optional) */}
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1.5">
-            <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+            <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
               Horsepower
             </label>
             <input
@@ -103,12 +103,12 @@ export function ProfileSetup({ email, onSave }: Props) {
               onChange={e => setCarHp(e.target.value.replace(/\D/g, ''))}
               placeholder="e.g. 503"
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              style={{ fontFamily: 'JetBrains Mono', fontSize: 12 }}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: 14 }}
               inputMode="numeric"
             />
           </div>
           <div className="space-y-1.5">
-            <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+            <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
               Weight (lbs)
             </label>
             <input
@@ -116,13 +116,13 @@ export function ProfileSetup({ email, onSave }: Props) {
               onChange={e => setCarWeight(e.target.value.replace(/\D/g, ''))}
               placeholder="e.g. 3828"
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              style={{ fontFamily: 'JetBrains Mono', fontSize: 12 }}
+              style={{ fontFamily: 'JetBrains Mono', fontSize: 14 }}
               inputMode="numeric"
             />
           </div>
         </div>
         <div className="space-y-1.5">
-          <label style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             Drivetrain
           </label>
           <div className="flex gap-2">
@@ -147,7 +147,7 @@ export function ProfileSetup({ email, onSave }: Props) {
         </div>
 
         {error && (
-          <p style={{ fontSize: 11, color: '#EF3340' }}>{error}</p>
+          <p style={{ fontSize: 13, color: 'hsl(var(--destructive))' }}>{error}</p>
         )}
 
         <button

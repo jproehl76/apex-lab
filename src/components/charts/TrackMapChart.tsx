@@ -88,7 +88,7 @@ function CornerCard({ corner, onClose }: { corner: BestLapCorner; onClose: () =>
     <div className="shrink-0 border-t border-border p-3 bg-card/50">
       <div className="flex items-center justify-between mb-2.5">
         <span className="text-sm font-bold tracking-widest text-foreground uppercase">{corner.corner_name}</span>
-        <button onClick={onClose} className="text-muted-foreground hover:text-destructive transition-colors text-[10px] tracking-widest uppercase">
+        <button onClick={onClose} className="text-muted-foreground hover:text-destructive transition-colors text-[12px] tracking-widest uppercase">
           ✕ close
         </button>
       </div>
@@ -100,9 +100,9 @@ function CornerCard({ corner, onClose }: { corner: BestLapCorner; onClose: () =>
           { label: 'Exit',  val: mph(corner.exit_speed_kph),  color: '#22C55E' },
         ].map(s => (
           <div key={s.label} className="rounded p-2 text-center bg-background border border-border">
-            <div className="text-[8px] tracking-widest text-muted-foreground uppercase mb-0.5">{s.label}</div>
-            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '17px', fontWeight: 600, color: s.color, lineHeight: 1 }}>{s.val}</div>
-            <div className="text-[8px] text-muted-foreground mt-0.5">mph</div>
+            <div className="text-[10px] tracking-widest text-muted-foreground uppercase mb-0.5">{s.label}</div>
+            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '19px', fontWeight: 600, color: s.color, lineHeight: 1 }}>{s.val}</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">mph</div>
           </div>
         ))}
       </div>
@@ -114,8 +114,8 @@ function CornerCard({ corner, onClose }: { corner: BestLapCorner; onClose: () =>
           { label: 'Peak G', val: `${corner.peak_lat_g.toFixed(2)}G`, warn: false },
         ].map(s => (
           <div key={s.label} className="rounded p-1.5 text-center bg-background border border-border">
-            <div className="text-[8px] tracking-widest text-muted-foreground uppercase mb-0.5">{s.label}</div>
-            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', fontWeight: 600, color: s.warn ? '#F59E0B' : undefined }}
+            <div className="text-[10px] tracking-widest text-muted-foreground uppercase mb-0.5">{s.label}</div>
+            <div style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: 600, color: s.warn ? '#F59E0B' : undefined }}
               className={s.warn ? '' : 'text-muted-foreground'}>{s.val}</div>
           </div>
         ))}
@@ -135,7 +135,7 @@ export interface TrackMapProps {
 export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, onCornerSelect }: TrackMapProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const session = sessions[0];
-  const trace   = session?.data.gps_trace ?? [];
+  const trace   = useMemo(() => session?.data.gps_trace ?? [], [session]);
 
   const refLayout = useMemo(() => findTrackLayout(session?.data.header.track), [session]);
 
@@ -182,18 +182,18 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
 
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">{trackName}</span>
+        <span className="text-[12px] tracking-widest text-muted-foreground uppercase">{trackName}</span>
         {sessions.length > 1 && (
           <div className="flex gap-1">
             {sessions.map(s => (
-              <span key={s.id} className="text-[9px] px-1.5 py-0.5 rounded border text-muted-foreground"
+              <span key={s.id} className="text-[10px] px-1.5 py-0.5 rounded border text-muted-foreground"
                 style={{ borderColor: s.color, color: s.color }}>
                 {sessionLabel(s)}
               </span>
             ))}
           </div>
         )}
-        <span className="text-[9px] tracking-widest text-muted-foreground/40 uppercase">tap corner</span>
+        <span className="text-[10px] tracking-widest text-muted-foreground/40 uppercase">tap corner</span>
       </div>
 
       {/* SVG map */}
@@ -237,7 +237,7 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
           {/* No-track fallback */}
           {!refPath && !tracePath && (
             <text x={SVG_W / 2} y={SVG_H / 2} textAnchor="middle" dominantBaseline="middle"
-              style={{ fontFamily: 'BMWTypeNext', fontSize: '10px', letterSpacing: '0.2em', fill: '#252535', textTransform: 'uppercase' }}>
+              style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.2em', fill: '#252535', textTransform: 'uppercase' }}>
               No GPS data — load a session
             </text>
           )}
@@ -287,7 +287,7 @@ export function TrackMapChart({ sessions, variant = 'chart', selectedCornerId, o
                 <text x={a.x} y={a.y + 0.5} textAnchor="middle" dominantBaseline="middle"
                   style={{
                     fontFamily: 'BMWTypeNext',
-                    fontSize: sel ? '10px' : '9px',
+                    fontSize: sel ? '12px' : '10px',
                     fontWeight: 700,
                     fill: sel ? '#FFF' : hasData ? '#C0C0D4' : '#5A5A72',
                     userSelect: 'none',

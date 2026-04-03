@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { MapIcon, Heart, LogOut, Trash2, LayoutGrid } from 'lucide-react';
+import { MapIcon, GraduationCap, LogOut, Trash2, LayoutGrid } from 'lucide-react';
 import {
   CommandDialog,
   CommandEmpty,
@@ -21,11 +21,10 @@ interface CommandPaletteProps {
 }
 
 const TABS = [
-  { id: 'session',  label: 'Session',  Icon: () => <span>⊞</span>, key: '1' },
-  { id: 'map',      label: 'Map',      Icon: MapIcon,               key: '2' },
-  { id: 'corners',  label: 'Corners',  Icon: () => <span>◎</span>, key: '3' },
-  { id: 'health',   label: 'Health',   Icon: Heart,                 key: '4' },
-  { id: 'notes',    label: 'Notes',    Icon: () => <span>✎</span>, key: '5' },
+  { id: 'session',  label: 'Session',  Icon: () => <span>⊞</span>,  key: '1' },
+  { id: 'track',    label: 'Track',    Icon: MapIcon,                key: '2' },
+  { id: 'coach',    label: 'Coach',    Icon: GraduationCap,          key: '3' },
+  { id: 'progress', label: 'Progress', Icon: () => <span>↗</span>, key: '4' },
 ];
 
 export function CommandPalette({
