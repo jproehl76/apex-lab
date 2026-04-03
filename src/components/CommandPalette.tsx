@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { MapIcon, GraduationCap, LogOut, Trash2, LayoutGrid } from 'lucide-react';
+import { MapIcon, GraduationCap, LogOut, Trash2, LayoutGrid, Monitor, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeContext';
 import {
   CommandDialog,
   CommandEmpty,
@@ -31,6 +32,7 @@ const TABS = [
 export function CommandPalette({
   open, onOpenChange, onNavigate, onClearAll, onSignOut, hasData,
 }: CommandPaletteProps) {
+  const { setTheme } = useTheme();
   // ⌘K / Ctrl+K to open
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -89,6 +91,22 @@ export function CommandPalette({
             </CommandGroup>
           </>
         )}
+
+        <CommandSeparator />
+        <CommandGroup heading="Theme">
+          <CommandItem value="theme system" onSelect={() => run(() => setTheme('system'))}>
+            <Monitor size={14} />
+            <span>System theme</span>
+          </CommandItem>
+          <CommandItem value="theme light" onSelect={() => run(() => setTheme('light'))}>
+            <Sun size={14} />
+            <span>Light theme</span>
+          </CommandItem>
+          <CommandItem value="theme dark" onSelect={() => run(() => setTheme('dark'))}>
+            <Moon size={14} />
+            <span>Dark theme</span>
+          </CommandItem>
+        </CommandGroup>
 
         <CommandSeparator />
         <CommandGroup heading="Account">

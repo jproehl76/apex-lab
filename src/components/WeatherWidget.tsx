@@ -134,7 +134,7 @@ export function WeatherWidget({ date, lat, lon }: Props) {
       <div className="flex flex-wrap gap-2">
         {tiles.map(t => (
           <div key={t.label} className="flex flex-col rounded px-2 py-1"
-            style={{ background: '#0E0E1A', border: '1px solid #1E1E2E', minWidth: 72 }}>
+            style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', minWidth: 72 }}>
             <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted }}>
               {t.label}
             </span>

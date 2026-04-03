@@ -3,7 +3,8 @@ import {
 } from 'recharts';
 import type { LoadedSession } from '@/types/session';
 import { formatLapTime, sessionLabel } from '@/lib/utils';
-import { CHART_MARGINS, AXIS_STYLE, GRID_STYLE, TOOLTIP_STYLE, TOOLTIP_HEADER_STYLE, LEGEND_LABEL_STYLE, T, FF, FS, axisLabel } from '@/lib/chartTheme';
+import { CHART_MARGINS, TOOLTIP_STYLE, TOOLTIP_HEADER_STYLE, LEGEND_LABEL_STYLE, T, FF, FS, axisLabel, useChartColors } from '@/lib/chartTheme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props {
   sessions: LoadedSession[];
@@ -49,6 +50,9 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function LapTimesChart({ sessions }: Props) {
+  const { resolvedTheme } = useTheme();
+  const cc = useChartColors(resolvedTheme);
+
   if (sessions.length === 0) {
     return <EmptyState message="Load sessions to see lap time progression" />;
   }
@@ -79,18 +83,18 @@ export function LapTimesChart({ sessions }: Props) {
 
       <ResponsiveContainer width="100%" height={360}>
         <LineChart data={data} margin={CHART_MARGINS}>
-          <CartesianGrid stroke={GRID_STYLE.stroke} vertical={false} />
+          <CartesianGrid stroke={cc.gridStyle.stroke} vertical={false} />
           <XAxis
             dataKey="lap"
-            tick={AXIS_STYLE.tick}
-            axisLine={AXIS_STYLE.axisLine}
-            tickLine={AXIS_STYLE.tickLine}
+            tick={cc.axisStyle.tick}
+            axisLine={cc.axisStyle.axisLine}
+            tickLine={cc.axisStyle.tickLine}
             label={axisLabel('LAP', 'insideBottom')}
           />
           <YAxis
-            tick={AXIS_STYLE.tick}
-            axisLine={AXIS_STYLE.axisLine}
-            tickLine={AXIS_STYLE.tickLine}
+            tick={cc.axisStyle.tick}
+            axisLine={cc.axisStyle.axisLine}
+            tickLine={cc.axisStyle.tickLine}
             tickFormatter={(v: number) => formatLapTime(v)}
             width={76}
             domain={['auto', 'auto']}

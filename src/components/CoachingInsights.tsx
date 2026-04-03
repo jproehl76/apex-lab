@@ -4,6 +4,7 @@ import { KPH_TO_MPH, M_TO_FEET, sessionLabel } from '@/lib/utils';
 import { CoachingChat } from '@/components/CoachingChat';
 import type { UserProfile } from '@/lib/userProfile';
 import type { AppMemory } from '@/lib/memory';
+import { FF, FS } from '@/lib/chartTheme';
 
 interface Insight {
   id: string;
@@ -98,7 +99,7 @@ export function CoachingInsights({ sessions, profile, trackHistory }: Props) {
 
   if (sessions.length === 0) {
     return (
-      <p style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', letterSpacing: '0.06em', color: '#9A9AB0' }}>
+      <p style={{ fontFamily: FF.sans, fontSize: '14px', letterSpacing: '0.06em', color: 'hsl(var(--muted-foreground))' }}>
         Load a session to see coaching insights.
       </p>
     );
@@ -109,11 +110,11 @@ export function CoachingInsights({ sessions, profile, trackHistory }: Props) {
       {insightsBySession.map(({ session, insights }) => (
         <div key={session.id} className="space-y-2">
           {sessions.length > 1 && (
-            <p style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C0C0D4' }}>{sessionLabel(session)}</p>
+            <p style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>{sessionLabel(session)}</p>
           )}
           {insights.length === 0 ? (
             <div className="rounded p-3 flex items-center gap-3" style={{ borderLeft: '3px solid #22C55E', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderLeftWidth: 3 }}>
-              <div style={{ fontFamily: 'BMWTypeNext', fontSize: '16px', fontWeight: 600, letterSpacing: '0.06em', color: '#22C55E' }}>
+              <div style={{ fontFamily: FF.sans, fontSize: '16px', fontWeight: 600, letterSpacing: '0.06em', color: '#22C55E' }}>
                 Consistent driving — no significant issues found.
               </div>
             </div>
@@ -124,8 +125,8 @@ export function CoachingInsights({ sessions, profile, trackHistory }: Props) {
                 className="rounded p-3"
                 style={{ borderLeft: `3px solid ${insight.severityColor}`, background: `rgba(${insight.severityRGB}, 0.06)`, border: `1px solid rgba(${insight.severityRGB}, 0.15)`, borderLeftWidth: 3 }}
               >
-                <div style={{ fontFamily: 'BMWTypeNext', fontSize: '16px', fontWeight: 700, letterSpacing: '0.06em', color: '#E8E8F0' }}>{insight.label}</div>
-                <div style={{ fontFamily: 'BMWTypeNext', fontSize: '15px', letterSpacing: '0.04em', color: '#7878A0', marginTop: 3 }}>{insight.detail}</div>
+                <div style={{ fontFamily: FF.sans, fontSize: '16px', fontWeight: 700, letterSpacing: '0.06em', color: 'hsl(var(--foreground))' }}>{insight.label}</div>
+                <div style={{ fontFamily: FF.sans, fontSize: `${FS.value}px`, letterSpacing: '0.04em', color: 'hsl(var(--muted-foreground))', marginTop: 3 }}>{insight.detail}</div>
               </div>
             ))
           )}

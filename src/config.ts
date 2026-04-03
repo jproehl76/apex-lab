@@ -8,8 +8,8 @@ export const config = {
   appName: 'JP Apex Lab',
   carName: '',  // set via user profile on first launch
   carLogoUrl: null as string | null,
-  stripeColors: ['#1C69D4', '#6B2D9E', '#EF3340'] as string[],
-  defaultPrimaryColor: '#1C69D4',
+  stripeColors: ['#16588E', '#E7222E', '#81C4FF'] as string[],
+  defaultPrimaryColor: '#16588E',
   defaultAccentColor: '#A855F7',
   googleDriveFolderId: '1BrltfQ6HfS5O5Rkb0xU767zSpuCtLsGM',
   coachingWorkerUrl: (import.meta.env.VITE_COACHING_WORKER_URL !== 'undefined' && import.meta.env.VITE_COACHING_WORKER_URL) || '',

@@ -1,6 +1,7 @@
 import { Progress } from '@/components/ui/progress';
 import type { LoadedSession } from '@/types/session';
 import { celsiusToF, sessionLabel, THERMAL_THRESHOLDS, thermalAlertLevel } from '@/lib/utils';
+import { FF, FS } from '@/lib/chartTheme';
 
 const CHANNELS = [
   { key: 'oil_temp',     label: 'Oil',     min: 180, max: 300 },
@@ -11,7 +12,7 @@ const CHANNELS = [
 ];
 
 function alertColor(level: 'ok' | 'watch' | 'critical'): string {
-  if (level === 'critical') return '#EF3340';
+  if (level === 'critical') return '#EF4444';
   if (level === 'watch') return '#F59E0B';
   return '#22C55E';
 }
@@ -55,19 +56,19 @@ export function ThermalChart({ sessions }: Props) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full" style={{ background: card.color }} />
-                      <span className="text-[12px] tracking-widest text-muted-foreground uppercase">{card.label}</span>
+                      <span style={{ fontFamily: FF.sans, fontSize: `${FS.small}px`, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>{card.label}</span>
                     </div>
-                    <span className="text-[12px] text-muted-foreground/50" style={{ fontFamily: 'JetBrains Mono' }}>
+                    <span style={{ fontFamily: FF.mono, fontSize: `${FS.small}px`, color: 'hsl(var(--muted-foreground) / 0.5)' }}>
                       pk {card.peak}{card.unit}
                     </span>
                   </div>
 
                   {/* Current value */}
                   <div className="flex items-baseline gap-1">
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '30px', fontWeight: 600, color: card.color, lineHeight: 1, textShadow: `0 0 20px ${card.color}44` }}>
+                    <span style={{ fontFamily: FF.mono, fontSize: '30px', fontWeight: 600, color: card.color, lineHeight: 1, textShadow: `0 0 20px ${card.color}44` }}>
                       {card.current}
                     </span>
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', color: `${card.color}80` }}>{card.unit}</span>
+                    <span style={{ fontFamily: FF.sans, fontSize: '14px', color: `${card.color}80` }}>{card.unit}</span>
                   </div>
 
                   {/* Progress bar */}
@@ -75,7 +76,7 @@ export function ThermalChart({ sessions }: Props) {
                     style={{ '--progress-color': card.color } as React.CSSProperties} />
 
                   {/* Start value */}
-                  <p className="text-[12px] text-muted-foreground/40" style={{ fontFamily: 'JetBrains Mono' }}>
+                  <p style={{ fontFamily: FF.mono, fontSize: `${FS.small}px`, color: 'hsl(var(--muted-foreground) / 0.4)' }}>
                     start {card.start}{card.unit}
                   </p>
                 </div>

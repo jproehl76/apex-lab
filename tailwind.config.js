@@ -43,12 +43,12 @@ module.exports = {
           foreground: "hsl(var(--popover-foreground))",
         },
         surface: {
-          void:      '#08080C',
-          base:      '#0F0F14',
-          card:      '#1A1A22',
-          elevated:  '#242430',
-          overlay:   '#2E2E3C',
-          highlight: '#38384A',
+          void:      'hsl(var(--surface-void))',
+          base:      'hsl(var(--surface-base))',
+          card:      'hsl(var(--surface-card))',
+          elevated:  'hsl(var(--surface-elevated))',
+          overlay:   'hsl(var(--surface-overlay))',
+          highlight: 'hsl(var(--surface-highlight))',
         },
         channel: {
           speed:    '#3B82F6',

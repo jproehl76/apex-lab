@@ -321,7 +321,7 @@ function CoachingPanel({
                 { label: 'Apex',  val: (sel.corner.min_speed_kph  * KPH_TO_MPH).toFixed(0), color: S.best },
                 { label: 'Exit',  val: (sel.corner.exit_speed_kph * KPH_TO_MPH).toFixed(0), color: S.good },
               ].map(({ label, val, color }) => (
-                <div key={label} className="rounded p-1.5 text-center" style={{ background: '#0E0E1A', border: '1px solid #1E1E2E' }}>
+                <div key={label} className="rounded p-1.5 text-center" style={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))' }}>
                   <div style={{ fontFamily: FF.sans, fontSize: '10px', letterSpacing: '0.08em', color: T.muted, textTransform: 'uppercase' }}>{label}</div>
                   <div style={{ fontFamily: FF.mono, fontSize: `${FS.large}px`, fontWeight: 700, color, lineHeight: 1.2 }}>{val}</div>
                   <div style={{ fontFamily: FF.sans, fontSize: '10px', color: T.muted }}>mph</div>
@@ -393,16 +393,16 @@ function CoachingPanel({
           return (
             <button key={c.id} onClick={() => onSelect(isSelected ? null : c.id)}
               className="w-full flex items-center gap-2 px-3 py-2 transition-colors"
-              style={{ background: isSelected ? `${color}12` : undefined, borderBottom: '1px solid #12121C' }}>
+              style={{ background: isSelected ? `${color}12` : undefined, borderBottom: '1px solid hsl(var(--border))' }}>
               <span style={{ fontFamily: FF.mono, fontSize: '10px', color: T.muted, width: 14, textAlign: 'right', flexShrink: 0 }}>{i + 1}</span>
-              <div className="relative rounded-full overflow-hidden" style={{ width: 32, height: 4, background: '#1A1A2A', flexShrink: 0 }}>
+              <div className="relative rounded-full overflow-hidden" style={{ width: 32, height: 4, background: 'hsl(var(--muted))', flexShrink: 0 }}>
                 <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${c.opportunityPct}%`, background: color }} />
               </div>
               <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, fontWeight: isSelected ? 700 : 400,
                 color: isSelected ? color : T.label, flex: 1, textAlign: 'left' }}>{c.name}</span>
               {c.apexGapMph !== null && (
                 <span style={{ fontFamily: FF.mono, fontSize: `${FS.nano}px`, color, flexShrink: 0 }}>
-                  {c.apexGapMph.toFixed(1)}<span style={{ fontFamily: FF.sans, fontSize: '9px', color: T.muted }}> mph</span>
+                  {c.apexGapMph.toFixed(1)}<span style={{ fontFamily: FF.sans, fontSize: '11px', color: T.muted }}> mph</span>
                 </span>
               )}
               <span style={{ fontSize: 10, flexShrink: 0 }}>
@@ -440,7 +440,7 @@ const CHANNELS: { id: HeatChannel; label: string; color: string }[] = [
   { id: 'brake',    label: 'Brake',    color: S.bad  },
 ];
 
-// Satellite tile layer options
+// Tile layer options
 const TILE_LAYERS = {
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -451,6 +451,11 @@ const TILE_LAYERS = {
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
+  },
+  positron: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+    maxZoom: 20,
   },
 };
 
@@ -552,7 +557,7 @@ export function TrackHeatMap({ sessions, selectedCornerId, onCornerSelect }: Pro
         </div>
 
         {/* Channel selector */}
-        <div className="flex items-center rounded overflow-hidden" style={{ border: '1px solid #1E1E2E' }}>
+        <div className="flex items-center rounded overflow-hidden" style={{ border: '1px solid hsl(var(--border))' }}>
           {CHANNELS.map(ch => (
             <button key={ch.id} onClick={() => setChannel(ch.id)}
               style={{
@@ -560,7 +565,7 @@ export function TrackHeatMap({ sessions, selectedCornerId, onCornerSelect }: Pro
                 padding: '4px 12px', textTransform: 'uppercase',
                 background: channel === ch.id ? `${ch.color}20` : 'transparent',
                 color: channel === ch.id ? ch.color : T.muted,
-                borderRight: ch.id !== 'brake' ? '1px solid #1E1E2E' : undefined,
+                borderRight: ch.id !== 'brake' ? '1px solid hsl(var(--border))' : undefined,
                 transition: 'all 0.15s',
               }}>
               {ch.label}
@@ -572,7 +577,7 @@ export function TrackHeatMap({ sessions, selectedCornerId, onCornerSelect }: Pro
         <div className="flex items-center gap-1.5">
           {legendItems.map((item, i) => (
             <span key={i} className="flex items-center gap-1">
-              <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: item.color, border: '1px solid #2A2A3A' }} />
+              <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: item.color, border: '1px solid hsl(var(--border))' }} />
               {item.label && <span style={{ fontFamily: FF.sans, fontSize: `${FS.nano}px`, color: T.muted }}>{item.label}</span>}
             </span>
           ))}
@@ -583,7 +588,7 @@ export function TrackHeatMap({ sessions, selectedCornerId, onCornerSelect }: Pro
           style={{
             fontFamily: FF.sans, fontSize: `${FS.nano}px`, letterSpacing: '0.08em',
             padding: '3px 10px', borderRadius: 4, textTransform: 'uppercase',
-            border: '1px solid #1E1E2E', background: 'transparent', color: T.muted,
+            border: '1px solid hsl(var(--border))', background: 'transparent', color: T.muted,
             transition: 'all 0.15s',
           }}>
           {tileMode === 'satellite' ? '🛰 Satellite' : '🗺 Streets'}

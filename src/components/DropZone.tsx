@@ -77,18 +77,16 @@ export function DropZone({ onSessionLoaded, compact = false }: DropZoneProps) {
   if (compact) {
     return (
       <label
-        className="relative rounded-lg border border-dashed flex items-center justify-center gap-2 px-3 py-2 transition-all duration-200 cursor-pointer"
-        style={{
-          borderColor: isDragging ? '#3B82F6' : '#2E2E3C',
-          background: isDragging ? 'rgba(59,130,246,0.08)' : 'rgba(26,26,34,0.6)',
-        }}
+        className={`relative rounded-lg border border-dashed flex items-center justify-center gap-2 px-3 py-2 transition-all duration-200 cursor-pointer ${
+          isDragging ? 'border-blue-500 bg-blue-500/[0.08]' : 'border-border bg-card/60'
+        }`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
       >
         <input type="file" accept=".json,.csv" multiple className="sr-only" onChange={onInputChange} />
-        <Upload size={14} style={{ color: isDragging ? '#3B82F6' : '#9A9AB0' }} />
-        <span style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#9A9AB0', whiteSpace: 'nowrap' }}>
+        <Upload size={14} className={isDragging ? 'text-blue-500' : 'text-muted-foreground'} />
+        <span className={`whitespace-nowrap ${isDragging ? 'text-blue-500' : 'text-muted-foreground'}`} style={{ fontFamily: 'BMWTypeNext', fontSize: '13px' }}>
           {isDragging ? 'Drop here' : 'Add Session'}
         </span>
       </label>
@@ -97,11 +95,9 @@ export function DropZone({ onSessionLoaded, compact = false }: DropZoneProps) {
 
   return (
     <label
-      className="relative rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-3 p-6 text-center transition-all duration-200 cursor-pointer"
-      style={{
-        borderColor: isDragging ? '#3B82F6' : '#2E2E3C',
-        background: isDragging ? 'rgba(59,130,246,0.08)' : 'rgba(26,26,34,0.6)',
-      }}
+      className={`relative rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-3 p-6 text-center transition-all duration-200 cursor-pointer ${
+        isDragging ? 'border-blue-500 bg-blue-500/[0.08]' : 'border-border bg-card/60'
+      }`}
       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={onDrop}
@@ -113,12 +109,12 @@ export function DropZone({ onSessionLoaded, compact = false }: DropZoneProps) {
         className="sr-only"
         onChange={onInputChange}
       />
-      <Upload size={20} style={{ color: isDragging ? '#3B82F6' : '#9A9AB0' }} />
+      <Upload size={20} className={isDragging ? 'text-blue-500' : 'text-muted-foreground'} />
       <div>
-        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '16px', fontWeight: 600, letterSpacing: '0.05em', color: '#E8E8F0' }}>
+        <div className="text-foreground" style={{ fontFamily: 'BMWTypeNext', fontSize: '16px', fontWeight: 600, letterSpacing: '0.05em' }}>
           {isDragging ? 'Drop session here' : 'Load Session'}
         </div>
-        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#9A9AB0', marginTop: 2 }}>
+        <div className="text-muted-foreground" style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', marginTop: 2 }}>
           RaceChrono CSV · JSON · tap to browse
         </div>
       </div>

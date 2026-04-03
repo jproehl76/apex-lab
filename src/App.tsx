@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { LogOut, MapIcon, FolderOpen, GraduationCap } from 'lucide-react';
+import { LogOut, MapIcon, GraduationCap } from 'lucide-react';
 import { LoginScreen } from '@/components/LoginScreen';
 import { Toaster } from 'sonner';
 import { DropZone } from '@/components/DropZone';
@@ -44,13 +44,15 @@ import { ExpertCoach } from '@/components/ExpertCoach';
 
 import { Settings } from 'lucide-react';
 import React from 'react';
+import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const AUTH_KEY = 'apex-lab-auth-user';
 
 interface AuthUser { email: string; name: string; picture: string }
 
 // 5 tabs (desktop): Session, Track, Coach, Notes, Progress
-// 5 tabs (mobile):  Load, Session, Track, Coach, Progress
+// 4 tabs (mobile):  Session, Track, Coach, Progress
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
   { id: 'track',    label: 'Track'    },
@@ -60,7 +62,6 @@ const DESKTOP_TABS = [
 ];
 
 const MOBILE_TABS = [
-  { id: 'load',     label: 'Load',     Icon: FolderOpen },
   { id: 'session',  label: 'Session',  Icon: () => <span style={{ fontSize: 20 }}>⊞</span> },
   { id: 'track',    label: 'Track',    Icon: MapIcon },
   { id: 'coach',    label: 'Coach',    Icon: GraduationCap },
@@ -68,6 +69,16 @@ const MOBILE_TABS = [
 ];
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
+  );
+}
+
+function AppInner() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const store = usePersistedSessions();
   const { memory, loaded, update } = useMemory();
   const [activeTab, setActiveTab] = useState('session');
@@ -122,6 +133,7 @@ export default function App() {
     let saved = memory.lastActiveTab || 'session';
     if (saved === 'health') saved = 'coach';
     if (saved === 'map' || saved === 'corners') saved = 'track';
+    if (saved === 'load') saved = 'session';
     queueMicrotask(() => setActiveTab(saved));
   }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
@@ -308,14 +320,14 @@ export default function App() {
           setSharedSummary(null);
           window.history.replaceState({}, '', window.location.pathname);
         }} />
-        <Toaster position="bottom-right" richColors />
+        <Toaster position="bottom-right" richColors theme={resolvedTheme} />
       </>
     );
   }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="bottom-right" richColors theme={resolvedTheme} />
       <PrintView sessions={store.activeSessions} />
       {showProfileSetup && user && (
         <ProfileSetup
@@ -338,17 +350,11 @@ export default function App() {
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
       }}>
-        {/* CSS motorsport background — adapts to track colors */}
+        {/* CSS motorsport background — adapts to track colors + theme */}
         <div className="absolute inset-0" style={{
-          background: `
-            linear-gradient(105deg,
-              #0E0E1A 0%,
-              #121220 22%,
-              ${trackPrimary}38 52%,
-              ${trackAccent}20 75%,
-              #0E0E1A 100%
-            )
-          `,
+          background: isDark
+            ? `linear-gradient(105deg, #0E0E1A 0%, #121220 22%, ${trackPrimary}38 52%, ${trackAccent}20 75%, #0E0E1A 100%)`
+            : `linear-gradient(105deg, #E8EBF0 0%, #F0F1F5 22%, ${trackPrimary}20 52%, ${trackAccent}12 75%, #E8EBF0 100%)`,
         }} />
         {/* Subtle diagonal stripe texture */}
         <div className="absolute inset-0" style={{
@@ -356,8 +362,8 @@ export default function App() {
             -55deg,
             transparent,
             transparent 12px,
-            rgba(255,255,255,0.012) 12px,
-            rgba(255,255,255,0.012) 13px
+            ${isDark ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.015)'} 12px,
+            ${isDark ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.015)'} 13px
           )`,
         }} />
 
@@ -394,6 +400,8 @@ export default function App() {
             >
               <Settings size={13} />
             </button>
+            {/* Theme toggle */}
+            <ThemeToggle />
             {/* ⌘K hint — desktop only */}
             <button
               onClick={() => setPaletteOpen(true)}
@@ -434,59 +442,19 @@ export default function App() {
 
       {/* MOBILE layout (< lg): no sidebar, swipe navigation */}
       <div className="flex flex-col flex-1 min-h-0 lg:hidden" {...bindSwipe()} style={{ touchAction: 'pan-y' }}>
-        {activeTab === 'load' ? (
-          /* ── Load Session page ── */
-          <div className="flex-1 overflow-y-auto scroll-touch p-5 pb-[calc(80px+env(safe-area-inset-bottom))] space-y-5">
-            <div>
-              <h2 style={{ fontFamily: 'BMWTypeNext', fontSize: 15, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#F0F0FA' }}>
-                Load Session
-              </h2>
-              <p style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: '#9A9AB0', marginTop: 3, letterSpacing: '0.05em' }}>
-                RaceChrono CSV or JSON · tap to browse files
-              </p>
+        <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
+          {/* Compact load row at top of mobile content */}
+          <div className="flex gap-2 mb-3">
+            <div className="flex-1">
+              <DropZone compact onSessionLoaded={store.addSession} />
             </div>
-
-            <DropZone onSessionLoaded={(name, data) => {
-              const result = store.addSession(name, data);
-              if (result.ok) setActiveTab('session');
-              return result;
-            }} />
-
-            <DrivePickerButton
-              onSessionLoaded={(name, data) => {
-                const result = store.addSession(name, data);
-                if (result.ok) setActiveTab('session');
-                return result;
-              }}
-              onTokenChange={setDriveAccessToken}
-            />
-
-            {store.sessions.length > 0 && (
-              <div className="space-y-3">
-                <div className="h-px bg-border" />
-                <SessionList
-                  sessions={store.sessions}
-                  activeIds={store.activeSessionIds}
-                  onToggle={store.toggleActive}
-                  onRemove={store.removeSession}
-                  onRename={store.renameSession}
-                  onClearAll={store.clearAll}
-                />
-                <button onClick={store.clearSavedSessions}
-                  className="text-[10px] tracking-widest text-muted-foreground/25 hover:text-destructive transition-colors uppercase">
-                  Clear saved sessions
-                </button>
-              </div>
-            )}
+            <DrivePickerButton compact onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
           </div>
-        ) : (
-          <div className="flex-1 overflow-y-auto scroll-touch p-4 pb-[calc(72px+env(safe-area-inset-bottom))]">
-            {store.activeSessions.length === 0 && activeTab !== 'progress'
-              ? <EmptyDashboard />
-              : renderTabContent(activeTab)
-            }
-          </div>
-        )}
+          {store.activeSessions.length === 0 && activeTab !== 'progress'
+            ? <EmptyDashboard />
+            : renderTabContent(activeTab)
+          }
+        </div>
       </div>
 
       {/* DESKTOP layout (>= lg): resizable sidebar + main */}
@@ -503,8 +471,8 @@ export default function App() {
           <Panel id="sidebar" defaultSize="24" minSize="16" maxSize="40" className="flex flex-col border-r border-border bg-card">
             <div className="shrink-0 p-2.5 space-y-2 border-b border-border">
               <div className="flex gap-2">
-                <div className="flex-1"><DropZone onSessionLoaded={store.addSession} /></div>
-                <DrivePickerButton onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
+                <div className="flex-1"><DropZone compact onSessionLoaded={store.addSession} /></div>
+                <DrivePickerButton compact onSessionLoaded={store.addSession} onTokenChange={setDriveAccessToken} />
               </div>
               {store.sessions.length > 0 && (
                 <SessionList
@@ -551,7 +519,7 @@ export default function App() {
                       title={`${tab.label} (${i + 1})`}
                       className="group relative px-4 py-2.5 text-xs tracking-[0.15em] uppercase transition-colors"
                       style={{
-                        color: activeTab === tab.id ? '#F0F0FA' : 'hsl(var(--muted-foreground))',
+                        color: activeTab === tab.id ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))',
                         fontFamily: 'BMWTypeNext',
                       }}>
                       {tab.label}
@@ -559,7 +527,7 @@ export default function App() {
                         style={{ fontFamily: 'JetBrains Mono' }}>{i + 1}</span>
                       {activeTab === tab.id && (
                         <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-t"
-                          style={{ background: 'linear-gradient(to right, #1C69D4, #A855F7)' }} />
+                          style={{ background: 'linear-gradient(to right, hsl(var(--primary)), #A855F7)' }} />
                       )}
                     </button>
                   ))}
@@ -580,7 +548,7 @@ export default function App() {
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-[1000] lg:hidden border-t border-border"
         style={{
-          background: 'rgba(10,10,18,0.97)',
+          background: isDark ? 'rgba(10,10,18,0.97)' : 'rgba(245,246,248,0.97)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           paddingBottom: 'env(safe-area-inset-bottom)',
@@ -593,7 +561,7 @@ export default function App() {
               style={{
                 width: activeTab === tab.id ? 16 : 4,
                 height: 3,
-                background: activeTab === tab.id ? '#1C69D4' : 'rgba(255,255,255,0.15)',
+                background: activeTab === tab.id ? 'hsl(var(--primary))' : isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
               }} />
           ))}
         </div>
@@ -604,9 +572,9 @@ export default function App() {
             return (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                 className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-all duration-100 active:scale-[0.90] active:opacity-70 select-none"
-                style={{ color: active ? '#1C69D4' : 'hsl(var(--muted-foreground))' }}>
+                style={{ color: active ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}>
                 <tab.Icon size={18} />
-                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
+                <span style={{ fontFamily: 'BMWTypeNext', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{tab.label}</span>
               </button>
             );
           })}
@@ -652,10 +620,10 @@ function LapList({ sessions }: { sessions: import('@/types/session').LoadedSessi
                 return (
                   <div key={lap.lap_num} className="flex items-center justify-between px-2 py-0.5 rounded"
                     style={{ background: isBest ? 'rgba(168,85,247,0.08)' : undefined }}>
-                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: isBest ? '#A855F7' : '#9A9AB0', width: 28 }}>
+                    <span style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', color: isBest ? '#A855F7' : 'hsl(var(--muted-foreground))', width: 28 }}>
                       L{lap.lap_num}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : '#E8E8F0' }}>
+                    <span style={{ fontFamily: 'JetBrains Mono', fontSize: '14px', fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : 'hsl(var(--foreground))' }}>
                       {formatLapTime(lap.lap_time_s)}
                     </span>
                     <span style={{ fontFamily: 'JetBrains Mono', fontSize: '12px', color: deltaColor, width: 44, textAlign: 'right' }}>
@@ -679,7 +647,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     <div>
       <div className="flex items-center gap-2 mb-2.5">
         <div className="w-[3px] h-3 rounded-full shrink-0"
-          style={{ background: 'linear-gradient(to bottom, #1C69D4, #A855F7)' }} />
+          style={{ background: 'linear-gradient(to bottom, hsl(var(--primary)), #A855F7)' }} />
         <span style={{
           fontFamily: 'BMWTypeNext',
           fontSize: '12px',

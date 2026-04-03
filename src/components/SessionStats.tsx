@@ -1,5 +1,6 @@
 import type { LoadedSession } from '@/types/session';
 import { formatLapTime, sessionLabel, consistencyRating } from '@/lib/utils';
+import { FF, FS } from '@/lib/chartTheme';
 
 interface Props {
   sessions: LoadedSession[];
@@ -8,7 +9,7 @@ interface Props {
 export function SessionStats({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
-      <div className="flex h-32 items-center justify-center" style={{ fontFamily: 'BMWTypeNext', fontSize: '15px', color: '#9A9AB0' }}>
+      <div className="flex h-32 items-center justify-center" style={{ fontFamily: FF.sans, fontSize: `${FS.value}px`, color: 'hsl(var(--muted-foreground))' }}>
         Load sessions to see summary statistics
       </div>
     );
@@ -25,7 +26,7 @@ export function SessionStats({ sessions }: Props) {
         return (
           <div key={session.id}>
             {sessions.length > 1 && (
-              <p className="mb-2" style={{ fontFamily: 'BMWTypeNext', fontSize: '14px', fontWeight: 500, color: '#C0C0D4' }}>
+              <p className="mb-2" style={{ fontFamily: FF.sans, fontSize: '14px', fontWeight: 500, color: 'hsl(var(--muted-foreground))' }}>
                 {sessionLabel(session)}
               </p>
             )}
@@ -34,10 +35,10 @@ export function SessionStats({ sessions }: Props) {
               <div className="card p-3 sm:p-4 col-span-2 sm:col-span-1 overflow-hidden lg:hidden" style={{ borderColor: 'rgba(168,85,247,0.3)', background: 'rgba(168,85,247,0.06)' }}>
                 <div className="flex items-center gap-1.5 mb-2">
                   <div className="w-0.5 h-3 rounded-full shrink-0" style={{ background: '#A855F7' }} />
-                  <span className="truncate" style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#705080' }}>Best Lap</span>
+                  <span className="truncate" style={{ fontFamily: FF.sans, fontSize: `${FS.small}px`, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>Best Lap</span>
                 </div>
-                <div className="truncate" style={{ fontFamily: 'JetBrains Mono', fontSize: 'clamp(20px, 5.5vw, 28px)', fontWeight: 600, color: '#A855F7', lineHeight: 1, textShadow: '0 0 20px rgba(168,85,247,0.35)' }}>{bestLap}</div>
-                <div style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', letterSpacing: '0.1em', color: '#9A9AB0', marginTop: 5, textTransform: 'uppercase' }}>
+                <div className="truncate" style={{ fontFamily: FF.mono, fontSize: 'clamp(20px, 5.5vw, 28px)', fontWeight: 600, color: '#A855F7', lineHeight: 1, textShadow: '0 0 20px rgba(168,85,247,0.35)' }}>{bestLap}</div>
+                <div style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, letterSpacing: '0.1em', color: 'hsl(var(--muted-foreground))', marginTop: 5, textTransform: 'uppercase' }}>
                   {header.analyzed_laps} laps analyzed
                 </div>
               </div>
@@ -70,7 +71,7 @@ export function SessionStats({ sessions }: Props) {
 
             {/* Missing channels warning */}
             {header.channels_missing.length > 0 && (
-              <p className="mt-2" style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', color: '#F59E0B' }}>
+              <p className="mt-2" style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, color: '#F59E0B' }}>
                 Missing channels: {header.channels_missing.join(', ')}
               </p>
             )}
@@ -96,15 +97,15 @@ function KpiCard({ label, value, valueColor, subtext, dotColor, quality }: KpiCa
     <div className="card p-3 sm:p-4 flex flex-col gap-1 overflow-hidden relative">
       <div className="flex items-center gap-1.5 mb-1">
         {dotColor && <div className="w-0.5 h-3 rounded-full flex-shrink-0" style={{ background: dotColor }} />}
-        <span className="truncate" style={{ fontFamily: 'BMWTypeNext', fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9A9AB0' }}>
+        <span className="truncate" style={{ fontFamily: FF.sans, fontSize: `${FS.small}px`, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
           {label}
         </span>
       </div>
-      <div className="truncate" style={{ fontFamily: 'JetBrains Mono', fontSize: 'clamp(16px, 4.5vw, 26px)', fontWeight: 500, color: valueColor ?? '#E0E0EE', lineHeight: 1 }}>
+      <div className="truncate" style={{ fontFamily: FF.mono, fontSize: 'clamp(16px, 4.5vw, 26px)', fontWeight: 500, color: valueColor ?? 'hsl(var(--foreground))', lineHeight: 1 }}>
         {value}
       </div>
       {subtext && (
-        <div style={{ fontFamily: 'BMWTypeNext', fontSize: '13px', letterSpacing: '0.08em', color: '#9A9AB0', marginTop: 3 }}>{subtext}</div>
+        <div style={{ fontFamily: FF.sans, fontSize: `${FS.base}px`, letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', marginTop: 3 }}>{subtext}</div>
       )}
       {quality !== undefined && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-border/30">

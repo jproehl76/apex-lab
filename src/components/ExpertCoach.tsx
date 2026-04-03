@@ -261,7 +261,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
           {!driveAccessToken && (
             <div className="flex items-center gap-1 text-muted-foreground/50" title="Connect Google Drive for full session history">
               <CloudOff size={12} />
-              <span className="text-[9px] tracking-widest uppercase">No Drive</span>
+              <span className="text-[11px] tracking-widest uppercase">No Drive</span>
             </div>
           )}
         </div>
@@ -275,7 +275,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
                 style={{ width: `${(scanProgress.done / scanProgress.total) * 100}%` }}
               />
             </div>
-            <p className="text-[9px] tracking-widest text-muted-foreground/50 uppercase">
+            <p className="text-[11px] tracking-widest text-muted-foreground/50 uppercase">
               Scanning Drive: {scanProgress.done}/{scanProgress.total} files
             </p>
           </div>
@@ -283,7 +283,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
 
         {/* Track stats bar */}
         {trackInfo && (
-          <div className="flex items-center gap-3 text-[9px] tracking-wider text-muted-foreground">
+          <div className="flex items-center gap-3 text-[11px] tracking-wider text-muted-foreground">
             <span>{trackInfo.count} sessions</span>
             <span className="text-primary">{formatLapTime(trackInfo.bestLapS)}</span>
             <span>Last: {trackInfo.lastDate}</span>
@@ -319,7 +319,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
               {msg.role === 'assistant' ? (
                 <MarkdownBlock text={msg.content} />
               ) : (
-                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 15, color: '#D0D0E8' }}>{msg.content}</p>
+                <p style={{ fontFamily: 'BMWTypeNext', fontSize: 15, color: 'hsl(var(--foreground))' }}>{msg.content}</p>
               )}
             </div>
           </div>

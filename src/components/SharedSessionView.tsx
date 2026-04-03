@@ -25,12 +25,12 @@ export function SharedSessionView({ summary, onClose }: Props) {
     <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
       <div className="shrink-0 px-6 py-4 border-b border-border flex items-center justify-between"
-        style={{ background: 'linear-gradient(105deg,#0E0E1A 0%,#1C69D4 52%,#0E0E1A 100%)' }}>
+        style={{ background: 'linear-gradient(105deg, hsl(var(--background)) 0%, hsl(var(--primary)) 52%, hsl(var(--background)) 100%)' }}>
         <div>
-          <h1 style={{ fontFamily: 'BMWTypeNext', fontSize: 20, fontWeight: 700, color: '#F0F0FA', letterSpacing: '0.1em' }}>
+          <h1 style={{ fontFamily: 'BMWTypeNext', fontSize: 20, fontWeight: 700, color: 'hsl(var(--foreground))', letterSpacing: '0.1em' }}>
             {summary.track}
           </h1>
-          <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#9090B0', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: 'hsl(var(--muted-foreground))', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
             {summary.date} · Shared session
           </p>
         </div>
@@ -57,7 +57,7 @@ export function SharedSessionView({ summary, onClose }: Props) {
             <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
               Clean Laps
             </p>
-            <p style={{ fontFamily: 'JetBrains Mono', fontSize: 30, fontWeight: 600, color: '#E8E8F0' }}>
+            <p style={{ fontFamily: 'JetBrains Mono', fontSize: 30, fontWeight: 600, color: 'hsl(var(--foreground))' }}>
               {summary.laps.length}
             </p>
           </div>
@@ -76,7 +76,7 @@ export function SharedSessionView({ summary, onClose }: Props) {
               return (
                 <div key={num} className="flex items-center px-4 py-2 border-b border-border last:border-0"
                   style={{ background: isBest ? 'rgba(168,85,247,0.06)' : undefined }}>
-                  <span style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: '#9090B0', width: 36 }}>L{num}</span>
+                  <span style={{ fontFamily: 'BMWTypeNext', fontSize: 12, color: 'hsl(var(--muted-foreground))', width: 36 }}>L{num}</span>
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: 16, fontWeight: isBest ? 700 : 400, color: isBest ? '#A855F7' : '#E8E8F0', flex: 1 }}>
                     {fmt(time)}
                   </span>
@@ -96,7 +96,7 @@ export function SharedSessionView({ summary, onClose }: Props) {
             <div className="rounded-xl border border-border bg-card divide-y divide-border">
               {summary.coaching.map((note, i) => (
                 <div key={i} className="px-4 py-3">
-                  <p style={{ fontFamily: 'BMWTypeNext', fontSize: 14, color: '#E8E8F0' }}>{note}</p>
+                  <p style={{ fontFamily: 'BMWTypeNext', fontSize: 14, color: 'hsl(var(--foreground))' }}>{note}</p>
                 </div>
               ))}
             </div>
@@ -112,7 +112,7 @@ export function SharedSessionView({ summary, onClose }: Props) {
             <div className="rounded-xl border border-border bg-card divide-y divide-border">
               {summary.corners.map(([name, speed], i) => (
                 <div key={i} className="flex items-center px-4 py-2">
-                  <span style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: '#E8E8F0', flex: 1 }}>{name}</span>
+                  <span style={{ fontFamily: 'BMWTypeNext', fontSize: 13, color: 'hsl(var(--foreground))', flex: 1 }}>{name}</span>
                   <span style={{ fontFamily: 'JetBrains Mono', fontSize: 15, fontWeight: 600, color: '#1C69D4' }}>
                     {speed.toFixed(1)} km/h
                   </span>

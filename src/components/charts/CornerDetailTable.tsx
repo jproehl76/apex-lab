@@ -96,7 +96,7 @@ function throttleColor(v: number | null): string {
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
   return (
     <th className={`pb-1 pt-0 whitespace-nowrap ${right ? 'text-right' : 'text-left'}`}
-      style={{ color: T.muted, fontFamily: FF.sans, fontSize: `${FS.nano}px`, fontWeight: 400, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: '1px solid #1A1A2A' }}>
+      style={{ color: T.muted, fontFamily: FF.sans, fontSize: `${FS.nano}px`, fontWeight: 400, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: '1px solid hsl(var(--border))' }}>
       {children}
     </th>
   );
@@ -112,7 +112,7 @@ function Td({ children, right, mono, color, dim }: {
         fontSize:   `${FS.value}px`,
         color:      color ?? (dim ? T.muted : T.fg),
         letterSpacing: mono ? 0 : '0.03em',
-        borderBottom: '1px solid #12121C',
+        borderBottom: '1px solid hsl(var(--border))',
       }}>
       {children}
     </td>
@@ -199,7 +199,7 @@ export function CornerDetailTable({ sessions }: Props) {
                 <Td>
                   <div className="flex items-center gap-2">
                     {idx === 0 && (
-                      <span className="text-[9px] px-1 py-0.5 rounded"
+                      <span className="text-[10px] px-1 py-0.5 rounded"
                         style={{ background: '#EF334020', color: '#EF3340', fontFamily: 'BMWTypeNext', letterSpacing: '0.06em' }}>
                         #1
                       </span>

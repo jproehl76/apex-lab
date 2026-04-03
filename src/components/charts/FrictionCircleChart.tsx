@@ -14,7 +14,8 @@
 
 import type { LoadedSession } from '@/types/session';
 import { sessionLabel } from '@/lib/utils';
-import { T, FF, FS, SESSION_COLORS } from '@/lib/chartTheme';
+import { T, FF, FS, SESSION_COLORS, useChartColors } from '@/lib/chartTheme';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface Props { sessions: LoadedSession[] }
 
@@ -56,6 +57,10 @@ function polygonPath(values: number[]): string {
 }
 
 export function FrictionCircleChart({ sessions }: Props) {
+  const { resolvedTheme } = useTheme();
+  const cc = useChartColors(resolvedTheme);
+  const isDark = resolvedTheme === 'dark';
+
   const data = METRICS.map(({ key, scale }) =>
     sessions.map(s => {
       const raw = s.data.friction_circle[key as keyof typeof s.data.friction_circle] as number;
@@ -114,12 +119,12 @@ export function FrictionCircleChart({ sessions }: Props) {
           const d   = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ') + 'Z';
           return (
             <g key={li}>
-              <path d={d} fill="none" stroke="#1C1C2C" strokeWidth={li === LEVELS - 1 ? 1.5 : 0.75} />
+              <path d={d} fill="none" stroke={isDark ? '#1C1C2C' : '#D0D3DE'} strokeWidth={li === LEVELS - 1 ? 1.5 : 0.75} />
               {li === LEVELS - 1 && (
                 <text
                   x={CX + 4} y={CY - MAXR - 4}
                   style={{ fontFamily: FF.sans, fontSize: 9 }}
-                  fill={T.muted} textAnchor="start">100</text>
+                  fill={cc.t.muted} textAnchor="start">100</text>
               )}
             </g>
           );
@@ -134,7 +139,7 @@ export function FrictionCircleChart({ sessions }: Props) {
               key={m.key}
               x1={CX} y1={CY}
               x2={x.toFixed(1)} y2={y.toFixed(1)}
-              stroke="#1E1E30" strokeWidth={1}
+              stroke={isDark ? '#1E1E30' : '#D0D3DE'} strokeWidth={1}
             />
           );
         })}
@@ -154,7 +159,7 @@ export function FrictionCircleChart({ sessions }: Props) {
                 const radius = (data[mi][si] / 100) * MAXR;
                 const [x, y] = toXY(angle, radius);
                 return (
-                  <circle key={mi} cx={x} cy={y} r={3} fill={color} stroke="#08080E" strokeWidth={1} />
+                  <circle key={mi} cx={x} cy={y} r={3} fill={color} stroke={cc.canvasBg} strokeWidth={1} />
                 );
               })}
             </g>
@@ -183,7 +188,7 @@ export function FrictionCircleChart({ sessions }: Props) {
                   textAnchor={anchor}
                   dominantBaseline="middle"
                   style={{ fontFamily: FF.sans, fontSize: 10 }}
-                  fill={T.label}
+                  fill={cc.t.label}
                   letterSpacing="0.06em"
                 >
                   {line.toUpperCase()}

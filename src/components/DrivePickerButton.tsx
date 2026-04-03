@@ -18,9 +18,10 @@ const sessionSummarySchema = z.object({
 interface Props {
   onSessionLoaded: (filename: string, data: SessionSummary) => { ok: boolean; error?: string };
   onTokenChange?: (token: string | null) => void;
+  compact?: boolean;
 }
 
-export function DrivePickerButton({ onSessionLoaded, onTokenChange }: Props) {
+export function DrivePickerButton({ onSessionLoaded, onTokenChange, compact = false }: Props) {
   const [loading, setLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
@@ -71,11 +72,25 @@ export function DrivePickerButton({ onSessionLoaded, onTokenChange }: Props) {
 
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) return null;
 
+  if (compact) {
+    return (
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors px-2 py-2 rounded-lg border border-border hover:border-border/80 bg-card/50 disabled:opacity-50"
+        aria-label={accessToken ? 'Load from Drive' : 'Connect Google Drive'}
+        title={accessToken ? 'Load from Drive' : 'Connect Google Drive'}
+      >
+        {loading ? <Loader2 size={14} className="animate-spin" /> : <HardDrive size={14} />}
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={handleClick}
       disabled={loading}
-      className="flex items-center gap-2 w-full justify-center text-xs text-slate-400 hover:text-slate-100 transition-colors px-3 py-2 rounded-lg border border-slate-700 hover:border-slate-500 bg-slate-900/50 disabled:opacity-50"
+      className="flex items-center gap-2 w-full justify-center text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg border border-border hover:border-border/80 bg-card/50 disabled:opacity-50"
       aria-label="Load session from Google Drive"
     >
       {loading ? <Loader2 size={14} className="animate-spin" /> : <HardDrive size={14} />}

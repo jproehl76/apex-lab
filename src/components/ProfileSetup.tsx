@@ -47,17 +47,17 @@ export function ProfileSetup({ email, onSave }: Props) {
         style={{ fontFamily: 'BMWTypeNext' }}
       >
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#F0F0FA', letterSpacing: '0.05em' }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'hsl(var(--foreground))', letterSpacing: '0.05em' }}>
             Welcome to JP Apex Lab
           </h2>
-          <p style={{ fontSize: 13, color: '#9090B0', marginTop: 4, letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: 13, color: 'hsl(var(--muted-foreground))', marginTop: 4, letterSpacing: '0.05em' }}>
             Tell us about your car to personalise the dashboard
           </p>
         </div>
 
         {/* VIN lookup */}
         <div className="space-y-2">
-          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             VIN (optional — auto-fills car name)
           </label>
           <div className="flex gap-2">
@@ -81,7 +81,7 @@ export function ProfileSetup({ email, onSave }: Props) {
 
         {/* Car name */}
         <div className="space-y-2">
-          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             Car Name
           </label>
           <input
@@ -95,7 +95,7 @@ export function ProfileSetup({ email, onSave }: Props) {
         {/* Car specs (optional) */}
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1.5">
-            <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+            <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
               Horsepower
             </label>
             <input
@@ -108,7 +108,7 @@ export function ProfileSetup({ email, onSave }: Props) {
             />
           </div>
           <div className="space-y-1.5">
-            <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+            <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
               Weight (lbs)
             </label>
             <input
@@ -122,7 +122,7 @@ export function ProfileSetup({ email, onSave }: Props) {
           </div>
         </div>
         <div className="space-y-1.5">
-          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#9090B0' }}>
+          <label style={{ fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
             Drivetrain
           </label>
           <div className="flex gap-2">
@@ -147,7 +147,7 @@ export function ProfileSetup({ email, onSave }: Props) {
         </div>
 
         {error && (
-          <p style={{ fontSize: 13, color: '#EF3340' }}>{error}</p>
+          <p style={{ fontSize: 13, color: 'hsl(var(--destructive))' }}>{error}</p>
         )}
 
         <button
