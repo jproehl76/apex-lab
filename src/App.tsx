@@ -46,7 +46,6 @@ import { ExpertCoach } from '@/components/ExpertCoach';
 import { Settings } from 'lucide-react';
 import React from 'react';
 import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 const AUTH_KEY = 'apex-lab-auth-user';
 
@@ -79,7 +78,6 @@ export default function App() {
 
 function AppInner() {
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
   const store = usePersistedSessions();
   const { memory, loaded, update } = useMemory();
   const [activeTab, setActiveTab] = useState('session');
@@ -354,9 +352,7 @@ function AppInner() {
       }}>
         {/* CSS motorsport background — adapts to track colors + theme */}
         <div className="absolute inset-0" style={{
-          background: isDark
-            ? `linear-gradient(105deg, #0E0E1A 0%, #121220 22%, ${trackPrimary}38 52%, ${trackAccent}20 75%, #0E0E1A 100%)`
-            : `linear-gradient(105deg, #E8EBF0 0%, #F0F1F5 22%, ${trackPrimary}20 52%, ${trackAccent}12 75%, #E8EBF0 100%)`,
+          background: `linear-gradient(105deg, #0E0E1A 0%, #121220 22%, ${trackPrimary}38 52%, ${trackAccent}20 75%, #0E0E1A 100%)`,
         }} />
         {/* Subtle diagonal stripe texture */}
         <div className="absolute inset-0" style={{
@@ -364,8 +360,8 @@ function AppInner() {
             -55deg,
             transparent,
             transparent 12px,
-            ${isDark ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.015)'} 12px,
-            ${isDark ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.015)'} 13px
+            rgba(255,255,255,0.012) 12px,
+            rgba(255,255,255,0.012) 13px
           )`,
         }} />
 
@@ -402,8 +398,6 @@ function AppInner() {
             >
               <Settings size={13} />
             </button>
-            {/* Theme toggle */}
-            <ThemeToggle />
             {/* ⌘K hint — desktop only */}
             <button
               onClick={() => setPaletteOpen(true)}
@@ -550,7 +544,7 @@ function AppInner() {
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-[1000] lg:hidden border-t border-border"
         style={{
-          background: isDark ? 'rgba(10,10,18,0.97)' : 'rgba(245,246,248,0.97)',
+          background: 'rgba(10,10,18,0.97)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           paddingBottom: 'env(safe-area-inset-bottom)',
@@ -563,7 +557,7 @@ function AppInner() {
               style={{
                 width: activeTab === tab.id ? 16 : 4,
                 height: 3,
-                background: activeTab === tab.id ? 'hsl(var(--primary))' : isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                background: activeTab === tab.id ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.15)',
               }} />
           ))}
         </div>

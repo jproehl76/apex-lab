@@ -58,47 +58,8 @@
 }
 
 @layer base {
-  /* ── Light mode (default) ────────────────────────────────────────────────── */
+  /* ── Dark mode (only mode) ──────────────────────────────────────────────── */
   :root {
-    color-scheme: light;
-    --background:       220 15% 97%;
-    --foreground:       220 25% 12%;
-    --card:             0 0% 100%;
-    --card-foreground:  220 25% 12%;
-    --popover:          0 0% 100%;
-    --popover-foreground: 220 25% 12%;
-    --primary:          207 72% 32%;
-    --primary-foreground: 0 0% 100%;
-    --secondary:        220 14% 92%;
-    --secondary-foreground: 220 20% 25%;
-    --muted:            220 14% 92%;
-    --muted-foreground: 220 10% 45%;
-    --accent:           220 14% 93%;
-    --accent-foreground: 220 20% 20%;
-    --destructive:      0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-    --border:           220 13% 87%;
-    --input:            220 13% 87%;
-    --ring:             207 72% 32%;
-    --radius:           0.5rem;
-
-    /* Chart-specific */
-    --chart-grid:       220 13% 90%;
-    --chart-axis:       220 13% 82%;
-    --chart-tooltip-bg: 0 0% 100%;
-    --chart-tooltip-border: 220 13% 87%;
-
-    /* Surface scale for light */
-    --surface-void:      220 15% 95%;
-    --surface-base:      220 15% 97%;
-    --surface-card:      0 0% 100%;
-    --surface-elevated:  220 14% 95%;
-    --surface-overlay:   220 14% 93%;
-    --surface-highlight: 220 14% 90%;
-  }
-
-  /* ── Dark mode ────────────────────────────────────────────────────────────── */
-  .dark {
     color-scheme: dark;
     --background:       220 20% 5%;
     --foreground:       220 15% 92%;
@@ -127,7 +88,7 @@
     --chart-tooltip-bg: 220 20% 8%;
     --chart-tooltip-border: 220 18% 16%;
 
-    /* Surface scale for dark */
+    /* Surface scale */
     --surface-void:      230 25% 3%;
     --surface-base:      228 18% 5%;
     --surface-card:      225 15% 9%;
@@ -175,17 +136,11 @@
     user-select: text;
   }
 
-  /* Scrollbar — dark mode */
-  .dark ::-webkit-scrollbar { width: 4px; height: 4px; }
-  .dark ::-webkit-scrollbar-track { background: transparent; }
-  .dark ::-webkit-scrollbar-thumb { background: #2A2A38; border-radius: 2px; }
-  .dark ::-webkit-scrollbar-thumb:hover { background: #3A3A4C; }
-
-  /* Scrollbar — light mode */
+  /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: hsl(220 13% 82%); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(220 13% 72%); }
+  ::-webkit-scrollbar-thumb { background: #2A2A38; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3A3A4C; }
 }
 
 /* ── Theme transition ──────────────────────────────────────────────────── */
@@ -253,39 +208,21 @@
 .leaflet-corner-label::before,
 .leaflet-corner-label::after { display: none !important; }
 
-/* Attribution control — scoped to dark */
-.dark .leaflet-control-attribution {
+/* Attribution control */
+.leaflet-control-attribution {
   font-size: 8px !important;
   background: rgba(8,8,14,0.7) !important;
   color: #5A5A72 !important;
 }
-.dark .leaflet-control-attribution a { color: #5A5A72 !important; }
+.leaflet-control-attribution a { color: #5A5A72 !important; }
 
-.leaflet-control-attribution {
-  font-size: 8px !important;
-  background: rgba(255,255,255,0.8) !important;
-  color: #6A6D7E !important;
-}
-.leaflet-control-attribution a { color: #6A6D7E !important; }
-
-/* Zoom controls — dark theme */
-.dark .leaflet-control-zoom a {
+/* Zoom controls */
+.leaflet-control-zoom a {
   background: rgba(14,14,26,0.9) !important;
   border-color: #1E1E2E !important;
   color: #C0C0D4 !important;
 }
-.dark .leaflet-control-zoom a:hover {
+.leaflet-control-zoom a:hover {
   background: rgba(28,28,40,0.95) !important;
   color: #E8E8F0 !important;
-}
-
-/* Zoom controls — light theme */
-.leaflet-control-zoom a {
-  background: rgba(255,255,255,0.95) !important;
-  border-color: hsl(220 13% 87%) !important;
-  color: #3A3D4E !important;
-}
-.leaflet-control-zoom a:hover {
-  background: rgba(245,246,248,1) !important;
-  color: #1A1D2E !important;
 }

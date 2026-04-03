@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Eye, EyeOff, CheckCircle, Loader, Monitor, Sun, Moon } from 'lucide-react';
+import { X, Eye, EyeOff, CheckCircle, Loader } from 'lucide-react';
 import type { UserProfile } from '@/lib/userProfile';
 import { readProfile, writeProfile, lookupVin } from '@/lib/userProfile';
 import { AVAILABLE_MODELS, DEFAULT_MODEL } from '@/lib/services/modelConfig';
 import { useTheme } from '@/lib/ThemeContext';
+
 
 interface Props {
   email: string;
@@ -125,8 +126,8 @@ export function AISettings({ email, onClose, onSave }: Props) {
         ) : (
           <div className="p-5 space-y-6">
 
-            {/* ── Appearance ─────────────────────────────────────────── */}
-            <AppearanceSection />
+            {/* ── Text Size ─────────────────────────────────────────── */}
+            <TextSizeSection />
 
             {/* ── Car / Profile ─────────────────────────────────────────── */}
             <section className="space-y-3">
@@ -293,12 +294,6 @@ export function AISettings({ email, onClose, onSave }: Props) {
   );
 }
 
-const THEME_OPTIONS = [
-  { value: 'system' as const, label: 'System', Icon: Monitor },
-  { value: 'light'  as const, label: 'Light',  Icon: Sun },
-  { value: 'dark'   as const, label: 'Dark',   Icon: Moon },
-];
-
 const SCALE_OPTIONS: { value: 0.9 | 1.0 | 1.1 | 1.25; label: string }[] = [
   { value: 0.9,  label: 'Small' },
   { value: 1.0,  label: 'Default' },
@@ -306,62 +301,30 @@ const SCALE_OPTIONS: { value: 0.9 | 1.0 | 1.1 | 1.25; label: string }[] = [
   { value: 1.25, label: 'Extra Large' },
 ];
 
-function AppearanceSection() {
-  const { theme, setTheme, textScale, setTextScale } = useTheme();
+function TextSizeSection() {
+  const { textScale, setTextScale } = useTheme();
 
   return (
     <section className="space-y-3">
       <p style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
-        Appearance
+        Text Size
       </p>
-
-      {/* Theme */}
-      <div className="space-y-1.5">
-        <label style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
-          Theme
-        </label>
-        <div className="flex gap-2">
-          {THEME_OPTIONS.map(({ value, label, Icon }) => (
-            <button
-              key={value}
-              onClick={() => setTheme(value)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-xs tracking-wider transition-colors"
-              style={{
-                borderColor: theme === value ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                background: theme === value ? 'hsl(var(--primary) / 0.1)' : 'transparent',
-                color: theme === value ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                fontFamily: 'BMWTypeNext',
-              }}
-            >
-              <Icon size={13} />
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Text Size */}
-      <div className="space-y-1.5">
-        <label style={{ fontFamily: 'BMWTypeNext', fontSize: 12, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))' }}>
-          Text Size
-        </label>
-        <div className="flex gap-2">
-          {SCALE_OPTIONS.map(({ value, label }) => (
-            <button
-              key={value}
-              onClick={() => setTextScale(value)}
-              className="flex-1 py-2 rounded-lg border text-xs tracking-wider transition-colors"
-              style={{
-                borderColor: textScale === value ? 'hsl(var(--primary))' : 'hsl(var(--border))',
-                background: textScale === value ? 'hsl(var(--primary) / 0.1)' : 'transparent',
-                color: textScale === value ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                fontFamily: 'BMWTypeNext',
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <div className="flex gap-2">
+        {SCALE_OPTIONS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => setTextScale(value)}
+            className="flex-1 py-2 rounded-lg border text-xs tracking-wider transition-colors"
+            style={{
+              borderColor: textScale === value ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+              background: textScale === value ? 'hsl(var(--primary) / 0.1)' : 'transparent',
+              color: textScale === value ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
+              fontFamily: 'BMWTypeNext',
+            }}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </section>
   );
