@@ -6,6 +6,7 @@ import { sendExpertCoachingMessage, type ExpertCoachingContext } from '@/lib/ser
 import type { ConversationMessage } from '@/lib/services/coachingApi';
 import type { LoadedSession } from '@/types/session';
 import type { UserProfile } from '@/lib/userProfile';
+import type { DebriefNote } from '@/lib/memory';
 import type { CoachingProfile, SessionManifestEntry } from '@/lib/coachingStore';
 import {
   readCoachingProfile,
@@ -26,9 +27,10 @@ export interface ExpertCoachProps {
   profile: UserProfile | null;
   userEmail: string;
   driveAccessToken: string | null;
+  debriefNotes?: Record<string, DebriefNote>;
 }
 
-export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: ExpertCoachProps) {
+export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken, debriefNotes }: ExpertCoachProps) {
   // ── State ──────────────────────────────────────────────────────────────────
   const [coachingProfile, setCoachingProfile] = useState<CoachingProfile | null>(null);
   const [manifest, setManifest] = useState<SessionManifestEntry[]>([]);
@@ -158,6 +160,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
       recentSession,
       bestSession,
       lastRecommendation: lastRec,
+      debriefNotes,
     };
 
     let accumulated = '';
@@ -200,7 +203,7 @@ export function ExpertCoach({ sessions, profile, userEmail, driveAccessToken }: 
         },
       }
     );
-  }, [history, loading, canChat, apiKey, isOwner, coachingProfile, mergedManifest, selectedTrack, recentSession, bestSession, lastRec]);
+  }, [history, loading, canChat, apiKey, isOwner, coachingProfile, mergedManifest, selectedTrack, recentSession, bestSession, lastRec, debriefNotes]);
 
   function handleStop() {
     abortRef.current?.abort();

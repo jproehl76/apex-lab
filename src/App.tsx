@@ -51,13 +51,11 @@ const AUTH_KEY = 'apex-lab-auth-user';
 
 interface AuthUser { email: string; name: string; picture: string }
 
-// 5 tabs (desktop): Session, Track, Coach, Notes, Progress
-// 4 tabs (mobile):  Session, Track, Coach, Progress
+// 4 tabs (desktop + mobile): Session, Track, Coach, Progress
 const DESKTOP_TABS = [
   { id: 'session',  label: 'Session'  },
   { id: 'track',    label: 'Track'    },
   { id: 'coach',    label: 'Coach'    },
-  { id: 'notes',    label: 'Notes'    },
   { id: 'progress', label: 'Progress' },
 ];
 
@@ -134,6 +132,7 @@ function AppInner() {
     if (saved === 'health') saved = 'coach';
     if (saved === 'map' || saved === 'corners') saved = 'track';
     if (saved === 'load') saved = 'session';
+    if (saved === 'notes') saved = 'session';
     queueMicrotask(() => setActiveTab(saved));
   }, [loaded]); // eslint-disable-line
   useEffect(() => { if (loaded) update({ lastActiveTab: activeTab }); }, [activeTab, loaded]); // eslint-disable-line
@@ -246,19 +245,17 @@ function AppInner() {
           <Section title="Lap Times">
             <ErrorBoundary><LapTimesChart sessions={store.activeSessions} /></ErrorBoundary>
           </Section>
-          {/* Debrief notes on mobile (desktop has dedicated Notes tab) */}
-          <div className="lg:hidden">
-            <Section title="Debrief Notes">
-              {store.activeSessions.map(s => (
-                <div key={s.id} className="space-y-1 mb-4">
-                  {store.activeSessions.length > 1 && (
-                    <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
-                  )}
-                  <DebriefNotes sessionId={s.id} onCloudSync={syncToCloud} />
-                </div>
-              ))}
-            </Section>
-          </div>
+          {/* Debrief notes (all breakpoints) */}
+          <Section title="Debrief Notes">
+            {store.activeSessions.map(s => (
+              <div key={s.id} className="space-y-1 mb-4">
+                {store.activeSessions.length > 1 && (
+                  <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
+                )}
+                <DebriefNotes sessionId={s.id} onCloudSync={syncToCloud} />
+              </div>
+            ))}
+          </Section>
         </div>
       );
       case 'track': return (
@@ -292,20 +289,9 @@ function AppInner() {
               profile={profile}
               userEmail={userEmail ?? ''}
               driveAccessToken={driveAccessToken}
+              debriefNotes={memory.debriefNotes}
             />
           </ErrorBoundary>
-        </Section>
-      );
-      case 'notes': return (
-        <Section title="Debrief Notes">
-          {store.activeSessions.map(s => (
-            <div key={s.id} className="space-y-1 mb-4">
-              {store.activeSessions.length > 1 && (
-                <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
-              )}
-              <DebriefNotes sessionId={s.id} onCloudSync={syncToCloud} />
-            </div>
-          ))}
         </Section>
       );
       default: return null;

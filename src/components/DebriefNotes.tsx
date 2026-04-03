@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useMemory } from '@/hooks/useMemory';
 import type { DebriefNote } from '@/lib/memory';
 
-const MAX_CHARS = 2000;
+const MAX_CHARS = 5000;
 const LS_KEY = (id: string) => `notes:${id}`;
 
 interface Props {

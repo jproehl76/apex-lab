@@ -24,8 +24,7 @@ const TABS = [
   { id: 'session',  label: 'Session',  Icon: () => <span>⊞</span>,  key: '1' },
   { id: 'track',    label: 'Track',    Icon: MapIcon,                key: '2' },
   { id: 'coach',    label: 'Coach',    Icon: GraduationCap,          key: '3' },
-  { id: 'notes',    label: 'Notes',    Icon: () => <span>✎</span>,  key: '4' },
-  { id: 'progress', label: 'Progress', Icon: () => <span>↗</span>, key: '5' },
+  { id: 'progress', label: 'Progress', Icon: () => <span>↗</span>, key: '4' },
 ];
 
 export function CommandPalette({

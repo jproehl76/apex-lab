@@ -1,4 +1,5 @@
 import type { CoachingProfile, SessionManifestEntry } from '@/lib/coachingStore';
+import type { DebriefNote } from '@/lib/memory';
 import { formatLapTime } from '@/lib/utils';
 
 export const EXPERT_COACHING_MODEL = 'claude-sonnet-4-6' as const;
@@ -515,13 +516,56 @@ PROGRESSION:
   return result;
 }
 
+// ── Debrief notes formatter ──────────────────────────────────────────────────
+
+export function formatDebriefNotes(
+  notes: Record<string, DebriefNote>,
+  manifest: SessionManifestEntry[],
+  selectedTrack?: string
+): string | undefined {
+  // Session IDs are formatted as "track__date" (see makeSessionId in utils.ts)
+  // Build a lookup from that key to the manifest entry
+  const entryByKey = new Map(manifest.map(e => [`${e.track}__${e.date}`, e]));
+
+  // Filter to selected track's sessions, or include all if general
+  const relevant = Object.entries(notes)
+    .filter(([, note]) => note.text.trim().length > 0)
+    .map(([id, note]) => {
+      const entry = entryByKey.get(id);
+      return { id, note, entry };
+    })
+    .filter(({ entry }) => {
+      if (!selectedTrack) return true;
+      return entry?.track === selectedTrack;
+    })
+    // Sort by date descending (most recent first)
+    .sort((a, b) => {
+      const dateA = a.entry?.date ?? '';
+      const dateB = b.entry?.date ?? '';
+      return dateB.localeCompare(dateA);
+    })
+    // Cap at last 5 entries
+    .slice(0, 5);
+
+  if (relevant.length === 0) return undefined;
+
+  const lines = relevant.map(({ note, entry }) => {
+    const date = entry?.date ?? 'unknown date';
+    const track = entry?.track ?? 'unknown track';
+    return `[${date}] [${track}]: ${note.text.trim()}`;
+  });
+
+  return `DRIVER DEBRIEF NOTES:\n${lines.join('\n')}`;
+}
+
 // ── Initial user message builder ────────────────────────────────────────────
 
 export function buildInitialUserMessage(
   tier1: string,
   tier2?: string,
   selectedTrack?: string,
-  lastRecommendation?: string
+  lastRecommendation?: string,
+  debriefNotesBlock?: string
 ): string {
   const parts: string[] = [];
 
@@ -529,6 +573,10 @@ export function buildInitialUserMessage(
 
   if (tier2) {
     parts.push(tier2);
+  }
+
+  if (debriefNotesBlock) {
+    parts.push(debriefNotesBlock);
   }
 
   if (lastRecommendation) {

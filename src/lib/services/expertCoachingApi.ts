@@ -5,10 +5,12 @@ import {
   formatTier1Summary,
   formatTier2TrackData,
   buildInitialUserMessage,
+  formatDebriefNotes,
 } from '@/lib/services/expertCoachingPrompt';
 import { buildSessionSummary } from '@/lib/services/coachingApi';
 import type { CoachingProfile, SessionManifestEntry } from '@/lib/coachingStore';
 import type { LoadedSession } from '@/types/session';
+import type { DebriefNote } from '@/lib/memory';
 
 export interface ExpertCoachingContext {
   isOwner: boolean;
@@ -18,6 +20,7 @@ export interface ExpertCoachingContext {
   recentSession?: LoadedSession;
   bestSession?: LoadedSession;
   lastRecommendation?: string;
+  debriefNotes?: Record<string, DebriefNote>;
 }
 
 export interface ExpertCoachingOptions {
@@ -66,11 +69,20 @@ export async function sendExpertCoachingMessage(
       tier2 = formatTier2TrackData(trackEntries, recentText, bestText);
     }
 
+    const debriefBlock = context.debriefNotes
+      ? formatDebriefNotes(
+          context.debriefNotes,
+          context.manifest,
+          context.selectedTrack
+        )
+      : undefined;
+
     const dataMessage = buildInitialUserMessage(
       tier1,
       tier2,
       context.selectedTrack,
-      context.lastRecommendation
+      context.lastRecommendation,
+      debriefBlock
     );
 
     // Prepend data context to user's message
