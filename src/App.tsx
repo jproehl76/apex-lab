@@ -40,6 +40,7 @@ import { LapInfoPanel } from '@/components/LapInfoPanel';
 import { findTrackLayout } from '@/assets/trackLayouts';
 import { useShareTarget } from '@/hooks/useShareTarget';
 import { useDriveAutoImport } from '@/hooks/useDriveAutoImport';
+import { useDriveNotesSync } from '@/hooks/useDriveNotesSync';
 import { ExpertCoach } from '@/components/ExpertCoach';
 
 import { Settings } from 'lucide-react';
@@ -127,6 +128,7 @@ function AppInner() {
   // Feature hooks
   useShareTarget(store);
   useDriveAutoImport(driveAccessToken, store, store.hydrated);
+  const { syncToCloud } = useDriveNotesSync(driveAccessToken, memory, loaded, update);
 
   useEffect(() => {
     if (!loaded) return;
@@ -254,7 +256,7 @@ function AppInner() {
                   {store.activeSessions.length > 1 && (
                     <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
                   )}
-                  <DebriefNotes sessionId={s.id} />
+                  <DebriefNotes sessionId={s.id} onCloudSync={syncToCloud} />
                 </div>
               ))}
             </Section>
@@ -303,7 +305,7 @@ function AppInner() {
               {store.activeSessions.length > 1 && (
                 <p className="text-xs tracking-wider text-muted-foreground uppercase mb-2">{sessionLabel(s)}</p>
               )}
-              <DebriefNotes sessionId={s.id} />
+              <DebriefNotes sessionId={s.id} onCloudSync={syncToCloud} />
             </div>
           ))}
         </Section>

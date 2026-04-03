@@ -26,7 +26,7 @@ export function DrivePickerButton({ onSessionLoaded, onTokenChange, compact = fa
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const login = useGoogleLogin({
-    scope: 'https://www.googleapis.com/auth/drive.readonly',
+    scope: 'https://www.googleapis.com/auth/drive.file',
     onSuccess: (response) => {
       setAccessToken(response.access_token);
       onTokenChange?.(response.access_token);

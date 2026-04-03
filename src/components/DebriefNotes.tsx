@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useMemory } from '@/hooks/useMemory';
+import type { DebriefNote } from '@/lib/memory';
 
 const MAX_CHARS = 2000;
 const LS_KEY = (id: string) => `notes:${id}`;
 
 interface Props {
   sessionId: string;
+  onCloudSync?: (notes: Record<string, DebriefNote>) => void;
 }
 
-export function DebriefNotes({ sessionId }: Props) {
+export function DebriefNotes({ sessionId, onCloudSync }: Props) {
   const { memory, loaded, update } = useMemory();
   const [text, setText] = useState('');
   const [saved, setSaved] = useState(false);
@@ -23,7 +25,8 @@ export function DebriefNotes({ sessionId }: Props) {
     void Promise.resolve().then(() => {
       if (cancelled) return;
 
-      const idbValue = memory.debriefNotes[sessionId] ?? '';
+      const entry = memory.debriefNotes[sessionId];
+      const idbValue = entry?.text ?? '';
       if (idbValue) {
         setText(idbValue);
         setMigrated(true);
@@ -35,7 +38,8 @@ export function DebriefNotes({ sessionId }: Props) {
         const lsValue = localStorage.getItem(LS_KEY(sessionId));
         if (lsValue) {
           setText(lsValue);
-          update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: lsValue } });
+          const note: DebriefNote = { text: lsValue, updatedAt: Date.now() };
+          update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: note } });
           localStorage.removeItem(LS_KEY(sessionId));
         }
       } catch { /* quota or restricted */ }
@@ -48,10 +52,13 @@ export function DebriefNotes({ sessionId }: Props) {
 
   const handleBlur = useCallback(() => {
     const trimmed = text.slice(0, MAX_CHARS);
-    update({ debriefNotes: { ...memory.debriefNotes, [sessionId]: trimmed } });
+    const note: DebriefNote = { text: trimmed, updatedAt: Date.now() };
+    const next = { ...memory.debriefNotes, [sessionId]: note };
+    update({ debriefNotes: next });
+    onCloudSync?.(next);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  }, [sessionId, text, memory.debriefNotes, update]);
+  }, [sessionId, text, memory.debriefNotes, update, onCloudSync]);
 
   const remaining = MAX_CHARS - text.length;
 

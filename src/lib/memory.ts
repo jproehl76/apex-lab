@@ -1,7 +1,12 @@
+export interface DebriefNote {
+  text: string;
+  updatedAt: number;
+}
+
 export interface AppMemory {
   lastActiveTab: string;
   lastViewedLapIndex: number;
-  debriefNotes: Record<string, string>;
+  debriefNotes: Record<string, DebriefNote>;
   preferences: {
     tempUnit: 'f' | 'c';
     chartHeight: 'compact' | 'normal' | 'expanded';
@@ -98,12 +103,33 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
   return result;
 }
 
+/** Migrate old plain-string debriefNotes to { text, updatedAt } shape. */
+function migrateDebriefNotes(raw: Record<string, unknown>): Record<string, DebriefNote> {
+  const result: Record<string, DebriefNote> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof value === 'string') {
+      result[key] = { text: value, updatedAt: 0 };
+    } else if (value && typeof value === 'object' && 'text' in value) {
+      result[key] = value as DebriefNote;
+    }
+  }
+  return result;
+}
+
 export async function readMemory(): Promise<AppMemory> {
   try {
     const db = await openDB();
     return new Promise(resolve => {
       const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(MEMORY_KEY);
-      req.onsuccess = () => resolve({ ...DEFAULT_MEMORY, ...(req.result ?? {}) });
+      req.onsuccess = () => {
+        const stored = req.result ?? {};
+        const merged = { ...DEFAULT_MEMORY, ...stored };
+        // Migrate old string-based debriefNotes
+        if (stored.debriefNotes) {
+          merged.debriefNotes = migrateDebriefNotes(stored.debriefNotes);
+        }
+        resolve(merged);
+      };
       req.onerror = () => resolve(DEFAULT_MEMORY);
     });
   } catch { return DEFAULT_MEMORY; }
