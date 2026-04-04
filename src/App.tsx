@@ -46,6 +46,7 @@ import { useDriveNotesSync } from '@/hooks/useDriveNotesSync';
 import { ExpertCoach } from '@/components/ExpertCoach';
 
 import { ThemeProvider, useTheme } from '@/lib/ThemeContext';
+import type { DebriefNote } from '@/lib/memory';
 
 const AUTH_KEY = 'apex-lab-auth-user';
 
@@ -419,7 +420,7 @@ interface TabContentProps {
   memory: ReturnType<typeof useMemory>['memory'];
   selectedCornerId: string | null;
   setSelectedCornerId: (id: string | null) => void;
-  syncToCloud: () => void;
+  syncToCloud: (notes: Record<string, DebriefNote>) => void;
   activeTrackLayout: ReturnType<typeof findTrackLayout>;
 }
 
