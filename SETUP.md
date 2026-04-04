@@ -1,4 +1,4 @@
-# JP Apex Lab: Setup Guide
+# Apex Lab: Setup Guide
 
 A free, self-hosted HPDE telemetry + coaching PWA.
 Fork it, configure it, deploy it: your data stays in your browser.
@@ -39,7 +39,7 @@ gh auth login
 
 ### 1-A  Fork and clone
 
-1. Open **https://github.com/jproehl76/apex-lab**
+1. Open the repository you want to fork
 2. Click **Fork**
 3. Clone locally and install:
 
@@ -210,7 +210,7 @@ pnpm dev
 Add the upstream once:
 
 ```bash
-git remote add upstream https://github.com/jproehl76/apex-lab.git
+git remote add upstream https://github.com/UPSTREAM_OWNER/apex-lab.git
 ```
 
 Pull updates anytime:

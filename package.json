@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "validate": "npx tsx scripts/validate-setup.ts"
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.9.0",

@@ -48,7 +48,7 @@ export function ProfileSetup({ email, onSave }: Props) {
       >
         <div>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'hsl(var(--foreground))', letterSpacing: '0.05em' }}>
-            Welcome to JP Apex Lab
+            Welcome to Apex Lab
           </h2>
           <p style={{ fontSize: 13, color: 'hsl(var(--muted-foreground))', marginTop: 4, letterSpacing: '0.05em' }}>
             Tell us about your car to personalise the dashboard

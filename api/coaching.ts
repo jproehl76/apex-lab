@@ -39,15 +39,28 @@ function checkRateLimit(key: string): boolean {
 }
 
 // ── CORS headers ──────────────────────────────────────────────────────────────
-const ALLOWED_ORIGINS = new Set([
-  'https://jproehl76.github.io',
-  'http://localhost:5173',
-  'http://localhost:4173',
-]);
+// Production origin is set via ALLOWED_ORIGIN env var in Vercel
+// Localhost origins are always allowed for development
+function getAllowedOrigins(): Set<string> {
+  const origins = new Set([
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://localhost:3000',
+  ]);
+
+  // Add production origin from environment variable
+  const prodOrigin = process.env.ALLOWED_ORIGIN;
+  if (prodOrigin) {
+    origins.add(prodOrigin);
+  }
+
+  return origins;
+}
 
 function corsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('Origin') ?? '';
-  const allowed = ALLOWED_ORIGINS.has(origin) ? origin : '';
+  const allowedOrigins = getAllowedOrigins();
+  const allowed = allowedOrigins.has(origin) ? origin : '';
   return {
     'Access-Control-Allow-Origin':  allowed,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',

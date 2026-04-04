@@ -18,7 +18,7 @@ export function PrintView({ sessions }: PrintViewProps) {
       <div style={{ borderBottom: '2px solid #1C69D4', paddingBottom: 12, marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>JP Apex Lab</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '0.08em', margin: 0 }}>Apex Lab</h1>
             <p style={{ fontSize: 13, color: '#555', marginTop: 2 }}>Session Report</p>
           </div>
           <p style={{ fontSize: 12, color: '#777' }}>

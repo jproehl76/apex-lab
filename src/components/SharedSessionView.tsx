@@ -123,7 +123,7 @@ export function SharedSessionView({ summary, onClose }: Props) {
         )}
 
         <p style={{ fontFamily: 'BMWTypeNext', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', opacity: 0.5, textAlign: 'center', paddingBottom: 16 }}>
-          JP Apex Lab · jproehl76.github.io/apex-lab
+          Apex Lab
         </p>
       </div>
     </div>

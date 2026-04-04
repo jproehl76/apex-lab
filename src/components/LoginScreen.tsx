@@ -47,7 +47,7 @@ export function LoginScreen({ onAuth }: LoginScreenProps) {
       <div className="relative z-10 flex flex-col items-center gap-8 px-6">
         <img
           src={apexLabLogo}
-          alt="JP Apex Lab"
+          alt="Apex Lab"
           style={{ height: 160, width: 'auto' }}
         />
         <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-8 flex flex-col items-center gap-4 w-full max-w-sm">

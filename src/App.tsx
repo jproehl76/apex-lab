@@ -355,7 +355,7 @@ function AppInner() {
           {/* App logo */}
           <img
             src={apexLabLogo}
-            alt="JP Apex Lab"
+            alt="Apex Lab"
             style={{
               height: 'clamp(52px, 10vh, 110px)',
               width: 'auto',

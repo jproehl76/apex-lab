@@ -1,5 +1,5 @@
 {
-  "name": "JP Apex Lab",
+  "name": "Apex Lab",
   "short_name": "Apex Lab",
   "description": "Track telemetry and session analysis dashboard",
   "id": "/apex-lab/",
@@ -15,14 +15,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "JP Apex Lab desktop dashboard"
+      "label": "Apex Lab desktop dashboard"
     },
     {
       "src": "/apex-lab/screenshots/mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "JP Apex Lab mobile view"
+      "label": "Apex Lab mobile view"
     }
   ],
   "icons": [

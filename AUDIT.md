@@ -1,4 +1,4 @@
-# JP Apex Lab: Codebase Audit & Improvement Plan
+# Apex Lab: Codebase Audit & Improvement Plan
 
 **Date:** April 2, 2026
 **Scope:** Full codebase audit, Phase 1 fixes applied, Phase 2 cleanup complete

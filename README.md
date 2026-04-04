@@ -1,8 +1,8 @@
-# JP Apex Lab: Track Telemetry Dashboard
+# Apex Lab: Track Telemetry Dashboard
 
-Personal track data dashboard for high-performance driving. Ingests RaceChrono CSV exports and presents lap analysis, corner performance, engine thermals, and AI coaching in a single pit-wall interface.
+Track telemetry dashboard for high-performance driving enthusiasts. Ingests RaceChrono CSV exports and presents lap analysis, corner performance, engine thermals, and AI coaching in a single pit-wall interface.
 
-**Live app:** https://jproehl76.github.io/apex-lab/
+> **Note:** This is a template repository. Fork it and configure your own instance. See [ONBOARDING.md](ONBOARDING.md) for setup instructions.
 
 ---
 
@@ -41,8 +41,10 @@ Then in the dashboard: drag the CSV onto the drop zone, or use **Load from Drive
 Requires Node 22+ and pnpm.
 
 ```bash
-git clone https://github.com/jproehl76/apex-lab.git
+git clone https://github.com/YOUR_USERNAME/apex-lab.git
 cd apex-lab
+cp .env.example .env
+# Edit .env with your credentials (see ONBOARDING.md)
 pnpm install
 pnpm dev
 ```
